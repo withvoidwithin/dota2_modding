@@ -26,6 +26,8 @@
 - [Valve Documentation](https://developer.valvesoftware.com/wiki/Dota_2_Workshop_Tools) - Официальная документация, где написано обо всем и по немногу, крайне редко обновляется, но позволяет понять фундаментальную базу. Некоторая информация может быть не актуальной или устаревшей.
 ### Lua API
 - [RobinCode Lua API Updates](https://robincode.cn/dota2/logs) - Ресурс, на котором можно узнать изминения в Lua API по датам.
+### Abilities
+- [Abilities Data Driven](https://developer.valvesoftware.com/wiki/Dota_2_Workshop_Tools/Scripting/Abilities_Data_Driven) - Официальная документация.
 ### Modifiers
 - [Default Modifiers](https://developer.valvesoftware.com/wiki/Dota_2_Workshop_Tools/Scripting/Built-In_Modifier_Names) - Список базовых модификаторов игры.
 

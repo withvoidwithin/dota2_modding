@@ -2,6 +2,7 @@
 
 -- Version 5.1
 -- Author: https://steamcommunity.com/id/withvoidwithin/
+-- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
 
 _G.__Cache = _G.__Cache or {}

@@ -1,85 +1,83 @@
-| Event | Panel Event | Description |
-|---|---|---|
-| <code>AddStyle(panoramasymbol class)</code> | Yes | Add a CSS class to a panel. |
-| <code>AddStyleAfterDelay(panoramasymbol class, float pre-delay)</code> | Yes | Add a CSS class to a panel after a specified delay. |
-| <code>AddStyleToEachChild(panoramasymbol class)</code> | Yes | Add a CSS class to all children of this panel. |
-| <code>AddTimedStyle(panoramasymbol class, float duration, float pre-delay)</code> | Yes | Add a class for a specified duration, with optional pre-delay; clears existing timers when called with same class. |
-| <code>AsyncEvent(float delay, event eventToFire)</code> | No | Fire another event after a delay (in seconds). |
-| <code>DOTADisplayDashboardTip(string string, string optional string)</code> | No | Tip to display, panel to attach to (default 'DefaultTipAttachment') |
-| <code>DOTAHideAbilityTooltip()</code> | Yes | Hide the ability tooltip |
-| <code>DOTAHideBuffTooltip()</code> | Yes | Hide the buff tooltip |
-| <code>DOTAHideDroppedItemTooltip()</code> | Yes | Hide the dropped item tooltip |
-| <code>DOTAHideEconItemTooltip()</code> | Yes | Hide the econ item tooltip. |
-| <code>DOTAHideFacetTooltip()</code> | Yes | Hides the variant tooltip |
-| <code>DOTAHideProfileCardTooltip()</code> | Yes | Hide the profile card tooltip. |
-| <code>DOTAHideRankTierTooltip()</code> | Yes | Hide the rank tier tooltip. |
-| <code>DOTAHideRuneTooltip()</code> | Yes | Hide the rune tooltip |
-| <code>DOTAHideTextTooltip()</code> | Yes | Hide the text tooltip |
-| <code>DOTAHideTI10EventGameTooltip()</code> | Yes | Hide the ti10 event game tooltip |
-| <code>DOTAHideTitleImageTextTooltip()</code> | Yes | Hide the title image text tooltip. |
-| <code>DOTAHideTitleTextTooltip()</code> | Yes | Hide the title text tooltip. |
-| <code>DOTALiveStreamUpcoming(uint32 time)</code> | Yes | Notify change in RTime32 we expect the stream to start |
-| <code>DOTALiveStreamVideoLive(bool isLive)</code> | Yes | Notify change in stream state (we detected the stream going live) |
-| <code>DOTALiveStreamVideoPlaying(bool isShowingVideo)</code> | Yes | Notify change in video state (is it pointing at a live stream page or not) |
-| <code>DOTAShowAbilityInventoryItemTooltip(int32 entityIndex, int32 inventorySlot)</code> | Yes | Show tooltip for an item in the entityIndex NPC's inventory. |
-| <code>DOTAShowAbilityShopItemTooltip(string abilityName, string guideName, int32 entityIndex)</code> | Yes | Show tooltip for an item in the entityIndex NPC's shop. |
-| <code>DOTAShowAbilityTooltip(string abilityName)</code> | Yes | Show an ability tooltip. |
-| <code>DOTAShowAbilityTooltipForEntityIndex(string abilityName, int32 entityIndex)</code> | Yes | Show an ability tooltip. Level information comes from the entity specified by the entityIndex. |
-| <code>DOTAShowAbilityTooltipForFacet(string abilityName, class CUtlStringToken facetName, bool showVideo)</code> | Yes | Show an ability tooltip for a specific facet. |
-| <code>DOTAShowAbilityTooltipForGuide(string abilityName, string guideName, class HeroID_t, bool)</code> | Yes | Show an ability tooltip annotated with a particular guide's info. |
-| <code>DOTAShowAbilityTooltipForHero(string abilityName, class HeroID_t heroid, class HeroFacetID_t heroVariant, bool, bool)</code> | Yes | Show an ability tooltip for the specified hero. |
-| <code>DOTAShowAbilityTooltipForLevel(string abilityName, int32)</code> | Yes | Show an ability tooltip for a specific level. |
-| <code>DOTAShowBuffTooltip(int32 entityIndex, int32 buffSerial, bool bOnEnemy)</code> | Yes | Show a buff tooltip for the specified entityIndex + buff serial. |
-| <code>DOTAShowEconItemTooltip(class item_definition_index_t itemDef, class style_index_t styleIndex, class HeroID_t heroID)</code> | Yes | Show the econ item tooltip for a given item, style, and hero. Use 0 for the default style, and 0 for the default hero. |
-| <code>DOTAShowFacetTooltip(class HeroID_t HeroID, class HeroFacetID_t Hero Variant ID)</code> | Yes | Shows a variant tooltip for the given hero + variant |
-| <code>DOTAShowProfileCardTooltip(uint64 steamID, bool useProName)</code> | Yes | Show a user's profile card. Use pro name determines whether to use their professional team name if applicable. |
-| <code>DOTAShowProfileCardTooltipForPartyMember(uint64 steamID, bool useProName)</code> | Yes | Show a user's profile card including their hero ban choices. Use pro name determines whether to use their professional team name if applicable. |
-| <code>DOTAShowRankTierTooltip(uint64 steamID)</code> | Yes | Show the rank tier tooltip for a user |
-| <code>DOTAShowRuneTooltip(int32 X, int32 Y, int32 RuneType)</code> | Yes | Show a rune tooltip in the X Y location for the rune type |
-| <code>DOTAShowTextTooltip(string text)</code> | Yes | Show a tooltip with the given text. |
-| <code>DOTAShowTextTooltipStyled(string text, panoramasymbol style)</code> | Yes | Show a tooltip with the given text. Also apply a CSS class named "style" to allow custom styling. |
-| <code>DOTAShowTI10EventGameTooltip(struct TI10EventGameTooltipInfo_t const * __ptr64 X)</code> | Yes | Show a ti10 event game tooltip |
-| <code>DOTAShowTitleImageTextTooltip(string title, string imagePath, string text)</code> | Yes | Show a tooltip with the given title, image, and text. |
-| <code>DOTAShowTitleImageTextTooltipStyled(string title, string imagePath, string text, panoramasymbol style)</code> | Yes | Show a tooltip with the given title, image, and text. Also apply a CSS class named "style" to allow custom styling. |
-| <code>DOTAShowTitleTextTooltip(string title, string text)</code> | Yes | Show a tooltip with the given title and text. |
-| <code>DOTAShowTitleTextTooltipStyled(string title, string text, panoramasymbol style)</code> | Yes | Show a tooltip with the given title and text. Also apply a CSS class named "style" to allow custom styling. |
-| <code>DropInputFocus()</code> | Yes | Drop focus entirely from the window containing this panel. |
-| <code>IfHasClassEvent(panoramasymbol class, event eventToFire)</code> | Yes | Fire another event if this panel has a given class. |
-| <code>IfHoverOtherEvent(string otherPanelID, event eventToFire)</code> | Yes | Fire another event if currently hovering over a panel with the given ID. |
-| <code>IfNotHasClassEvent(panoramasymbol class, event eventToFire)</code> | Yes | Fire another event if this panel does not have a given class. |
-| <code>IfNotHoverOtherEvent(string otherPanelID, event eventToFire)</code> | Yes | Fire another event if not currently hovering over a panel with the given ID. |
-| <code>MovePanelDown(int32 repeatCount)</code> | Yes | Move down from the panel. By default, this will change the focus position, but other panel types may implement this differently. |
-| <code>MovePanelLeft(int32 repeatCount)</code> | Yes | Move left from the panel. By default, this will change the focus position, but other panel types may implement this differently. |
-| <code>MovePanelRight(int32 repeatCount)</code> | Yes | Move right from the panel. By default, this will change the focus position, but other panel types may implement this differently. |
-| <code>MovePanelUp(int32 repeatCount)</code> | Yes | Move up from the panel. By default, this will change the focus position, but other panel types may implement this differently. |
-| <code>PageDown()</code> | No | Scroll the panel down by one page. |
-| <code>PageLeft()</code> | No | Scroll the panel left by one page. |
-| <code>PagePanelDown()</code> | Yes | Scroll the panel down by one page. |
-| <code>PagePanelLeft()</code> | Yes | Scroll the panel left by one page. |
-| <code>PagePanelRight()</code> | Yes | Scroll the panel left by one page. |
-| <code>PagePanelUp()</code> | Yes | Scroll the panel up by one page. |
-| <code>PageRight()</code> | No | Scroll the panel right by one page. |
-| <code>PageUp()</code> | No | Scroll the panel up by one page. |
-| <code>RemoveStyle(panoramasymbol class)</code> | Yes | Remove a CSS class from a panel. |
-| <code>RemoveStyleAfterDelay(panoramasymbol class, float pre-delay)</code> | Yes | Remove a CSS class from a panel after a specified delay. |
-| <code>RemoveStyleFromEachChild(panoramasymbol class)</code> | Yes | Remove a CSS class from all children of this panel. |
-| <code>ScrollDown()</code> | No | Scroll the panel down by one line. |
-| <code>ScrollLeft()</code> | No | Scroll the panel left by one line. |
-| <code>ScrollPanelDown()</code> | Yes | Scroll the panel down by one line. |
-| <code>ScrollPanelLeft()</code> | Yes | Scroll the panel left by one line. |
-| <code>ScrollPanelRight()</code> | Yes | Scroll the panel right by one line. |
-| <code>ScrollPanelUp()</code> | Yes | Scroll the panel up by one line. |
-| <code>ScrollRight()</code> | No | Scroll the panel right by one line. |
-| <code>ScrollToBottom()</code> | Yes | Scroll this panel to the bottom. |
-| <code>ScrollToTop()</code> | Yes | Scroll this panel to the top. |
-| <code>ScrollUp()</code> | No | Scroll the panel up by one line. |
-| <code>SetChildPanelsSelected(bool selected)</code> | Yes | Set whether any child panels are :selected. |
-| <code>SetInputFocus()</code> | Yes | Set focus to this panel. |
-| <code>SetPanelEnabled(bool enabled)</code> | Yes | Sets whether the given panel is enabled |
-| <code>SetPanelSelected(bool selected)</code> | Yes | Set whether this panel is :selected. |
-| <code>SwitchStyle(panoramasymbol slot, panoramasymbol class)</code> | Yes | Switch which class the panel has for a given attribute slot. Allows easily changing between multiple states. |
-| <code>TogglePanelSelected()</code> | Yes | Toggle whether this panel is :selected. |
-| <code>ToggleStyle(panoramasymbol class)</code> | Yes | Toggle whether a panel has the given CSS class. |
-| <code>TriggerStyle(panoramasymbol class)</code> | Yes | Remove then immediately add back a CSS class from a panel. Useful to re-trigger events like animations or sound effects. |
-
-Generated using **dump_panorama_events** on **2024.08.21**
+| Event                                                                 | Panel Event | Description                                                                           | Описание на русском                                                                 |
+|-----------------------------------------------------------------------|-------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| `AddStyle(panoramasymbol class)`                                       | Yes         | Add a CSS class to a panel.                                                           | Добавить CSS-класс к панели.                                                        |
+| `AddStyleAfterDelay(panoramasymbol class, float pre-delay)`            | Yes         | Add a CSS class to a panel after a specified delay.                                   | Добавить CSS-класс к панели после указанной задержки.                               |
+| `AddStyleToEachChild(panoramasymbol class)`                            | Yes         | Add a CSS class to all children of this panel.                                        | Добавить CSS-класс ко всем дочерним элементам этой панели.                          |
+| `AddTimedStyle(panoramasymbol class, float duration, float pre-delay)` | Yes         | Add a class for a specified duration, with optional pre-delay; clears existing timers when called with the same class. | Добавить класс на определенное время с возможной задержкой; очищает таймеры для этого класса. |
+| `AsyncEvent(float delay, event eventToFire)`                           | No          | Fire another event after a delay (in seconds).                                        | Запустить другое событие через указанную задержку (в секундах).                     |
+| `DOTADisplayDashboardTip(string string, string optional string)`       | No          | Tip to display, panel to attach to (default 'DefaultTipAttachment').                  | Показать совет, панель для привязки (по умолчанию 'DefaultTipAttachment').           |
+| `DOTAHideAbilityTooltip()`                                             | Yes         | Hide the ability tooltip.                                                            | Скрыть тултип способности.                                                          |
+| `DOTAHideBuffTooltip()`                                                | Yes         | Hide the buff tooltip.                                                                | Скрыть тултип баффа.                                                                |
+| `DOTAHideDroppedItemTooltip()`                                         | Yes         | Hide the dropped item tooltip.                                                        | Скрыть тултип выпавшего предмета.                                                   |
+| `DOTAHideEconItemTooltip()`                                            | Yes         | Hide the econ item tooltip.                                                           | Скрыть тултип экономического предмета.                                               |
+| `DOTAHideFacetTooltip()`                                               | Yes         | Hides the variant tooltip.                                                            | Скрыть тултип варианта.                                                             |
+| `DOTAHideProfileCardTooltip()`                                         | Yes         | Hide the profile card tooltip.                                                        | Скрыть тултип карточки профиля.                                                     |
+| `DOTAHideRankTierTooltip()`                                            | Yes         | Hide the rank tier tooltip.                                                           | Скрыть тултип ранга.                                                                |
+| `DOTAHideRuneTooltip()`                                                | Yes         | Hide the rune tooltip.                                                                | Скрыть тултип руны.                                                                 |
+| `DOTAHideTextTooltip()`                                                | Yes         | Hide the text tooltip.                                                                | Скрыть текстовый тултип.                                                            |
+| `DOTAHideTI10EventGameTooltip()`                                       | Yes         | Hide the ti10 event game tooltip.                                                     | Скрыть тултип события TI10.                                                         |
+| `DOTAHideTitleImageTextTooltip()`                                      | Yes         | Hide the title image text tooltip.                                                    | Скрыть тултип заголовка с изображением и текстом.                                   |
+| `DOTAHideTitleTextTooltip()`                                           | Yes         | Hide the title text tooltip.                                                          | Скрыть текстовый тултип заголовка.                                                  |
+| `DOTALiveStreamUpcoming(uint32 time)`                                  | Yes         | Notify change in RTime32 we expect the stream to start.                               | Уведомить об изменении RTime32, ожидаемом для начала стрима.                        |
+| `DOTALiveStreamVideoLive(bool isLive)`                                 | Yes         | Notify change in stream state (we detected the stream going live).                    | Уведомить об изменении состояния стрима (обнаружено начало трансляции).              |
+| `DOTALiveStreamVideoPlaying(bool isShowingVideo)`                      | Yes         | Notify change in video state (is it pointing at a live stream page or not).           | Уведомить об изменении состояния видео (ссылка на трансляцию или нет).               |
+| `DOTAShowAbilityInventoryItemTooltip(int32 entityIndex, int32 inventorySlot)` | Yes    | Show tooltip for an item in the entityIndex NPC's inventory.                          | Показать тултип предмета в инвентаре NPC с указанным entityIndex.                   |
+| `DOTAShowAbilityShopItemTooltip(string abilityName, string guideName, int32 entityIndex)` | Yes | Show tooltip for an item in the entityIndex NPC's shop.                               | Показать тултип предмета в магазине NPC с указанным entityIndex.                    |
+| `DOTAShowAbilityTooltip(string abilityName)`                           | Yes         | Show an ability tooltip.                                                              | Показать тултип способности.                                                        |
+| `DOTAShowAbilityTooltipForEntityIndex(string abilityName, int32 entityIndex)` | Yes      | Show an ability tooltip. Level information comes from the entity specified by the entityIndex. | Показать тултип способности. Информация об уровне берётся из указанного entityIndex. |
+| `DOTAShowAbilityTooltipForFacet(string abilityName, class CUtlStringToken facetName, bool showVideo)` | Yes | Show an ability tooltip for a specific facet.                                         | Показать тултип способности для указанного аспекта.                                 |
+| `DOTAShowAbilityTooltipForGuide(string abilityName, string guideName, class HeroID_t, bool)` | Yes  | Show an ability tooltip annotated with a particular guide's info.                     | Показать тултип способности с аннотациями по конкретному гайду.                     |
+| `DOTAShowAbilityTooltipForHero(string abilityName, class HeroID_t heroid, class HeroFacetID_t heroVariant, bool, bool)` | Yes | Show an ability tooltip for the specified hero.                                       | Показать тултип способности для указанного героя.                                   |
+| `DOTAShowAbilityTooltipForLevel(string abilityName, int32)`            | Yes         | Show an ability tooltip for a specific level.                                         | Показать тултип способности для определённого уровня.                               |
+| `DOTAShowBuffTooltip(int32 entityIndex, int32 buffSerial, bool bOnEnemy)` | Yes        | Show a buff tooltip for the specified entityIndex + buff serial.                      | Показать тултип баффа для указанного entityIndex и серийного номера баффа.          |
+| `DOTAShowEconItemTooltip(class item_definition_index_t itemDef, class style_index_t styleIndex, class HeroID_t heroID)` | Yes | Show the econ item tooltip for a given item, style, and hero. Use 0 for the default style, and 0 for the default hero. | Показать тултип экономического предмета для указанного предмета, стиля и героя. Используйте 0 для стиля и героя по умолчанию. |
+| `DOTAShowFacetTooltip(class HeroID_t HeroID, class HeroFacetID_t Hero Variant ID)` | Yes      | Shows a variant tooltip for the given hero + variant.                                 | Показать тултип варианта для указанного героя и его варианта.                       |
+| `DOTAShowProfileCardTooltip(uint64 steamID, bool useProName)`          | Yes         | Show a user's profile card. Use pro name determines whether to use their professional team name if applicable. | Показать карточку профиля пользователя. Параметр useProName определяет, использовать ли имя профессиональной команды (если применимо). |
+| `DOTAShowProfileCardTooltipForPartyMember(uint64 steamID, bool useProName)` | Yes       | Show a user's profile card including their hero ban choices. Use pro name determines whether to use their professional team name if applicable. | Показать карточку профиля пользователя с указанием забаненных героев. Параметр useProName определяет, использовать ли имя профессиональной команды (если применимо). |
+| `DOTAShowRankTierTooltip(uint64 steamID)`                              | Yes         | Show the rank tier tooltip for a user.                                                | Показать тултип ранга для пользователя.                                              |
+| `DOTAShowRuneTooltip(int32 X, int32 Y, int32 RuneType)`                | Yes         | Show a rune tooltip in the X Y location for the rune type.                            | Показать тултип руны на указанных координатах X и Y для указанного типа руны.       |
+| `DOTAShowTextTooltip(string text)`                                     | Yes         | Show a tooltip with the given text.                                                   | Показать тултип с указанным текстом.                                                |
+| `DOTAShowTextTooltipStyled(string text, panoramasymbol style)`         | Yes         | Show a tooltip with the given text. Also apply a CSS class named "style" to allow custom styling. | Показать тултип с указанным текстом и применить указанный CSS-класс для стилизации. |
+| `DOTAShowTI10EventGameTooltip(struct TI10EventGameTooltipInfo_t const * __ptr64 X)` | Yes     | Show a ti10 event game tooltip.                                                       | Показать тултип события TI10.                                                       |
+| `DOTAShowTitleImageTextTooltip(string title, string imagePath, string text)` | Yes       | Show a tooltip with the given title, image, and text.                                 | Показать тултип с указанным заголовком, изображением и текстом.                     |
+| `DOTAShowTitleImageTextTooltipStyled(string title, string imagePath, string text, panoramasymbol style)` | Yes | Show a tooltip with the given title, image, and text. Also apply a CSS class named "style" to allow custom styling. | Показать тултип с заголовком, изображением и текстом, применяя CSS-класс для стилизации. |
+| `DOTAShowTitleTextTooltip(string title, string text)`                  | Yes         | Show a tooltip with the given title and text.                                         | Показать тултип с заголовком и текстом.                                              |
+| `DOTAShowTitleTextTooltipStyled(string title, string text, panoramasymbol style)` | Yes       | Show a tooltip with the given title and text. Also apply a CSS class named "style" to allow custom styling. | Показать тултип с заголовком и текстом, применяя CSS-класс для стилизации.          |
+| `DropInputFocus()`                                                     | Yes         | Drop focus entirely from the window containing this panel.                            | Полностью убрать фокус с окна, содержащего эту панель.                              |
+| `IfHasClassEvent(panoramasymbol class, event eventToFire)`             | Yes         | Fire another event if this panel has a given class.                                   | Запустить другое событие, если у панели есть указанный класс.                       |
+| `IfHoverOtherEvent(string otherPanelID, event eventToFire)`            | Yes         | Fire another event if currently hovering over a panel with the given ID.              | Запустить другое событие при наведении на панель с указанным ID.                    |
+| `IfNotHasClassEvent(panoramasymbol class, event eventToFire)`          | Yes         | Fire another event if this panel does not have a given class.                         | Запустить другое событие, если у панели нет указанного класса.                      |
+| `IfNotHoverOtherEvent(string otherPanelID, event eventToFire)`         | Yes         | Fire another event if not currently hovering over a panel with the given ID.          | Запустить другое событие, если указанная панель не под наведением.                  |
+| `MovePanelDown(int32 repeatCount)`                                     | Yes         | Move down from the panel. By default, this will change the focus position, but other panel types may implement this differently. | Переместиться вниз от панели. По умолчанию меняет позицию фокуса, но другие типы панелей могут реализовывать это по-другому. |
+| `MovePanelLeft(int32 repeatCount)`                                     | Yes         | Move left from the panel. By default, this will change the focus position, but other panel types may implement this differently. | Переместиться влево от панели. По умолчанию меняет позицию фокуса, но другие типы панелей могут реализовывать это по-другому. |
+| `MovePanelRight(int32 repeatCount)`                                    | Yes         | Move right from the panel. By default, this will change the focus position, but other panel types may implement this differently. | Переместиться вправо от панели. По умолчанию меняет позицию фокуса, но другие типы панелей могут реализовывать это по-другому. |
+| `MovePanelUp(int32 repeatCount)`                                       | Yes         | Move up from the panel. By default, this will change the focus position, but other panel types may implement this differently. | Переместиться вверх от панели. По умолчанию меняет позицию фокуса, но другие типы панелей могут реализовывать это по-другому. |
+| `PageDown()`                                                           | No          | Scroll the panel down by one page.                                                    | Прокрутить панель на одну страницу вниз.                                             |
+| `PageLeft()`                                                           | No          | Scroll the panel left by one page.                                                    | Прокрутить панель на одну страницу влево.                                            |
+| `PagePanelDown()`                                                      | Yes         | Scroll the panel down by one page.                                                    | Прокрутить панель на одну страницу вниз.                                             |
+| `PagePanelLeft()`                                                      | Yes         | Scroll the panel left by one page.                                                    | Прокрутить панель на одну страницу влево.                                            |
+| `PagePanelRight()`                                                     | Yes         | Scroll the panel right by one page.                                                   | Прокрутить панель на одну страницу вправо.                                           |
+| `PagePanelUp()`                                                        | Yes         | Scroll the panel up by one page.                                                      | Прокрутить панель на одну страницу вверх.                                            |
+| `PageRight()`                                                          | No          | Scroll the panel right by one page.                                                   | Прокрутить панель на одну страницу вправо.                                           |
+| `PageUp()`                                                             | No          | Scroll the panel up by one page.                                                      | Прокрутить панель на одну страницу вверх.                                            |
+| `RemoveStyle(panoramasymbol class)`                                    | Yes         | Remove a CSS class from a panel.                                                      | Удалить CSS-класс с панели.                                                         |
+| `RemoveStyleAfterDelay(panoramasymbol class, float pre-delay)`         | Yes         | Remove a CSS class from a panel after a specified delay.                              | Удалить CSS-класс с панели после указанной задержки.                                |
+| `RemoveStyleFromEachChild(panoramasymbol class)`                       | Yes         | Remove a CSS class from all children of this panel.                                   | Удалить CSS-класс со всех дочерних элементов панели.                                |
+| `ScrollDown()`                                                         | No          | Scroll the panel down by one line.                                                    | Прокрутить панель на одну строку вниз.                                               |
+| `ScrollLeft()`                                                         | No          | Scroll the panel left by one line.                                                    | Прокрутить панель на одну строку влево.                                              |
+| `ScrollPanelDown()`                                                    | Yes         | Scroll the panel down by one line.                                                    | Прокрутить панель на одну строку вниз.                                               |
+| `ScrollPanelLeft()`                                                    | Yes         | Scroll the panel left by one line.                                                    | Прокрутить панель на одну строку влево.                                              |
+| `ScrollPanelRight()`                                                   | Yes         | Scroll the panel right by one line.                                                   | Прокрутить панель на одну строку вправо.                                             |
+| `ScrollPanelUp()`                                                      | Yes         | Scroll the panel up by one line.                                                      | Прокрутить панель на одну строку вверх.                                              |
+| `ScrollRight()`                                                        | No          | Scroll the panel right by one line.                                                   | Прокрутить панель на одну строку вправо.                                             |
+| `ScrollToBottom()`                                                     | Yes         | Scroll this panel to the bottom.                                                      | Прокрутить панель до самого низа.                                                    |
+| `ScrollToTop()`                                                        | Yes         | Scroll this panel to the top.                                                         | Прокрутить панель до самого верха.                                                   |
+| `ScrollUp()`                                                           | No          | Scroll the panel up by one line.                                                      | Прокрутить панель на одну строку вверх.                                              |
+| `SetChildPanelsSelected(bool selected)`                                | Yes         | Set whether any child panels are :selected.                                           | Установить, выбраны ли дочерние панели.                                              |
+| `SetInputFocus()`                                                      | Yes         | Set focus to this panel.                                                              | Установить фокус на этой панели.                                                     |
+| `SetPanelEnabled(bool enabled)`                                        | Yes         | Sets whether the given panel is enabled.                                              | Установить, включена ли данная панель.                                               |
+| `SetPanelSelected(bool selected)`                                      | Yes         | Set whether this panel is :selected.                                                  | Установить, выбрана ли эта панель.                                                   |
+| `SwitchStyle(panoramasymbol slot, panoramasymbol class)`               | Yes         | Switch which class the panel has for a given attribute slot. Allows easily changing between multiple states. | Переключить класс панели для указанного слота атрибута. Позволяет легко переключаться между несколькими состояниями. |
+| `TogglePanelSelected()`                                                | Yes         | Toggle whether this panel is :selected.                                               | Переключить выбор панели.                                                           |
+| `ToggleStyle(panoramasymbol class)`                                    | Yes         | Toggle whether a panel has the given CSS class.                                       | Переключить наличие у панели указанного CSS-класса.                                 |
+| `TriggerStyle(panoramasymbol class)`                                   | Yes         | Remove then immediately add back a CSS class from a panel. Useful to re-trigger events like animations or sound effects. | Удалить, а затем снова добавить CSS-класс к панели. Полезно для повторного запуска событий, таких как анимации или звуковые эффекты. |

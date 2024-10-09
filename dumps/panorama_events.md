@@ -81,3 +81,6 @@
 | `TogglePanelSelected()`                                                | Yes         | Toggle whether this panel is :selected.                                               | Переключить выбор панели.                                                           |
 | `ToggleStyle(panoramasymbol class)`                                    | Yes         | Toggle whether a panel has the given CSS class.                                       | Переключить наличие у панели указанного CSS-класса.                                 |
 | `TriggerStyle(panoramasymbol class)`                                   | Yes         | Remove then immediately add back a CSS class from a panel. Useful to re-trigger events like animations or sound effects. | Удалить, а затем снова добавить CSS-класс к панели. Полезно для повторного запуска событий, таких как анимации или звуковые эффекты. |
+
+Сгенерированно с помощью **dump_panorama_events** от **10.10.24**
+Переведено **ChatGPT 4o**

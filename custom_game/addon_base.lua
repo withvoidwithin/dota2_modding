@@ -1,57 +1,59 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version 5.1
+-- Version: 1.0
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
 
-_G.__Cache = _G.__Cache or {}
-
--- Base
--- ================================================================================================================================
-
---- Конвертирует значение в булево значение.
---- @param Value number|string
-function _NumberToBool(Value)
-	return Value == 1 or Value == "1" or Value == true
-end
-
---- Возвращает значение фиксируя его в указанном диапазоне.
---- <br> Если Min нет, то фиксирует от 0.
---- <br> Если Max нет, то фиксирует передаваемым значением.
---- @param Number number
---- @param Min number|nil
---- @param Max number|nil
-function _Clamp(Number, Min, Max)
-    return math.max(Min or 0, math.min(Max or Number, Number))
-end
-
---- Вычисляет A и B по заданной функции.
---- @param A number
---- @param B number
---- @param CalcFunction function
---- @param Min number|nil
---- @param Max number|nil
---- @param BaseA number|nil
---- @param BaseB number|nil
---- @return number
-function _Calc(A, B, CalcFunction, Min, Max, BaseA, BaseB)
-    return _Clamp(CalcFunction(A or BaseA or 0, B or BaseB or 0), Min, Max)
-end
-
--- Base NPC
--- ================================================================================================================================
-
---- Полное ли здоровье юнита?
---- @param Unit CBaseEntity
-function _IsUnitHealthFull(Unit)
-    if Unit:GetHealth() >= Unit:GetMaxHealth() then return true end
-
-    return false
-end
-
 -- Tables
 -- ================================================================================================================================
+
+--- Создает копию таблицы, со всеми значениями из оригинальной таблицы.
+--- <br> **[ Server / Client ]**
+--- @param Table table - Оригинальная таблица.
+--- @param IsCopyMeta boolean|nil - Скопировать Metadata ?
+function _DeepCopy(Table, IsCopyMeta)
+    local BaseType = type(Table)
+    local Copy
+
+    if BaseType == "table" then
+        Copy = {}
+
+        for BaseKey, BaseValue in next, Table, nil do
+            Copy[_DeepCopy(BaseKey, IsCopyMeta)] = _DeepCopy(BaseValue, IsCopyMeta)
+        end
+
+        if IsCopyMeta then
+            setmetatable(Copy, _DeepCopy(getmetatable(Table), IsCopyMeta))
+        end
+    else
+        Copy = Table
+    end
+
+    return Copy
+end
+
+--- Добавляет и заменяет существующие значения BaseTable из NewTable
+--- <br> **[ Server / Client ]**
+--- @param BaseTable table
+--- @param NewTable table|nil
+function _MergeTables(BaseTable, NewTable)
+    if not BaseTable then BaseTable = {} end
+
+    for Key, Value in pairs(NewTable or {}) do
+        if type(Value) == "table" then
+            if not BaseTable[Key] or type(BaseTable[Key]) ~= "table" then
+                BaseTable[Key] = {}
+            end
+
+            BaseTable[Key] = _MergeTables(BaseTable[Key], Value)
+        else
+            BaseTable[Key] = Value
+        end
+    end
+
+    return BaseTable
+end
 
 --- Подсчитывает количество элементов в таблице.
 --- <br> **[ Server / Client ]**
@@ -96,6 +98,7 @@ function _GetTableRandomValue(Table)
 end
 
 --- Возвращает первый ключ таблицы.
+--- <br> **[ Server / Client ]**
 --- @param Table table
 --- @return number|string|nil
 function _GetTableFirstKey(Table)
@@ -105,6 +108,7 @@ function _GetTableFirstKey(Table)
 end
 
 --- Возвращает первое значение таблицы.
+--- <br> **[ Server / Client ]**
 --- @param Table table
 function _GetTableFirstValue(Table)
     for _, Value in pairs(Table) do
@@ -112,96 +116,71 @@ function _GetTableFirstValue(Table)
     end
 end
 
---- Добавляет и заменяет существующие значения BaseTable из NewTable
+--- Проверяет, является ли таблица пустой.
 --- <br> **[ Server / Client ]**
---- @param BaseTable table
---- @param NewTable table
-function _MergeTables(BaseTable, NewTable)
-    if not BaseTable then BaseTable = {} end
-
-    for Key, Value in pairs(NewTable or {}) do
-        if type(Value) == "table" then
-            if not BaseTable[Key] or type(BaseTable[Key]) ~= "table" then
-                BaseTable[Key] = {}
-            end
-
-            BaseTable[Key] = _MergeTables(BaseTable[Key], Value)
-        else
-            BaseTable[Key] = Value
-        end
+--- @param Table table Таблица, которую нужно проверить.
+--- @return boolean `true`, если таблица пустая или `nil`, иначе `false`.
+function _IsTableEmpty(Table)
+    for _ in pairs(Table or {}) do
+        return false
     end
 
-    return BaseTable
+    return true
 end
 
---- Создает новую таблицу со всеми значениями передаваемой таблицей.
---- @param Table table
---- @param IsCopyMeta boolean|nil
-function _DeepCopy(Table, IsCopyMeta)
-    local BaseType = type(Table)
-    local Copy
-
-    if BaseType == "table" then
-        Copy = {}
-
-        for BaseKey, BaseValue in next, Table, nil do
-            Copy[_DeepCopy(BaseKey, IsCopyMeta)] = _DeepCopy(BaseValue, IsCopyMeta)
-        end
-
-        if IsCopyMeta then
-            setmetatable(Copy, _DeepCopy(getmetatable(Table), IsCopyMeta))
-        end
-    else
-        Copy = Table
-    end
-
-    return Copy
-end
-
--- Game Events
+-- Handlers
 -- ================================================================================================================================
 
---- Регистрирует слушатель игрового эвента и вызывает соответствующий метод в заданном контексте.
---- <br> Поддерживает script_reload и не вызывает дублирование логики.
+--- Производит вычисление двух переменных по заданной функции и ограничивает результат в диапазоне.
 --- ```lua
---- Пример использования:
---- Listeners = { game_rules_state_change = "OnGameEventStateChanged" }
+--- Пример:
+--- CalcFunction = function(a, b) return a - b end
 --- ```
---- **[ Server / Client ]**
---- @param Context table
---- @param Listeners table
-function _RegisterGameEventListeners(Context, Listeners)
-    if not Context.__GameEventListeners then
-		Context.__GameEventListeners = {}
-	end
-
-    for ListenerName, FunctionName in pairs(Listeners or {}) do
-        if Context.__GameEventListeners[ListenerName] then
-            StopListeningToGameEvent(Context.__GameEventListeners[ListenerName])
-        end
-
-        Context.__GameEventListeners[ListenerName] = ListenToGameEvent(ListenerName, Dynamic_Wrap(Context, FunctionName), Context)
-    end
+--- <br> **[ Server / Client ]**
+--- @param A number|nil
+--- @param B number|nil
+--- @param CalcFunction function Функция, используемая для вычислений.
+--- @param Min number|nil
+--- @param Max number|nil
+--- @param BaseA number|nil
+--- @param BaseB number|nil
+function _Calc(A, B, CalcFunction, Min, Max, BaseA, BaseB)
+    return _Clamp(CalcFunction(A or BaseA or 0, B or BaseB or 0), Min, Max)
 end
 
---- Удаляет зарегистрированный слушатель игрового эвента в заданом контексте.
---- <br> Если Listeners нет, тогда удалит все существующие слушатели.
+--- Возвращает значение фиксируя его в указанном диапазоне.
+--- <br> Если Min нет, то фиксирует от 0.
+--- <br> Если Max нет, то фиксирует передаваемым значением.
+--- <br> **[ Server / Client ]**
+--- @param Number number
+--- @param Min number|nil
+--- @param Max number|nil
+function _Clamp(Number, Min, Max)
+    return math.max(Min or 0, math.min(Max or Number, Number))
+end
+
+--- Конвертирует значение в булево значение.
+--- <br> **[ Server / Client ]**
+--- @param Value number|string
+function _ValueToBool(Value)
+	return Value == 1 or Value == "1" or Value == true
+end
+
+--- Обрабатывает вызов функции обратного вызова с предоставленными аргументами.
 --- ```lua
---- Пример использования:
---- Listeners = { "game_rules_state_change", ... }
+--- Примеры:
+--- _HandleCallback({ Context = MyContext, FunctionName = "MyMethod", EventData = ...})
+--- _HandleCallback({ FunctionName = "GlobalFunction", EventData = ...})
+--- _HandleCallback({ Function  = DirectFunction, EventData = ...})
 --- ```
---- **[ Server / Client ]**
---- @param Context table
---- @param Listeners table|nil
-function _UnregisterGameEventListeners(Context, Listeners)
-    for ListenerName, ListenerID in pairs(Listeners or Context.__GameEventListeners or {}) do
-        StopListeningToGameEvent(ListenerID)
-
-        Context.__GameEventListeners[ListenerName] = nil
-    end
-
-    if _GetTableSize(Context.__GameEventListeners) == 0 then
-        Context.__GameEventListeners = nil
+--- @param CallbackData table
+function _HandleCallback(CallbackData)
+    if CallbackData.Context then
+        return CallbackData.Context[CallbackData.FunctionName](CallbackData.Context, CallbackData.EventData)
+    elseif CallbackData.FunctionName then
+        return _G[CallbackData.FunctionName](CallbackData.EventData)
+    elseif CallbackData.Function then
+        return CallbackData.Function(CallbackData.EventData)
     end
 end
 
@@ -223,17 +202,90 @@ function _HandleGameStateChange(ListenerEventData, States, Context)
 	if StateFunction then StateFunction(Context, StateID, ListenerEventData) end
 end
 
+--- Разбивает строку на отдельные значения, используя указанный разделитель, и возвращает их в виде таблицы.
+--- **[ Server / Client ]**
+--- @param String string Строка, которую нужно разбить на значения.
+--- @param Devider string Разделитель, по которому производится разделение строки (по умолчанию — пробел).
+function _ParseStringToValues(String, Devider)
+    local Values = {}
 
+    Devider = Devider or " "
 
+    for Value in String:gmatch("[^" .. Devider .. "]+") do
+        table.insert(Values, Value)
+    end
 
+    return Values
+end
+
+-- Game Events
+-- ================================================================================================================================
+
+--- Регистрирует слушателей игровых событий и связывает их с переданным контекстом и функцией.
+--- ```lua
+--- ListenersData = {
+---     ["dota_player_killed"] = { Context = MyContext, FunctionName = "OnPlayerKilled" },
+---     ["npc_spawned"]        = { Context = MyContext, FunctionName = "OnNPCSpawned" },
+--- }
+--- ```
+--- **[ Server / Client ]**
+--- @param ContextGameEventListeners table Таблица для хранения активных слушателей событий.
+--- @param ContextName string Имя контекста, в котором будут храниться слушатели.
+--- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
+function _RegisterGameEventListeners(ContextGameEventListeners, ContextName, ListenersData)
+    for ListenerName, CallbackData in pairs(ListenersData or {}) do
+        if not ContextGameEventListeners[ContextName] then ContextGameEventListeners[ContextName] = {} end
+
+        if ContextGameEventListeners[ContextName][ListenerName] then
+            StopListeningToGameEvent(ContextGameEventListeners[ContextName][ListenerName])
+        end
+
+        ContextGameEventListeners[ContextName][ListenerName] = ListenToGameEvent(ListenerName, Dynamic_Wrap(CallbackData.Context, CallbackData.FunctionName), CallbackData.Context)
+    end
+end
+
+--- Отменяет регистрацию слушателей игровых событий для указанного контекста.
+--- ```lua
+--- Listeners = {
+---     "dota_player_killed",
+---     "npc_spawned",
+--- }
+--- ```
+--- **[ Server / Client ]**
+--- @param ContextGameEventListeners table Таблица с активными слушателями событий.
+--- @param ContextName string Имя контекста, для которого удаляются слушатели.
+--- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
+function _UnregisterGameEventListeners(ContextGameEventListeners, ContextName, Listeners)
+    for _, ListenerName in pairs(Listeners or {}) do
+        if ContextGameEventListeners[ContextName] and ContextGameEventListeners[ContextName][ListenerName] then
+            StopListeningToGameEvent(ContextGameEventListeners[ContextName][ListenerName])
+
+            ContextGameEventListeners[ContextName][ListenerName] = nil
+        end
+    end
+
+    if _GetTableSize(ContextGameEventListeners[ContextName]) == 0 then
+        ContextGameEventListeners[ContextName] = nil
+    end
+end
+
+-- Base NPC
+-- ================================================================================================================================
+
+--- Проверяет, полное ли здоровье у указанного юнита.
+--- <br> **[ Server / Client ]**
+--- @return boolean `true`, если здоровье юнита полное, иначе `false`.
+function _IsUnitHealthFull(Unit)
+    return Unit:GetHealth() >= Unit:GetMaxHealth()
+end
 
 -- ================================================================================================================================
--- Server Only
+-- SERVER ONLY
 -- ================================================================================================================================
 
 if IsClient() then return end
 
--- Base
+-- Handlers
 -- ================================================================================================================================
 
 --- Прекеш ресурсов. Требует специальный контекст прекеша.
@@ -260,207 +312,51 @@ function _PrecacheTable(Context, Resources)
 	end
 end
 
---- Линкует модифаер на сервере и клиенте.
---- <br> Для корректной работы необходимо задекларировать эвент в ``"scripts/custom.gameevents"`` со следующей таблицей:
---- ```kv
---- "link_lua_modifier"
---- {
----     "modifier_name" "string"
----     "modifier_path" "string"
----     "modifier_type" "byte"
---- }
---- ```
---- А затем нужно принять эвент ``"link_lua_modifier"`` на клиенте и выполнить стандартную функцию LinkLuaModifier.
---- <br> **[ Server Only ]**
---- @param ModifierName string
---- @param ModifierPath string
---- @param ModifierType LuaModifierType
-function _LinkLuaModifier(ModifierName, ModifierPath, ModifierType)
-    LinkLuaModifier(ModifierName, ModifierPath, ModifierType)
-
-    FireGameEvent("link_lua_modifier", {
-        modifier_name = ModifierName,
-        modifier_path = ModifierPath,
-        modifier_type = ModifierType,
-    })
-end
-
---- Линкует таблицу с модифаерами на сервере и клиенте.
---- ```lua
---- Modifiers = {
----     { "ModifierName", "ModifierPath", LUA_MODIFIER_MOTION_NONE },
----     ...
---- }
---- ```
---- <br> Для корректной работы необходимо задекларировать эвент в ``"scripts/custom.gameevents"`` со следующей таблицей:
---- ```kv
---- "link_lua_modifier"
---- {
----     "modifier_name" "string"
----     "modifier_path" "string"
----     "modifier_type" "byte"
---- }
---- ```
---- А затем нужно принять эвент ``"link_lua_modifier"`` на клиенте и выполнить стандартную функцию LinkLuaModifier.
---- <br> **[ Server Only ]**
---- @param Modifiers table
-function _LinkLuaModifiers(Modifiers)
-    for _, ModifierData in pairs(Modifiers) do
-        _LinkLuaModifier(ModifierData[1], ModifierData[2], ModifierData[3])
-    end
-end
-
---- @param PlayerID PlayerID
---- @param EntityIndex number
---- @param KeyName string
---- @param Data any
-function _TrasmitEntityDataToClientLua(PlayerID, EntityIndex, KeyName, Data)
-    local PlayerController = PlayerResource:GetPlayer(PlayerID)
-
-    if not PlayerController then return end
-
-    CustomGameEventManager:Send_ServerToPlayer(PlayerController, "_sv_transmit_ent_data_to_client_lua", {
-        EntityIndex = EntityIndex,
-        KeyName     = KeyName,
-        Data        = Data,
-    })
-end
-
--- Events Listeners
+-- Client Events
 -- ================================================================================================================================
 
---- Регистрирует слушатель клиентских эвентов и вызывает соответствующий метод в заданном контексте.
---- <br> Поддерживает script_reload и не вызывает дублирование логики.
+--- Регистрирует слушателей клиентских событий и связывает их с переданным контекстом и функцией.
 --- ```lua
---- Listeners = { client_event_name = "FunctionName" }
+--- ListenersData = {
+---     ["custom_event_name"] = { Context = self, FunctionName = "OnCustomEvent" },
+--- }
 --- ```
 --- **[ Server Only ]**
---- @param Context table
---- @param Listeners table
-function _RegisterClientEventListeners(Context, Listeners)
-    if not Context.__ClientEventListeners then
-		Context.__ClientEventListeners = {}
-	end
+--- @param ContextClientEventListeners table Таблица для хранения активных слушателей событий на клиенте.
+--- @param ContextName string Имя контекста, в котором будут храниться слушатели.
+--- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
+function _RegisterClientEventListeners(ContextClientEventListeners, ContextName, ListenersData)
+    for ListenerName, CallbackData in pairs(ListenersData or {}) do
+        if not ContextClientEventListeners[ContextName] then ContextClientEventListeners[ContextName] = {} end
 
-    for ListenerName, FunctionName in pairs(Listeners or {}) do
-        if Context.__ClientEventListeners[ListenerName] then
-            CustomGameEventManager:UnregisterListener(Context.__ClientEventListeners[ListenerName])
+        if ContextClientEventListeners[ContextName][ListenerName] then
+            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[ContextName][ListenerName])
         end
 
-        Context.__ClientEventListeners[ListenerName] = CustomGameEventManager:RegisterListener(ListenerName, Context[FunctionName])
+        ContextClientEventListeners[ContextName][ListenerName] = CustomGameEventManager:RegisterListener(ListenerName, (CallbackData.Context and CallbackData.Context[CallbackData.FunctionName] or CallbackData.Function))
     end
 end
 
---- Удаляет зарегистрированный слушатель клиентских эвентов в заданом контексте.
---- <br> Если Listeners нет, тогда удалит все существующие слушатели.
+--- Отменяет регистрацию слушателей клиентских событий для указанного контекста.
 --- ```lua
---- Listeners = { "client_event_name", ... }
+--- Listeners = {
+---     "custom_event_name",
+--- }
 --- ```
 --- **[ Server Only ]**
---- @param Context table
---- @param Listeners table
-function _UnregisterClientEventListeners(Context, Listeners)
-    local ListenersTable = Context._ClientEventListeners
+--- @param ContextClientEventListeners table Таблица с активными слушателями событий на клиенте.
+--- @param ContextName string Имя контекста, для которого удаляются слушатели.
+--- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
+function _UnregisterClientEventListeners(ContextClientEventListeners, ContextName, Listeners)
+    for _, ListenerName in pairs(Listeners or {}) do
+        if ContextClientEventListeners[ContextName] and ContextClientEventListeners[ContextName][ListenerName] then
+            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[ContextName][ListenerName])
 
-    if Listeners then
-        ListenersTable = {}
-
-        for _, ListenerName in pairs(Listeners) do
-            if Context._ClientEventListeners[ListenerName] then
-                ListenersTable[ListenerName] = Context[ListenerName]
-            end
+            ContextClientEventListeners[ContextName][ListenerName] = nil
         end
     end
 
-    for ListenerName in pairs(ListenersTable or {}) do
-        CustomGameEventManager:UnregisterListener(Context._ClientEventListeners[ListenerName])
-        Context._ClientEventListeners[ListenerName] = nil
+    if _GetTableSize(ContextClientEventListeners[ContextName]) == 0 then
+        ContextClientEventListeners[ContextName] = nil
     end
 end
-
---- Регистрирует кастомный эвент для энтити.
---- @param Entity CBaseEntity
---- @param EventName string Название эвента, например: <i> OnEntityKilled
---- @param ActionName string Уникальное название действия.
---- @param CallbackContext table|nil Конекст вызова метода для эвента.
---- @param CallbackFunctionName string Имя метода в контексте вызова.
---- @param ... any Любые другие аргументы.
-function _RegisterEntityCustomEvent(Entity, EventName, ActionName, CallbackContext, CallbackFunctionName, ...)
-    if not __Cache.EntityCustomEvents                                         then __Cache.EntityCustomEvents                                       = {} end
-    if not __Cache.EntityCustomEvents[EventName]                              then __Cache.EntityCustomEvents[EventName]                            = {} end
-
-    local TableIndex
-
-    for Index, Ent in pairs(__Cache.EntityCustomEvents[EventName]) do
-        if Ent == Entity then TableIndex = Index end
-    end
-
-    if not TableIndex then table.insert(__Cache.EntityCustomEvents[EventName], Entity) end
-    if not Entity.__CustomEventData             then Entity.__CustomEventData               = {} end
-    if not Entity.__CustomEventData[EventName]  then Entity.__CustomEventData[EventName]    = {} end
-
-    Entity.__CustomEventData[EventName][ActionName] = {
-        Context         = CallbackContext,
-        FunctionName    = CallbackFunctionName,
-        Arguments       = {...},
-    }
-end
-
---- Удаляет кастомный эвент для энтити.
---- @param Entity CBaseEntity
---- @param EventName string Название эвента, например: <i> OnEntityKilled
---- @param ActionName string Уникальное название действия.
-function _UnregisterEntityCustomEvent(Entity, EventName, ActionName)
-    if not __Cache.EntityCustomEvents                     then return end
-    if not __Cache.EntityCustomEvents[EventName]          then return end
-
-    local TableIndex
-
-    for Index, Ent in pairs(__Cache.EntityCustomEvents[EventName] or {}) do
-        if Ent == Entity then TableIndex = Index end
-    end
-
-    if TableIndex then table.remove(__Cache.EntityCustomEvents[EventName], TableIndex) end
-
-    Entity.__CustomEventData = nil
-end
-
---- Функция вызова кастомного эвента.
---- @param EventName string Название эвента, например: <i> OnEntityKilled
---- @param EventData table Данные передачи внутрь эвента.
---- @param CurrentEntity CBaseEntity|nil Контекстный энтити с возвращаением результата.
-function _OnEntityCustomEvent(EventName, EventData, CurrentEntity)
-    if not __Cache.EntityCustomEvents               then return end
-    if not __Cache.EntityCustomEvents[EventName]    then return end
-
-    local function handle_actions(event_name, table_index, entity, event_data)
-        if IsValidEntity(entity) and entity.__CustomEventData then
-            for ActionName, ActionData in pairs(entity.__CustomEventData[event_name] or {}) do
-                if ActionData.Context then
-                    ActionData.Context[ActionData.FunctionName](ActionData.Context, entity, event_data, unpack(ActionData.Arguments))
-                else
-                    _G[ActionData.FunctionName](entity, event_data, unpack(ActionData.Arguments))
-                end
-            end
-        else
-            table.remove(__Cache.EntityCustomEvents[EventName], table_index)
-        end
-    end
-
-    if CurrentEntity then
-        local TableIndex
-
-        for Index, Ent in pairs(__Cache.EntityCustomEvents[EventName]) do
-            if Ent == CurrentEntity then TableIndex = Index end
-        end
-
-        return handle_actions(EventName, TableIndex, CurrentEntity, EventData)
-    else
-        for Index, Entity in pairs(__Cache.EntityCustomEvents[EventName]) do
-            handle_actions(EventName, Index, Entity, EventData)
-        end
-    end
-end
-
-
-

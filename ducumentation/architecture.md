@@ -9,11 +9,11 @@
     - npc_items_custom.txt
     - npc_units_custom.txt
     - portraits.txt
-  - vscripts
+  - [vscripts](#vscripts)
     - game
     - gamemodes
     - systems
-    - addon_base.lua
+    - [addon_base.lua](#addon_base.lua)
     - addon_game_mode.lua
     - addon_game_mode_client.lua
   - custom.gameevents
@@ -25,3 +25,9 @@
 
 ## NPC
 Стандартная папка npc обычно содержит файлы и скрипты, которые описывают поведение и характеристики различных игровых сущностей, таких как герои, нейтральные существа, способности и предметы.
+
+## VScripts
+Стандартная папка vscripts предназначена для хранения всех скриптов, написанных на языке Lua, которые управляют логикой и механиками пользовательской игры.
+
+## addon_base.lua
+[Addon Base](../custom_game/addon_base.lua) — это моя библиотека утилитарных функций, облегчающих разработку пользовательских игр Dota 2.

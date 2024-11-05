@@ -3,7 +3,7 @@
   - panorama
     - systems
       - data_handler.js
-    - [addon_base.js](#addon_base)
+    - [addon_base.js](#Addon-Base)
 - game
   - [scripts](#scripts)
     - [npc](#npc)

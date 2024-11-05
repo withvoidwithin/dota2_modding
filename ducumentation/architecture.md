@@ -2,7 +2,7 @@
 - content
   - panorama
     - systems
-      - data_hanlder.js
+      - data_handler.js
     - [addon_base.js](#addon_base)
 - game
   - [scripts](#scripts)

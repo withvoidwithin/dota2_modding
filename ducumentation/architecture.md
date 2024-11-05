@@ -3,7 +3,7 @@
   - panorama
     - systems
       - data_hanlder.js
-    - addon_base.js
+    - [addon_base.js](#addon_base)
 - game
   - [scripts](#scripts)
     - [npc](#npc)
@@ -37,4 +37,6 @@
 Стандартная папка vscripts предназначена для хранения всех скриптов, написанных на языке Lua, которые управляют логикой и механиками пользовательской игры.
 
 ## addon_base
-[Addon Base](../custom_game/addon_base.lua) — это моя библиотека утилитарных функций, облегчающих разработку пользовательских игр Dota 2.
+**Addon Base** — это моя библиотека утилитарных функций, облегчающих разработку пользовательских игр Dota 2.
+[addon_base.js](../custom_game/content/panorama/addon_base.js) - Функции для работы с Panorama.
+[addon_base.lua](../custom_game/game/addon_base.lua) - Функции для работы с Lua API.

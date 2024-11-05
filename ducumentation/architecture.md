@@ -20,6 +20,7 @@
       - gamemodes
       - systems
         - data_handler.lua
+        - players_handler.lua
       - [addon_base.lua](#Addon-Base)
       - addon_game_mode.lua
       - addon_game_mode_client.lua

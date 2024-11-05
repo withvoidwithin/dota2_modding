@@ -1,23 +1,30 @@
 # Структура архитектуры
-- [scripts](#scripts)
-  - [npc](#npc)
-    - abilities
-    - items
-    - units
-    - npc_abilities_custom.txt
-    - npc_heroes_custom.txt
-    - npc_items_custom.txt
-    - npc_units_custom.txt
-    - portraits.txt
-  - [vscripts](#vscripts)
-    - game
-    - gamemodes
+- content
+  - panorama
     - systems
-    - [addon_base.lua](#addon_base)
-    - addon_game_mode.lua
-    - addon_game_mode_client.lua
-  - custom.gameevents
-  - custom_net_tables.txt
+      - data_hanlder.js
+    - addon_base.js
+- game
+  - [scripts](#scripts)
+    - [npc](#npc)
+      - abilities
+      - items
+      - units
+      - npc_abilities_custom.txt
+      - npc_heroes_custom.txt
+      - npc_items_custom.txt
+      - npc_units_custom.txt
+      - portraits.txt
+    - [vscripts](#vscripts)
+      - game
+      - gamemodes
+      - systems
+        - data_handler.lua
+      - [addon_base.lua](#addon_base)
+      - addon_game_mode.lua
+      - addon_game_mode_client.lua
+    - custom.gameevents
+    - custom_net_tables.txt
 
 # Подробная документация
 ## Scripts

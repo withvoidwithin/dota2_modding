@@ -38,5 +38,5 @@
 
 ## addon_base
 **Addon Base** — это моя библиотека утилитарных функций, облегчающих разработку пользовательских игр Dota 2.
-[addon_base.js](../custom_game/content/panorama/addon_base.js) - Функции для работы с Panorama.
-[addon_base.lua](../custom_game/game/addon_base.lua) - Функции для работы с Lua API.
+<br> [addon_base.js](../custom_game/content/panorama/addon_base.js) - Функции для работы с Panorama.
+<br> [addon_base.lua](../custom_game/game/addon_base.lua) - Функции для работы с Lua API.

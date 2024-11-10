@@ -1,8 +1,9 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.0
+-- Version: 1.1
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
+-- Required: addon_base.lua
 -- ===================================================================================
 
 if IsClient() then return end
@@ -218,6 +219,9 @@ function PlayersHandler:HasPlayerUIPanel(PlayerID, UIPanelName, Context)
 
     return false
 end
+
+-- Game Events
+-- ================================================================================================================================
 
 function PlayersHandler:OnGameEventPlayerConnectFull(EventData)
     self:InitPlayerUIPanels(EventData.PlayerID)

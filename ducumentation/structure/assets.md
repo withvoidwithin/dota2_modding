@@ -10,7 +10,7 @@
 # 🏗️Структура
 <br>**custom_game**
 <br>`|— `[assets](#assets)
-<br>`|— |— `**pack_name**
+<br>`|  |— `**pack_name**
 <br>`|  |  |— `[materials](#materials)
 <br>`|  |  |  |— `[blends](#blends)
 <br>`|  |  |  |— `[dev](#%EF%B8%8Fdev)

@@ -5,19 +5,19 @@
 --------
 
 # 🏗️Структура
-- custom_game
-  - [assets](#assets)
-    - [materials](#materials)
-      - [blends](#blends)
-      - [dev](#dev)
-      - [environment](#environment)
-      - [generic](#generic)
-      - [structures](#structures)
-    - [models](#models)
-    - [particles](#particles)
-    - [sounds](#sounds)
-    - [textures](#textures)
-    - [ui](#ui)
+<br>**custom_game**
+<br>`|— `[assets](#assets)
+<br>`|  |— `[materials](#materials)
+<br>`|  |  |— `[blends](#blends)
+<br>`|  |  |— `[dev](#%EF%B8%8Fdev)
+<br>`|  |  |— `[environment](#%EF%B8%8Fenvironment)
+<br>`|  |  |— `[generic](#generic)
+<br>`|  |  |— `[structures](#%EF%B8%8Fstructures)
+<br>`|  |— `[models](#models)
+<br>`|  |— `[particles](#particles)
+<br>`|  |— `[sounds](#sounds)
+<br>`|  |— `[textures](#%EF%B8%8Ftextures)
+<br>`|  |— `[ui](#%EF%B8%8Fui)
 
 --------
 

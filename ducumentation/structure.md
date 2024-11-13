@@ -10,7 +10,7 @@
 # Структура файлов проекта
 - custom_game/
   - [assets](structure/assets.md#assets)
-  - [maps](#maps)
+  - maps
   - [panorama](structure/panorama.md#%EF%B8%8Fpanorama)
   - resource
   - scripts
@@ -19,14 +19,6 @@
   - panorama_debugger.cfg
   - tools_asset_info.bin
   - tools_thumbnail_cache.bin
-
---------
-
-# Maps
-Стандартная папка maps в структуре ассетов предназначена для хранения всех файлов, связанных с игровыми картами и префабами.
-
-# Panorama
-Стандартная папка panorama хранит в себе макеты (layouts .xml), стили (styles .css) и скрипты (scripts, .js).
 
 --------
 

@@ -11,7 +11,7 @@
 - custom_game/
   - [assets](structure/assets.md#assets)
   - [maps](#maps)
-  - [panorama](#panorama)
+  - [panorama](structure/panorama.md#%EF%B8%8Fpanorama)
   - resource
   - scripts
   - soundevents

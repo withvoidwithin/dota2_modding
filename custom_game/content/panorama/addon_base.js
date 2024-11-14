@@ -152,3 +152,75 @@ Game._DropFocusPanel = function(){
 
     $.DispatchEvent("DropInputFocus")
 }
+
+/**
+ * Создает или пересоздает пользовательскую панель с заданными параметрами и контекстными данными.
+ *
+ * @param {Object} PanelData - Данные для создания панели.
+ * @param {Panel} PanelData.Parent - Родительская панель, в которой будет создана новая панель.
+ * @param {string} PanelData.PanelID - Идентификатор панели.
+ * @param {string} PanelData.PanelType - Тип панели (например, "Panel", "Label" и т.д.).
+ * @param {string} PanelData.XML - Путь к XML макету панели.
+ * @param {Object} [PanelData.Properties={}] - Дополнительные свойства панели.
+ * @param {Object} [PanelData.Styles={}] - Стили, которые будут применены к панели.
+ * @param {*} [ContextData] - Данные контекста, которые будут привязаны к панели.
+ * @param {boolean} [IsRecreate=false] - Если `true`, существующая панель будет пересоздана.
+ * @returns {Panel} Созданная или обновленная панель.
+ *
+ * @example
+ * const panelData = {
+ *     Parent: $.GetContextPanel(),
+ *     PanelID: "CustomPanel",
+ *     PanelType: "Panel",
+ *     XML: "file://{resources}/layout/custom_layout.xml",
+ *     Properties: { class: "my-custom-class" },
+ *     Styles: { width: "200px", height: "100px" }
+ * };
+ * const customPanel = Game._CreateCustomPanel(panelData, { data: "context" }, true);
+ */
+Game._CreateCustomPanel = function(PanelData, ContextData, IsRecreate){
+    let Panel = PanelData.Parent.FindChildTraverse(PanelData.PanelID)
+
+    if(!Panel || IsRecreate){
+        if(Panel) Panel.DeleteAsync(0)
+
+        Panel = $.CreatePanel(PanelData.PanelType, PanelData.Parent, PanelData.PanelID, PanelData.Properties || {})
+
+        Panel.BLoadLayout( PanelData.XML, false, false )
+        Object.assign(Panel.style, PanelData.Styles || {})
+    }
+
+    if(ContextData !== undefined){
+        Panel._SetContextData = function(Data){
+            if(Data === undefined) return
+        
+            this._ContextData = Data
+
+            if(typeof(this["_OnContextDataUpdated"]) === "function" ) this["_OnContextDataUpdated"](this._ContextData)
+        }
+
+        Panel._GetContextData = function(){
+            return this._ContextData
+        }
+    
+        Panel._SetContextData(ContextData)
+    }
+
+    return Panel
+}
+
+/**
+ * Создает пользовательский тултип для указанной панели, устанавливая события для его показа и скрытия.
+ *
+ * @param {Panel} Panel - Панель, для которой нужно создать тултип.
+ * @param {string} TooltipID - Уникальный идентификатор тултипа.
+ * @param {string} TooltipPath - Путь к XML макету тултипа.
+ * @param {Object} TooltipData - Данные, которые будут переданы в тултип в виде параметров.
+ *
+ * @example
+ * Game._CreateCustomTooltip(myPanel, "MyTooltipID", "file://{resources}/layout/custom_tooltip.xml", { text: "Пример текста" });
+ */
+Game._CreateCustomTooltip = function(Panel, TooltipID, TooltipPath, TooltipData){
+    Panel.SetPanelEvent("onmouseover",  () => $.DispatchEvent( 'UIShowCustomLayoutParametersTooltip', Panel, TooltipID, TooltipPath, "TooltipParams=" + JSON.stringify(TooltipData)))
+    Panel.SetPanelEvent("onmouseout",   () => $.DispatchEvent( 'UIHideCustomLayoutTooltip', Panel, TooltipID))
+}

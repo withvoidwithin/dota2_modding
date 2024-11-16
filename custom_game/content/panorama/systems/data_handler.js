@@ -1,6 +1,6 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.0
+// Version 1.1
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
 // =============================================================================
@@ -102,7 +102,7 @@ GameData.TriggerListener = function(DataType, Key){
     for(const ListenerName in Listeners[DataType]){
         const ListenerData = Listeners[DataType][ListenerName]
 
-        if(ListenerData.Key == Key) ListenerData.CallbackFunction(Key, this.Get(DataType, Key), ListenerName, DataType)
+        if(ListenerData.Key == Key) ListenerData.CallbackFunction({Key: Key, Data: this.Get(DataType, Key), ListenerName: ListenerName, DataType: DataType})
     }
 }
 

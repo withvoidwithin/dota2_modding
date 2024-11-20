@@ -1,11 +1,9 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.0
+// Version 1.2
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
 // =============================================================================
-
-var Data = {}
 
 // Handlers
 // ================================================================================================================================
@@ -96,6 +94,20 @@ Game._SteamID64ToSteamID32 = function(SteamID64){
     return Number(SteamID64.substr(-16,16)) - 6561197960265728
 }
 
+/**
+ * Ищет модификатор (бафф) по его названию для указанного существа.
+ * @param {number} EntityIndex - Индекс сущности, для которой нужно найти модификатор.
+ * @param {string} ModifierName - Имя модификатора (баффа), который необходимо найти.
+ * @returns {number|undefined} Индекс найденного модификатора или undefined, если модификатор не найден.
+ */
+Game._FindModifierByName = function(EntityIndex, ModifierName){
+    for(let i = 0; i <= Entities.GetNumBuffs(EntityIndex) - 1; i++){
+        const BuffIndex = Entities.GetBuff(EntityIndex, i )
+
+        if(Buffs.GetName(EntityIndex, BuffIndex) == ModifierName) return BuffIndex
+    }
+}
+
 // Panels
 // ================================================================================================================================
 
@@ -131,7 +143,7 @@ Game._SetDefaultUIPanelVisible = function(PanelID, IsVisible){
 Game._SetFocusPanel = function(Panel){
     if(!Panel.IsValid()) return
 
-    Data.PanelInFocus = Panel
+    this.__PanelInFocus = Panel
 
     Panel.SetAcceptsFocus(true)
     Panel.SetFocus()
@@ -141,14 +153,14 @@ Game._SetFocusPanel = function(Panel){
  * Возвращает панель, которая в данный момент находится в фокусе.
  */
 Game._GetFocusPanel = function(){
-    return Data.PanelInFocus
+    return this.__PanelInFocus
 }
 
 /**
  * Сбрасывает текущую панель в фокусе и снимает фокус ввода.
  */
 Game._DropFocusPanel = function(){
-    delete Data.PanelInFocus
+    delete this.__PanelInFocus
 
     $.DispatchEvent("DropInputFocus")
 }
@@ -224,3 +236,67 @@ Game._CreateCustomTooltip = function(Panel, TooltipID, TooltipPath, TooltipData)
     Panel.SetPanelEvent("onmouseover",  () => $.DispatchEvent( 'UIShowCustomLayoutParametersTooltip', Panel, TooltipID, TooltipPath, "TooltipParams=" + JSON.stringify(TooltipData)))
     Panel.SetPanelEvent("onmouseout",   () => $.DispatchEvent( 'UIHideCustomLayoutTooltip', Panel, TooltipID))
 }
+
+/**
+ * Загружает новый xml файл в панель с определенным ID у определенного родителя.
+ *
+ * @param {string} PanelID - ID панели в которую загрузится xml верстка.
+ * @param {Panel} Context - Родитель с PanelID внутри.
+ * @param {string} ComponentPath - Путь к XML макету компонента.
+ *
+ * @example
+ * Game._LoadComponent("PanelID", Parent, "file://{resources}/layout/custom_game/my_component.xml");
+ */
+Game._LoadComponent = function(PanelID, Context, ComponentPath){
+    const Component = Context.FindChildTraverse(PanelID)
+
+    if(Component) Component.BLoadLayout( ComponentPath, true, false )
+}
+
+// Callback
+// ================================================================================================================================
+
+/**
+ * Регистрирует слушатель на эвенты нажатия кнопок мыши.
+ * @param {string} ListenerName
+ * @param {Function} Callback - Функция, вызываемая при событии мыши.
+ */
+Game._RegisterListenerMouseCallback = function(ListenerName, Callback){
+    if(!this.__ListenerMouseCallbacks) this.__ListenerMouseCallbacks = {}
+
+    this.__ListenerMouseCallbacks[ListenerName] = Callback
+}
+
+/**
+ * Удаляет зарегистрированный слушатель на эвенты мыши.
+ * @param {string} ListenerName
+ */
+Game._UnregisterListenerMouseCallback = function(ListenerName){
+    delete this.__ListenerMouseCallbacks[ListenerName]
+}
+
+// Events
+// ================================================================================================================================
+
+function OnInputFocusLost(LostFocusedPanel){
+    if(Game._GetFocusPanel() === LostFocusedPanel) Game._SetFocusPanel(LostFocusedPanel)
+}
+
+function OnGlobalMouseCallback(Status, MouseButtonID){
+    let IsIgnoreMouse = false
+
+    for(const ListenerName in this.__ListenerMouseCallbacks){
+        const Callback = this.__ListenerMouseCallbacks[ListenerName](Status, MouseButtonID)
+
+        if(Callback) IsIgnoreMouse = true
+    }
+
+    return IsIgnoreMouse
+}
+
+// Init
+// ================================================================================================================================
+
+$.RegisterForUnhandledEvent("InputFocusLost", OnInputFocusLost)
+
+GameUI.SetMouseCallback(OnGlobalMouseCallback)

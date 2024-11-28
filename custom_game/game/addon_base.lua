@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.0
+-- Version: 1.1
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -126,6 +126,68 @@ function _IsTableEmpty(Table)
     end
 
     return true
+end
+
+--- Печатает данные в консоле.
+--- Если данные являются таблицей, выводит структуру таблицы, включая ключи и значения.
+--- Поддерживает глубокий вывод для вложенных таблиц или данных сущностей, если указано.
+--- @param Data any Данные для вывода, могут быть любого типа.
+--- @param IsDeepPrint boolean|nil Необязательный. Если true, будет выполняться глубокий вывод вложенных таблиц и данных сущностей. По умолчанию false.
+--- @param TabSize string|nil Необязательный. Определяет строку, используемую для отступов. По умолчанию четыре пробела.
+function _Print(Data, IsDeepPrint, TabSize)
+    TabSize = TabSize or "    "
+
+    function PrintData(Data, Indent)
+        Indent = Indent or ""
+
+        if type(Data) == "table" then
+            if #Indent == 0 then print("{") end
+
+            for Key, Value in pairs(Data) do
+                if type(Value) == "table" then
+                    if IsValidEntity(Value) then
+                        local HasInsideData = _GetTableSize(Value) > 1
+                        print(Indent, Key.." = <"..Value:GetClassname().."|"..(Value:GetName() or " ").."|"..Value:GetEntityIndex()..">"..(IsDeepPrint and HasInsideData and " {" or ""))
+
+                        if IsDeepPrint and HasInsideData then
+                            for k, v in pairs(Value) do
+                                if k ~= "__self" then print(Indent..TabSize, k..":") end
+                                PrintData(v, Indent..TabSize..TabSize)
+                            end
+
+                            print(Indent, "}")
+                        end
+                    else
+                        print(Indent, Key..(next(Value) and ":" or ": {}"))
+                        PrintData(Value, Indent..TabSize)
+                    end
+                else
+                    local Type = type(Value) == "function" and "" or (" <"..type(Value)..">")
+                    print(Indent, Key.." = \""..tostring(Value).."\""..Type)
+                end
+            end
+
+            if #Indent == 0 then print("}") end
+        elseif type(Data) == "boolean" or type(Data) == "number" or type(Data) == "string" then
+            if #Indent > 0 then
+                print(Indent, "\""..tostring(Data).."\"", "<"..type(Data)..">")
+            else
+                print("\""..tostring(Data).."\"", "<"..type(Data)..">")
+            end
+        else
+            print(Data)
+        end
+    end
+
+    PrintData(Data)
+end
+
+--- Печатает данные в консоле, включая внутренние данные энтити, если такие есть.
+--- Если данные являются таблицей, выводит структуру таблицы, включая ключи и значения.
+--- @param Data any Данные для вывода, могут быть любого типа.
+--- @param TabSize string|nil Необязательный. Определяет строку, используемую для отступов. По умолчанию четыре пробела.
+function _DeepPrint(Data, TabSize)
+    _Print(Data, true, TabSize)
 end
 
 -- Handlers

@@ -1,6 +1,6 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.2
+// Version 1.3
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
 // =============================================================================
@@ -285,8 +285,8 @@ function OnInputFocusLost(LostFocusedPanel){
 function OnGlobalMouseCallback(Status, MouseButtonID){
     let IsIgnoreMouse = false
 
-    for(const ListenerName in this.__ListenerMouseCallbacks){
-        const Callback = this.__ListenerMouseCallbacks[ListenerName](Status, MouseButtonID)
+    for(const ListenerName in Game.__ListenerMouseCallbacks){
+        const Callback = Game.__ListenerMouseCallbacks[ListenerName](Status, MouseButtonID)
 
         if(Callback) IsIgnoreMouse = true
     }

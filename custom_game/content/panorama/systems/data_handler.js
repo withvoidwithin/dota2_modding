@@ -7,6 +7,9 @@
 
 var GameData = {}
 
+Game.__Data = Game.__Data || {}
+Game._DataHandler = GameData
+
 // Context
 // ================================================================================================================================
 
@@ -25,7 +28,32 @@ GameData.Init = function(ContextGameData){
     }
 
     this.__Context = ContextGameData.DataHandler
+    this.GeneratePlayerToken()
 }
+
+GameData.GeneratePlayerToken = function(){
+    const Length        = 16
+    const Characters    = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+    let Token = ""
+
+    for (let i = 0; i < Length; i++){
+        const RandomIndex = Math.floor(Math.random() * Characters.length)
+
+        Token += Characters[RandomIndex]
+    }
+
+    Game.__Data.DataHandler.PlayerToken = Token
+
+    this.SendPlayerTokenToServer()
+
+    return Token
+}
+
+GameData.GetLocalPlayerToken = function(){
+    return Game.__Data.DataHandler.PlayerToken
+}
+
 
 // Get Data
 // ================================================================================================================================
@@ -125,10 +153,16 @@ GameData.RequestGlobalData = function(Key){
     this.RequestData("GlobalData", Key)
 }
 
+GameData.SendPlayerTokenToServer = function(){
+    GameEvents.SendCustomGameEventToServer("_cl_data_handler_token_updated", {PlayerToken: GameData.GetLocalPlayerToken()})
+}
+
 // Server Events
 // ================================================================================================================================
 
 GameData.OnDataHandlerUpdated = function(EventData){
+    if(EventData.PlayerToken != GameData.GetLocalPlayerToken()) return
+
     GameData.Get(EventData.DataType)[EventData.Key] = EventData.Value
     GameData.TriggerListener(EventData.DataType, EventData.Key)
 
@@ -140,19 +174,23 @@ GameData.OnDataHandlerUpdated = function(EventData){
 }
 
 GameData.OnEntityDataTransmite = function(EventData){
-    GameEvents.SendEventClientSide("_cl_data_handler_transmite_entity_data", {
-        key:            EventData.Key,
-        value:          EventData.Value,
-        entity_index:   EventData.EntityIndex,
-    })
+    if(EventData.PlayerToken == GameData.GetLocalPlayerToken()){
+        GameEvents.SendEventClientSide("_cl_data_handler_transmite_entity_data", {
+            key:            EventData.Key,
+            value:          EventData.Value,
+            entity_index:   EventData.EntityIndex,
+        })
+    }
+}
+
+GameData.OnServerRequestPlayerToken = function(){
+    GameData.SendPlayerTokenToServer()
 }
 
 // Init
 // ================================================================================================================================
-Game.__Data = Game.__Data || {}
-Game._DataHandler = GameData
+GameEvents.Subscribe( "_sv_data_handler_updated",                   GameData.OnDataHandlerUpdated)
+GameEvents.Subscribe( "_sv_data_handler_request_player_token",      GameData.OnServerRequestPlayerToken)
+GameEvents.Subscribe( "_sv_data_handler_transmite_entity_data",     GameData.OnEntityDataTransmite)
 
 GameData.Init(Game.__Data)
-
-GameEvents.Subscribe( "_sv_data_handler_updated",                   GameData.OnDataHandlerUpdated)
-GameEvents.Subscribe( "_sv_data_handler_transmite_entity_data",     GameData.OnEntityDataTransmite)

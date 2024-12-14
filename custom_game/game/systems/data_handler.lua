@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.0
+-- Version: 1.1
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- Required: addon_base.lua
@@ -13,6 +13,7 @@ local DataHandler = {}
 
 function DataHandler:Init(Data)
     Data.ContextGameModeData.DataHandler = Data.ContextGameModeData.DataHandler or {
+        PlayersTokens = {},
         Data = {
             GameData    = {},
             PlayerData  = {},
@@ -30,12 +31,15 @@ function DataHandler:Init(Data)
     self:SetDefaultContext(Data.ContextGameModeData.DataHandler)
 
     if IsServer() then
-        _RegisterClientEventListeners(Data.ContextClientEventListeners, "DataHandler", { _cl_data_handler_request = { Context = DataHandler, FunctionName = "OnClientRequestData" } })
+        _RegisterClientEventListeners(Data.ContextClientEventListeners, "DataHandler", {
+            _cl_data_handler_request        = { Context = DataHandler, FunctionName = "OnClientRequestData" },
+            _cl_data_handler_token_updated  = { Context = DataHandler, FunctionName = "OnPlayerTokenUpdated" },
+        })
     else
         _RegisterGameEventListeners(Data.ContextGameEventListeners, "DataHandler", {
             _cl_data_handler_updated                    = { Context = DataHandler, FunctionName = "OnDataHandlerUpdated" },
-            _cl_data_handler_transmite_entity_data      = { Context = DataHandler, FunctionName = "OnEntityDataTransmite" },
             _sv_data_handler_link_lua_modifier          = { Context = DataHandler, FunctionName = "OnLinkLuaMidifier" },
+            _cl_data_handler_transmite_entity_data      = { Context = DataHandler, FunctionName = "OnEntityDataTransmite" },
         })
     end
 end
@@ -181,6 +185,9 @@ if IsServer() then
     -- Set Data
     -- ================================================================================================================================
 
+    -- Set Data
+    -- ================================================================================================================================
+
     function DataHandler:Set(DataType, DataIndex, Key, Value, IsMerge, Context)
         Context = DataHandler:CheckContext(Context)
 
@@ -262,27 +269,29 @@ if IsServer() then
     -- ================================================================================================================================
 
     function DataHandler:SyncData(DataType, DataIndex, Key, Value)
-        local EventData = {DataType = DataType, DataIndex = DataIndex, Key = Key, Value = Value}
-        local ServerEvents = {
-            PlayerData = function()
-                local PlayerController = PlayerResource:GetPlayer(DataIndex)
+        local PlayerIDsHandler = {
+            PlayerData = function(data_index)
+                return { data_index }
+            end,
+
+            TeamData = function(data_index)
+                return _GetPlayersInTeam(data_index)
+            end,
+
+            GlobalData = function()
+                return _GetPlayersInTeam()
+            end,
+        }
+
+        if PlayerIDsHandler[DataType] then
+            for _, PlayerID in ipairs(PlayerIDsHandler[DataType](DataIndex)) do
+                local PlayerController = PlayerResource:GetPlayer(PlayerID)
+                local EventData = {DataType = DataType, DataIndex = DataIndex, Key = Key, Value = Value, PlayerToken = self:GetPlayerToken(PlayerID)}
 
                 if PlayerController then
                     CustomGameEventManager:Send_ServerToPlayer(PlayerController, "_sv_data_handler_updated", EventData)
                 end
-            end,
-
-            TeamData = function()
-                CustomGameEventManager:Send_ServerToTeam(DataIndex, "_sv_data_handler_updated", EventData)
-            end,
-
-            GlobalData = function()
-                CustomGameEventManager:Send_ServerToAllClients("_sv_data_handler_updated", EventData)
-            end,
-        }
-
-        if ServerEvents[DataType] then
-            ServerEvents[DataType]()
+            end
         end
     end
 
@@ -422,6 +431,12 @@ if IsServer() then
         end
     end
 
+    function DataHandler:OnPlayerTokenUpdated(EventData)
+        if EventData.PlayerID > -1 then
+            DataHandler:GetDefaultContext().PlayersTokens[EventData.PlayerID] = EventData.PlayerToken
+        end
+    end
+
     -- Other
     -- ================================================================================================================================
 
@@ -431,6 +446,7 @@ if IsServer() then
         if not PlayerController then return end
 
         CustomGameEventManager:Send_ServerToPlayer(PlayerController, "_sv_data_handler_transmite_entity_data", {
+            PlayerToken = self:GetPlayerToken(PlayerID),
             EntityIndex = EntityIndex,
             Key         = Key,
             Value       = Value,
@@ -453,13 +469,31 @@ if IsServer() then
         end
     end
 
+    function DataHandler:GetPlayerToken(PlayerID, Context)
+        Context = self:CheckContext(Context)
+
+        return Context.PlayersTokens[PlayerID]
+    end
+
+    function DataHandler:RequestPlayerToken(PlayerID)
+        if PlayerID then
+            local PlayerController = PlayerResource:GetPlayer(PlayerID)
+
+            if not PlayerController then return end
+
+            CustomGameEventManager:Send_ServerToPlayer(PlayerController, "_sv_data_handler_request_player_token", {})
+        else
+            CustomGameEventManager:Send_ServerToAllClients("_sv_data_handler_request_player_token", {})
+        end
+    end
+
     -- Debug
     -- ================================================================================================================================
 
     function DataHandler:DebugData(DataType, Context)
         Context = DataHandler:CheckContext(Context)
 
-        DeepPrintTable(DataType and Context.Data[DataType] or Context)
+        _Print(DataType and Context.Data[DataType] or Context)
     end
 end
 

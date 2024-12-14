@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.1
+-- Version: 1.2
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -339,6 +339,24 @@ end
 --- @return boolean `true`, если здоровье юнита полное, иначе `false`.
 function _IsUnitHealthFull(Unit)
     return Unit:GetHealth() >= Unit:GetMaxHealth()
+end
+
+-- Player Resources
+-- ================================================================================================================================
+
+--- Возвращает список всех PlayerID игроков, принадлежащих указанной команде или всех игроков, если TeamID не указан.
+--- @param TeamID number|nil Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
+--- @return number[] Список PlayerID игроков.
+function _GetPlayersInTeam(TeamID)
+    local Players = {}
+
+    for PlayerID = 0, DOTA_MAX_PLAYERS - 1 do
+        if TeamID == nil or PlayerResource:IsValidPlayer(PlayerID) and PlayerResource:GetTeam(PlayerID) == TeamID then
+            table.insert(Players, PlayerID)
+        end
+    end
+
+    return Players
 end
 
 -- ================================================================================================================================

@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.2
+-- Version: 1.3
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -41,7 +41,7 @@ function _MergeTables(BaseTable, NewTable)
     if not BaseTable then BaseTable = {} end
 
     for Key, Value in pairs(NewTable or {}) do
-        if type(Value) == "table" then
+        if type(Value) == "table" and not IsValidEntity(Value) then
             if not BaseTable[Key] or type(BaseTable[Key]) ~= "table" then
                 BaseTable[Key] = {}
             end

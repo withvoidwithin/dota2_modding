@@ -4,9 +4,6 @@
 <br>**custom_game**
 <br>`|— `content
 <br>`|  |— `panorama
-<br>`|  |  |— `systems
-<br>`|  |  |  |— `data_handler.js
-<br>`|  |  |— `[addon_base.js](#Addon-Base)
 <br>`|— `game
 <br>`|  |— `[scripts](#scripts)
 <br>`|  |  |— `[npc](#npc)

@@ -23,7 +23,7 @@
 > [!IMPORTANT]
 > ## 📚 Документация:
 > - [Структура файлов](/documentation/structure.md)
-> - [Архитектура](/documentation/architecture.md)
+> - [Структура архитектуры](/documentation/architecture.md)
 
 --------
 

@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.3
+-- Version: 1.4
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -283,26 +283,33 @@ end
 -- Game Events
 -- ================================================================================================================================
 
---- Регистрирует слушателей игровых событий и связывает их с переданным контекстом и функцией.
+--- Регистрирует и индексирует слушателей игровых событий.
+--- <br> При повторном вызове ранее зарегистрированые слушатели в этом контексте будут отменены.
 --- ```lua
 --- ListenersData = {
----     ["dota_player_killed"] = { Context = MyContext, FunctionName = "OnPlayerKilled" },
----     ["npc_spawned"]        = { Context = MyContext, FunctionName = "OnNPCSpawned" },
+---     dota_player_killed = { Context = MyContext, FunctionName = "OnPlayerKilled" },
+---     npc_spawned        = { Context = MyContext, FunctionName = "OnNPCSpawned" },
 --- }
 --- ```
+--- Пример:
+--- ```lua
+--- _RegisterGameEventListeners(_GetGameEventListenersContext(), "Game", {
+--- 	game_rules_state_change = { Context = MyContext, FunctionName = "OnGameEventStateChanged" },
+--- })
+--- ```
 --- **[ Server / Client ]**
---- @param ContextGameEventListeners table Таблица для хранения активных слушателей событий.
---- @param ContextName string Имя контекста, в котором будут храниться слушатели.
+--- @param ContextGameEventListeners table Контекст хранения данных активных слушателей.
+--- @param KeyName string Название ключа, по которому будут проиндексированы слушатели.
 --- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
-function _RegisterGameEventListeners(ContextGameEventListeners, ContextName, ListenersData)
+function _RegisterGameEventListeners(ContextGameEventListeners, KeyName, ListenersData)
     for ListenerName, CallbackData in pairs(ListenersData or {}) do
-        if not ContextGameEventListeners[ContextName] then ContextGameEventListeners[ContextName] = {} end
+        if not ContextGameEventListeners[KeyName] then ContextGameEventListeners[KeyName] = {} end
 
-        if ContextGameEventListeners[ContextName][ListenerName] then
-            StopListeningToGameEvent(ContextGameEventListeners[ContextName][ListenerName])
+        if ContextGameEventListeners[KeyName][ListenerName] then
+            StopListeningToGameEvent(ContextGameEventListeners[KeyName][ListenerName])
         end
 
-        ContextGameEventListeners[ContextName][ListenerName] = ListenToGameEvent(ListenerName, Dynamic_Wrap(CallbackData.Context, CallbackData.FunctionName), CallbackData.Context)
+        ContextGameEventListeners[KeyName][ListenerName] = ListenToGameEvent(ListenerName, Dynamic_Wrap(CallbackData.Context, CallbackData.FunctionName), CallbackData.Context)
     end
 end
 
@@ -314,20 +321,20 @@ end
 --- }
 --- ```
 --- **[ Server / Client ]**
---- @param ContextGameEventListeners table Таблица с активными слушателями событий.
---- @param ContextName string Имя контекста, для которого удаляются слушатели.
+--- @param ContextGameEventListeners table Контекст хранения данных активных слушателей.
+--- @param KeyName string Название ключа, по которому ранее были зарегистрированы слушатели.
 --- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
-function _UnregisterGameEventListeners(ContextGameEventListeners, ContextName, Listeners)
+function _UnregisterGameEventListeners(ContextGameEventListeners, KeyName, Listeners)
     for _, ListenerName in pairs(Listeners or {}) do
-        if ContextGameEventListeners[ContextName] and ContextGameEventListeners[ContextName][ListenerName] then
-            StopListeningToGameEvent(ContextGameEventListeners[ContextName][ListenerName])
+        if ContextGameEventListeners[KeyName] and ContextGameEventListeners[KeyName][ListenerName] then
+            StopListeningToGameEvent(ContextGameEventListeners[KeyName][ListenerName])
 
-            ContextGameEventListeners[ContextName][ListenerName] = nil
+            ContextGameEventListeners[KeyName][ListenerName] = nil
         end
     end
 
-    if _GetTableSize(ContextGameEventListeners[ContextName]) == 0 then
-        ContextGameEventListeners[ContextName] = nil
+    if _GetTableSize(ContextGameEventListeners[KeyName]) == 0 then
+        ContextGameEventListeners[KeyName] = nil
     end
 end
 
@@ -339,24 +346,6 @@ end
 --- @return boolean `true`, если здоровье юнита полное, иначе `false`.
 function _IsUnitHealthFull(Unit)
     return Unit:GetHealth() >= Unit:GetMaxHealth()
-end
-
--- Player Resources
--- ================================================================================================================================
-
---- Возвращает список всех PlayerID игроков, принадлежащих указанной команде или всех игроков, если TeamID не указан.
---- @param TeamID number|nil Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
---- @return number[] Список PlayerID игроков.
-function _GetPlayersInTeam(TeamID)
-    local Players = {}
-
-    for PlayerID = 0, DOTA_MAX_PLAYERS - 1 do
-        if TeamID == nil or PlayerResource:IsValidPlayer(PlayerID) and PlayerResource:GetTeam(PlayerID) == TeamID then
-            table.insert(Players, PlayerID)
-        end
-    end
-
-    return Players
 end
 
 -- ================================================================================================================================
@@ -392,28 +381,48 @@ function _PrecacheTable(Context, Resources)
 	end
 end
 
+-- Player Resources
+-- ================================================================================================================================
+
+--- Возвращает список всех PlayerID игроков, принадлежащих указанной команде или всех игроков, если TeamID не указан.
+--- <br> **[ Server Only ]**
+--- @param TeamID number|nil Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
+--- @return number[] Список PlayerID игроков.
+function _GetPlayersInTeam(TeamID)
+    local Players = {}
+
+    for PlayerID = 0, DOTA_MAX_PLAYERS - 1 do
+        if TeamID == nil or PlayerResource:IsValidPlayer(PlayerID) and PlayerResource:GetTeam(PlayerID) == TeamID then
+            table.insert(Players, PlayerID)
+        end
+    end
+
+    return Players
+end
+
 -- Client Events
 -- ================================================================================================================================
 
---- Регистрирует слушателей клиентских событий и связывает их с переданным контекстом и функцией.
+--- Регистрирует и индексирует слушателей клиентских событий.
+--- <br> При повторном вызове ранее зарегистрированые слушатели в этом контексте будут отменены.
 --- ```lua
 --- ListenersData = {
 ---     ["custom_event_name"] = { Context = self, FunctionName = "OnCustomEvent" },
 --- }
 --- ```
 --- **[ Server Only ]**
---- @param ContextClientEventListeners table Таблица для хранения активных слушателей событий на клиенте.
---- @param ContextName string Имя контекста, в котором будут храниться слушатели.
+--- @param ContextClientEventListeners table Контекст хранения данных активных слушателей.
+--- @param KeyName string Название ключа, по которому будут проиндексированы слушатели.
 --- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
-function _RegisterClientEventListeners(ContextClientEventListeners, ContextName, ListenersData)
+function _RegisterClientEventListeners(ContextClientEventListeners, KeyName, ListenersData)
     for ListenerName, CallbackData in pairs(ListenersData or {}) do
-        if not ContextClientEventListeners[ContextName] then ContextClientEventListeners[ContextName] = {} end
+        if not ContextClientEventListeners[KeyName] then ContextClientEventListeners[KeyName] = {} end
 
-        if ContextClientEventListeners[ContextName][ListenerName] then
-            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[ContextName][ListenerName])
+        if ContextClientEventListeners[KeyName][ListenerName] then
+            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[KeyName][ListenerName])
         end
 
-        ContextClientEventListeners[ContextName][ListenerName] = CustomGameEventManager:RegisterListener(ListenerName, (CallbackData.Context and CallbackData.Context[CallbackData.FunctionName] or CallbackData.Function))
+        ContextClientEventListeners[KeyName][ListenerName] = CustomGameEventManager:RegisterListener(ListenerName, (CallbackData.Context and CallbackData.Context[CallbackData.FunctionName] or CallbackData.Function))
     end
 end
 
@@ -424,19 +433,19 @@ end
 --- }
 --- ```
 --- **[ Server Only ]**
---- @param ContextClientEventListeners table Таблица с активными слушателями событий на клиенте.
---- @param ContextName string Имя контекста, для которого удаляются слушатели.
+--- @param ContextClientEventListeners table Контекст хранения данных активных слушателей.
+--- @param KeyName string Название ключа, по которому ранее были зарегистрированы слушатели.
 --- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
-function _UnregisterClientEventListeners(ContextClientEventListeners, ContextName, Listeners)
+function _UnregisterClientEventListeners(ContextClientEventListeners, KeyName, Listeners)
     for _, ListenerName in pairs(Listeners or {}) do
-        if ContextClientEventListeners[ContextName] and ContextClientEventListeners[ContextName][ListenerName] then
-            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[ContextName][ListenerName])
+        if ContextClientEventListeners[KeyName] and ContextClientEventListeners[KeyName][ListenerName] then
+            CustomGameEventManager:UnregisterListener(ContextClientEventListeners[KeyName][ListenerName])
 
-            ContextClientEventListeners[ContextName][ListenerName] = nil
+            ContextClientEventListeners[KeyName][ListenerName] = nil
         end
     end
 
-    if _GetTableSize(ContextClientEventListeners[ContextName]) == 0 then
-        ContextClientEventListeners[ContextName] = nil
+    if _GetTableSize(ContextClientEventListeners[KeyName]) == 0 then
+        ContextClientEventListeners[KeyName] = nil
     end
 end

@@ -1,9 +1,9 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.1
+-- Version: 1.2
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
--- Required: addon_base.lua
+-- Required: utils/vbase.lua
 -- ===================================================================================
 
 local DataHandler = {}
@@ -12,8 +12,10 @@ local DataHandler = {}
 -- ================================================================================================================================
 
 function DataHandler:Init(Data)
-    Data.ContextGameModeData.DataHandler = Data.ContextGameModeData.DataHandler or {
-        PlayersTokens = {},
+    if not Data.ContextGameData.DataHandler then Data.ContextGameData.DataHandler = {} end
+
+    _MergeTables(Data.ContextGameData.DataHandler, {
+        PlayersToken = {},
         Data = {
             GameData    = {},
             PlayerData  = {},
@@ -26,17 +28,17 @@ function DataHandler:Init(Data)
             TeamData    = {},
             GlobalData  = {},
         },
-    }
+    })
 
-    self:SetDefaultContext(Data.ContextGameModeData.DataHandler)
+    self:SetDefaultContext(Data.ContextGameData.DataHandler)
 
     if IsServer() then
-        _RegisterClientEventListeners(Data.ContextClientEventListeners, "DataHandler", {
+        _RegisterClientEventListeners(Data.ContextClientEvents, "DataHandler", {
             _cl_data_handler_request        = { Context = DataHandler, FunctionName = "OnClientRequestData" },
             _cl_data_handler_token_updated  = { Context = DataHandler, FunctionName = "OnPlayerTokenUpdated" },
         })
     else
-        _RegisterGameEventListeners(Data.ContextGameEventListeners, "DataHandler", {
+        _RegisterGameEventListeners(Data.ContextGameEvents, "DataHandler", {
             _cl_data_handler_updated                    = { Context = DataHandler, FunctionName = "OnDataHandlerUpdated" },
             _sv_data_handler_link_lua_modifier          = { Context = DataHandler, FunctionName = "OnLinkLuaMidifier" },
             _cl_data_handler_transmite_entity_data      = { Context = DataHandler, FunctionName = "OnEntityDataTransmite" },
@@ -49,6 +51,8 @@ end
 
 function DataHandler:SetDefaultContext(Context)
     self.__Context = Context
+
+    return self.__Context
 end
 
 function DataHandler:GetDefaultContext()
@@ -58,9 +62,7 @@ end
 function DataHandler:CheckContext(Context)
     Context = Context or self.__Context
 
-    if not Context then
-        print((IsClient() and "[Client]" or "").."[DataHandler] Context does not exist.")
-    end
+    if not Context then print("[DataHandler "..(IsServer() and "Server" or "Client").."] Context does not exist.") end
 
     return Context
 end
@@ -181,9 +183,6 @@ end
 -- ================================================================================================================================
 
 if IsServer() then
-
-    -- Set Data
-    -- ================================================================================================================================
 
     -- Set Data
     -- ================================================================================================================================
@@ -433,7 +432,7 @@ if IsServer() then
 
     function DataHandler:OnPlayerTokenUpdated(EventData)
         if EventData.PlayerID > -1 then
-            DataHandler:GetDefaultContext().PlayersTokens[EventData.PlayerID] = EventData.PlayerToken
+            DataHandler:GetDefaultContext().PlayersToken[EventData.PlayerID] = EventData.PlayerToken
         end
     end
 
@@ -472,7 +471,7 @@ if IsServer() then
     function DataHandler:GetPlayerToken(PlayerID, Context)
         Context = self:CheckContext(Context)
 
-        return Context.PlayersTokens[PlayerID]
+        return Context.PlayersToken[PlayerID]
     end
 
     function DataHandler:RequestPlayerToken(PlayerID)
@@ -493,7 +492,7 @@ if IsServer() then
     function DataHandler:DebugData(DataType, Context)
         Context = DataHandler:CheckContext(Context)
 
-        _Print(DataType and Context.Data[DataType] or Context)
+        _DeepPrint(DataType and Context.Data[DataType] or Context)
     end
 end
 

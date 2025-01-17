@@ -4,6 +4,8 @@
 <br>**custom_game**
 <br>`|— `content
 <br>`|  |— `panorama
+<br>`|  |  |— `utils
+<br>`|  |  |  |— `[vbase.js](#vbase)
 <br>`|— `game
 <br>`|  |— `[scripts](#scripts)
 <br>`|  |  |— `[npc](#npc)
@@ -16,7 +18,7 @@
 <br>`|  |  |  |— `[modules](#modules)
 <br>`|  |  |  |— `[systems](#systems)
 <br>`|  |  |  |— `[utils](#utils)
-<br>`|  |  |  |  |— `[vbase](#vbase)
+<br>`|  |  |  |  |— `[vbase.lua](#vbase)
 <br>`|  |  |  |— `addon_game_mode.lua
 <br>`|  |  |  |— `addon_game_mode_client.lua
 <br>`|  |  |— `custom_net_tables.txt

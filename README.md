@@ -22,8 +22,8 @@
 
 > [!IMPORTANT]
 > ## 📚 Документация:
-> - [Структура файлов](/documentation/structure.md)
-> - [Структура архитектуры](/documentation/architecture.md)
+> - [Структура файлов](/documentation/file_structure/_main.md)
+> - [Структура архитектуры](/documentation/architecture/structure.md)
 
 --------
 

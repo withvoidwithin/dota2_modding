@@ -1,4 +1,4 @@
-#### ↩️[Вернуться на основную страницу](../README.md)
+#### ↩️[Вернуться на основную страницу](../../README.md)
 
 # Базовая структура
 Основная структура пользовательской игр делится на две ключевые папки **Сontent** и **Game**.
@@ -9,9 +9,9 @@
 
 # Структура файлов проекта
 - custom_game/
-  - [assets](structure/assets.md#assets)
+  - [assets](file_structure/assets.md#assets)
   - maps
-  - [panorama](structure/panorama.md#%EF%B8%8Fpanorama)
+  - [panorama](file_structure/panorama.md#%EF%B8%8Fpanorama)
   - resource
   - scripts
   - soundevents
@@ -22,4 +22,4 @@
 
 --------
 
-#### ↩️[Вернуться на основную страницу](../README.md)
+#### ↩️[Вернуться на основную страницу](../../README.md)

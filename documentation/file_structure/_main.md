@@ -9,9 +9,9 @@
 
 # Структура файлов проекта
 - custom_game/
-  - [assets](file_structure/assets.md#assets)
+  - [assets](assets.md#assets)
   - maps
-  - [panorama](file_structure/panorama.md#%EF%B8%8Fpanorama)
+  - [panorama](panorama.md#%EF%B8%8Fpanorama)
   - resource
   - scripts
   - soundevents

@@ -96,6 +96,7 @@
 
 ## VBase
 Это мой специальный модуль базовых и утилитарных функций, облегчающих разработку пользовательских игр Dota 2.
+- [vbase.js](../../custom_game/content/panorama/utils/vbase.js) - Функции для работы с Panorama API.
 - [vbase.lua](../../custom_game/game/scripts/vscripts/utils/vbase.lua) - Функции для работы с Lua API.
 
 #### ↩️[Вернуться на основную страницу](../../README.md)

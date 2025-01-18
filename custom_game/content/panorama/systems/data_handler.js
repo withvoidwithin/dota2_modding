@@ -1,9 +1,8 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.2
+// Version 1.3
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
-// Required: panorama/utils/vbase.js
 // =============================================================================
 
 var GameData = {}
@@ -99,6 +98,12 @@ GameData.RegisterTeamDataListener = function(ListenerName, Key, CallbackFunction
 
 GameData.RegisterGlobalDataListener = function(ListenerName, Key, CallbackFunction){
     this.RegisterListener("GlobalData", ListenerName, Key, CallbackFunction)
+}
+
+GameData.Subscribe = function(EventName, CallbackFunction){
+    GameEvents.Subscribe(EventName, function(EventData){
+        if(GameData.GetLocalPlayerToken() == EventData.PlayerToken) CallbackFunction(EventData)
+    })
 }
 
 // Unregister Listeners

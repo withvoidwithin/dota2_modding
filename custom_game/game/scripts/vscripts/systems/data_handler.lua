@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.2
+-- Version: 1.3
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- Required: utils/vbase.lua
@@ -11,6 +11,13 @@ local DataHandler = {}
 -- Main
 -- ================================================================================================================================
 
+--- Функция инициализации системы. Необходимо инициировать после каждого подключения системы через require.
+--- <br> Пример:
+--- ```lua
+--- -- For Server:
+--- DataHandler:Init({ ContextGameData = _GetGameData(), ContextClientEvents = _GetContextClientEvents() })
+--- -- For Client:
+--- DataHandler:Init({ ContextGameData = _GetGameData(), ContextGameEvents = _GetContextGameEvents() })
 function DataHandler:Init(Data)
     if not Data.ContextGameData.DataHandler then Data.ContextGameData.DataHandler = {} end
 
@@ -37,6 +44,8 @@ function DataHandler:Init(Data)
             _cl_data_handler_request        = { Context = DataHandler, FunctionName = "OnClientRequestData" },
             _cl_data_handler_token_updated  = { Context = DataHandler, FunctionName = "OnPlayerTokenUpdated" },
         })
+
+        self:RequestPlayerToken()
     else
         _RegisterGameEventListeners(Data.ContextGameEvents, "DataHandler", {
             _cl_data_handler_updated                    = { Context = DataHandler, FunctionName = "OnDataHandlerUpdated" },
@@ -49,12 +58,17 @@ end
 -- Context Data
 -- ================================================================================================================================
 
+--- Устанавливает стандартный контекст для всех методов.
+--- @param Context table
+--- @return table
 function DataHandler:SetDefaultContext(Context)
     self.__Context = Context
 
     return self.__Context
 end
 
+--- Возвращает установленный стандартный контекст.
+--- @return table
 function DataHandler:GetDefaultContext()
     return self.__Context
 end
@@ -484,6 +498,16 @@ if IsServer() then
         else
             CustomGameEventManager:Send_ServerToAllClients("_sv_data_handler_request_player_token", {})
         end
+    end
+
+    function DataHandler:SendCustomEvent(PlayerID, EventName, EventData)
+        local PlayerController = PlayerResource:GetPlayer(PlayerID)
+
+        if not PlayerController then return end
+
+        EventData.PlayerToken = self:GetPlayerToken(PlayerID)
+
+        CustomGameEventManager:Send_ServerToPlayer(PlayerController, EventName, EventData)
     end
 
     -- Debug

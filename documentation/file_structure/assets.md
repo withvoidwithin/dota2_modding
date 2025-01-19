@@ -16,7 +16,7 @@
 <br>`|  |  |  |— `[dev](#%EF%B8%8Fdev)
 <br>`|  |  |  |— `[environment](#%EF%B8%8Fenvironment)
 <br>`|  |  |  |— `[generic](#generic)
-<br>`|  |  |  |— `[structures](#%EF%B8%8Fstructures)
+<br>`|  |  |  |— `[structures](#%EF%B8%8Fmodels)
 <br>`|  |  |— `[models](#models)
 <br>`|  |  |— `[particles](#particles)
 <br>`|  |  |— `[sounds](#sounds)

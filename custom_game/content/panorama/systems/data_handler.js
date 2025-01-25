@@ -1,6 +1,6 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.3
+// Version 1.4
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
 // =============================================================================
@@ -52,6 +52,10 @@ GameData.GeneratePlayerToken = function(){
 
 GameData.GetLocalPlayerToken = function(){
     return Game.__Data.DataHandler.PlayerToken
+}
+
+GameData.Cleanup = function(){
+    Game.__Data = {}
 }
 
 

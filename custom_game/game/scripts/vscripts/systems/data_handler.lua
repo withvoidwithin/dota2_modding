@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.3
+-- Version: 1.4
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- Required: utils/vbase.lua
@@ -15,9 +15,9 @@ local DataHandler = {}
 --- <br> Пример:
 --- ```lua
 --- -- For Server:
---- DataHandler:Init({ ContextGameData = _GetGameData(), ContextClientEvents = _GetContextClientEvents() })
+--- DataHandler:Init({ ContextGameData = _GAMEDATA(), ContextClientEvents = _GetContextClientEvents() })
 --- -- For Client:
---- DataHandler:Init({ ContextGameData = _GetGameData(), ContextGameEvents = _GetContextGameEvents() })
+--- DataHandler:Init({ ContextGameData = _GAMEDATA(), ContextGameEvents = _GetContextGameEvents() })
 function DataHandler:Init(Data)
     if not Data.ContextGameData.DataHandler then Data.ContextGameData.DataHandler = {} end
 

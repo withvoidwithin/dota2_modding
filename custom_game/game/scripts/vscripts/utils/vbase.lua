@@ -190,6 +190,11 @@ function _DeepPrint(Data, TabSize)
     _Print(Data, true, TabSize)
 end
 
+--- Перезаписывает данные подключенной таблицы другой таблицей.
+function _OverrideRequire(Base, RequireString)
+    return _MergeTables(Base, require(RequireString))
+end
+
 -- Handlers
 -- ================================================================================================================================
 

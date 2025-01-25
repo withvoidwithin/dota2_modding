@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.1
+-- Version: 1.2
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- Required: addon_base.lua
@@ -14,14 +14,16 @@ local PlayersHandler = {}
 -- ================================================================================================================================
 
 function PlayersHandler:Init(Data)
-    Data.ContextGameModeData.PlayersHandler = Data.ContextGameModeData.PlayersHandler or {
+    if not Data.ContextGameData.PlayersHandler then Data.ContextGameData.PlayersHandler = {} end
+
+    _MergeTables(Data.ContextGameData.PlayersHandler, {
         Players = {},
-    }
+    })
 
-    self:SetDefaultContext(Data.ContextGameModeData.PlayersHandler)
+    self:SetDefaultContext(Data.ContextGameData.PlayersHandler)
 
-    _RegisterGameEventListeners(Data.ContextGameEventListeners, "PlayersHandler", {
-        player_connect_full = { Context = PlayersHandler, FunctionName = "OnGameEventPlayerConnectFull" },
+    _RegisterGameEventListeners(Data.ContextGameEvents, "PlayersHandler", {
+        player_connect_full = { Context = self, FunctionName = "OnGameEventPlayerConnectFull" },
     })
 end
 

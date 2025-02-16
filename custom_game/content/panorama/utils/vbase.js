@@ -1,6 +1,6 @@
 // ================ Copyright © 2024, WVW, All rights reserved. ================
 
-// Version 1.5
+// Version 1.6
 // Author: https://steamcommunity.com/id/withvoidwithin/
 // Source: https://github.com/withvoidwithin/dota2_modding
 // =============================================================================

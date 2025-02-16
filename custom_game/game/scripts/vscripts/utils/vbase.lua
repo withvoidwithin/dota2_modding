@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.5
+-- Version: 1.6
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -114,6 +114,19 @@ function _GetTableFirstValue(Table)
     for _, Value in pairs(Table) do
         return Value
     end
+end
+
+--- Возвращает рандомный ключ с учетов весов.
+function _GetTableRandomKeyForWeight(Table)
+    local List = {}
+
+    for Key, Weight in pairs(Table) do
+        for i = 1, Weight do
+            table.insert(List, Key)
+        end
+    end
+
+    return _GetTableRandomValue(List)
 end
 
 --- Проверяет, является ли таблица пустой.

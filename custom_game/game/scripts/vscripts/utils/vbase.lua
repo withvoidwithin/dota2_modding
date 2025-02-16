@@ -174,6 +174,8 @@ function _Print(Data, IsDeepPrint, TabSize)
             else
                 print("\""..tostring(Data).."\"", "<"..type(Data)..">")
             end
+        elseif type(Data) == "function" or type(Data) == "userdata" then
+            print(Indent, Data)
         else
             print(Data)
         end

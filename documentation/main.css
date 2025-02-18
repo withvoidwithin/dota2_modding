@@ -1,0 +1,287 @@
+/* Шрифт Radiance */
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-BLACK.OTF') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-BLACKITALIC.OTF') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-BOLD.OTF') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-BOLDITALIC.OTF') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-LIGHT.OTF') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-LIGHTITALIC.OTF') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-REGULAR.OTF') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-REGULARITALIC.OTF') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-SEMIBOLD.OTF') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-SEMIBOLDITALIC.OTF') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-ULTRALIGHT.OTF') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Radiance';
+    src: url('fonts/RADIANCE-ULTRALIGHTITALIC.OTF') format('opentype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+/* Шрифт RadianceCM */
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-BLACK.OTF') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-BLACKITALIC.OTF') format('opentype');
+    font-weight: 900;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-BOLD.OTF') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-BOLDITALIC.OTF') format('opentype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-ITALIC.OTF') format('opentype');
+    font-weight: 400;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-LIGHT.OTF') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-LIGHTITALIC.OTF') format('opentype');
+    font-weight: 300;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-REGULAR.OTF') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-SEMIBOLD.OTF') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-SEMIBOLDITALIC.OTF') format('opentype');
+    font-weight: 600;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-ULTRALIGHT.OTF') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'RadianceCM';
+    src: url('fonts/RADIANCEM-ULTRALIGHTITALIC.OTF') format('opentype');
+    font-weight: 200;
+    font-style: italic;
+}
+
+/* Шрифт Reaver */
+@font-face {
+    font-family: 'Reaver';
+    src: url('fonts/REAYER-BLACK.OTF') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Reaver';
+    src: url('fonts/REAYER-BOLD.OTF') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Reaver';
+    src: url('fonts/REAYER-LIGHT.OTF') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Reaver';
+    src: url('fonts/REAYER-REGULAR.OTF') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Reaver';
+    src: url('fonts/REAYER-SEMIBOLD.OTF') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+p, h1, h2{
+    margin: 0;
+}
+
+.Text {
+    font-size: clamp(14px, 2vw, 20px);
+}
+
+.Title{
+    font-family: "Reaver";
+    font-size: clamp(18px, 3vw, 28px);
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+body {
+    padding: clamp(32px, 5vw, 128px);
+    color: #e2e7ff;
+    background-color: #141517;
+    font-family: "Radiance";
+    margin: 0;
+
+    > #TitileContainer{
+        width: fit-content;
+
+        > #MainTitle{
+            height: fit-content;
+            align-items: center;
+            display: flex;
+
+            > img{
+                width: clamp(32px, 5vw, 64px);
+            }
+
+            > h1{
+                font-size: clamp(24px, 4.44vw, 48px);
+                font-family: "Reaver";
+                display: inline-block;
+                margin: 0;
+                line-height: 1;
+                margin-left: 4px;
+            }
+        }
+
+        > #AuthorContainer{
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+
+            > #AuthorBy{
+                font-size: clamp(12px, 1.5vw, 20px);
+                opacity: 0.5;
+                font-weight: 500;
+                font-family: "Reaver";
+            }
+    
+            > #AuthorName{
+                font-size: clamp(12px, 1.5vw, 20px);
+                font-weight: 500;
+                opacity: 0.5;
+                font-family: "Reaver";
+                margin-left: 8px;
+                text-decoration: none;
+                color: rgb(226, 231, 255);
+            }
+        }
+    }
+
+    > #IntroductionContainer{
+        max-width: 1200px;
+        margin-top: clamp(32px, 4vw, 96px);
+
+        > .Chapter{
+            margin-top: clamp(32px, 2vw, 64px);
+
+            > .Text{
+                /* margin-top: clamp(16px, 2vw, 24px); */
+            }
+        }
+    }
+}

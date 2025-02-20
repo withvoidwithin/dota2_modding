@@ -1,17 +1,27 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.6
+-- Version: 1.7
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
 
--- Tables
+-- Annotations
+-- ================================================================================================================================
+
+--- Таблица с данными вызова.
+--- @class (exact) _CallbackData
+--- @field Context? table Контекст вызова.
+--- @field FunctionName? string|number Название функции в контексте.
+--- @field Function? function Вызываемая функция.
+--- @field EventData? table Передаваемые данные в обратный вызов.
+
+-- Функции для работы с данными.
 -- ================================================================================================================================
 
 --- Создает копию таблицы, со всеми значениями из оригинальной таблицы.
---- <br> **[ Server / Client ]**
 --- @param Table table - Оригинальная таблица.
---- @param IsCopyMeta boolean|nil - Скопировать Metadata ?
+--- @param IsCopyMeta? boolean - Скопировать Metadata ?
+--- <br> **[ Server / Client ]**
 function _DeepCopy(Table, IsCopyMeta)
     local BaseType = type(Table)
     local Copy
@@ -34,9 +44,9 @@ function _DeepCopy(Table, IsCopyMeta)
 end
 
 --- Добавляет и заменяет существующие значения BaseTable из NewTable
---- <br> **[ Server / Client ]**
 --- @param BaseTable table
---- @param NewTable table|nil
+--- @param NewTable? table
+--- <br> **[ Server / Client ]**
 function _MergeTables(BaseTable, NewTable)
     if not BaseTable then BaseTable = {} end
 
@@ -56,9 +66,9 @@ function _MergeTables(BaseTable, NewTable)
 end
 
 --- Подсчитывает количество элементов в таблице.
---- <br> **[ Server / Client ]**
---- @param Table table
+--- @param Table? table
 --- @return number
+--- <br> **[ Server / Client ]**
 function _GetTableSize(Table)
     local Count = 0
 
@@ -70,9 +80,9 @@ function _GetTableSize(Table)
 end
 
 --- Возвращает случайный ключ из таблицы.
---- <br> **[ Server / Client ]**
 --- @param Table table
---- @return string|number|nil
+--- @return string|number
+--- <br> **[ Server / Client ]**
 function _GetTableRandomKey(Table)
     local Keys = {}
 
@@ -84,9 +94,9 @@ function _GetTableRandomKey(Table)
 end
 
 --- Возвращает случайное значение из таблицы.
---- <br> **[ Server / Client ]**
 --- @param Table table
 --- @return any
+--- <br> **[ Server / Client ]**
 function _GetTableRandomValue(Table)
     local Values = {}
 
@@ -97,26 +107,10 @@ function _GetTableRandomValue(Table)
     return Values[RandomInt(1, #Values)]
 end
 
---- Возвращает первый ключ таблицы.
---- <br> **[ Server / Client ]**
---- @param Table table
---- @return number|string|nil
-function _GetTableFirstKey(Table)
-    for Key in pairs(Table or {}) do
-        return Key
-    end
-end
-
---- Возвращает первое значение таблицы.
---- <br> **[ Server / Client ]**
---- @param Table table
-function _GetTableFirstValue(Table)
-    for _, Value in pairs(Table) do
-        return Value
-    end
-end
-
 --- Возвращает рандомный ключ с учетов весов.
+--- @param Table table<string|number, number|string>
+--- @return string|number
+--- <br> **[ Server / Client ]**
 function _GetTableRandomKeyForWeight(Table)
     local List = {}
 
@@ -130,9 +124,9 @@ function _GetTableRandomKeyForWeight(Table)
 end
 
 --- Проверяет, является ли таблица пустой.
---- <br> **[ Server / Client ]**
 --- @param Table table Таблица, которую нужно проверить.
 --- @return boolean `true`, если таблица пустая или `nil`, иначе `false`.
+--- <br> **[ Server / Client ]**
 function _IsTableEmpty(Table)
     for _ in pairs(Table or {}) do
         return false
@@ -145,8 +139,9 @@ end
 --- Если данные являются таблицей, выводит структуру таблицы, включая ключи и значения.
 --- Поддерживает глубокий вывод для вложенных таблиц или данных сущностей, если указано.
 --- @param Data any Данные для вывода, могут быть любого типа.
---- @param IsDeepPrint boolean|nil Необязательный. Если true, будет выполняться глубокий вывод вложенных таблиц и данных сущностей. По умолчанию false.
---- @param TabSize string|nil Необязательный. Определяет строку, используемую для отступов. По умолчанию четыре пробела.
+--- @param IsDeepPrint? boolean Необязательный. Если true, будет выполняться глубокий вывод вложенных таблиц и данных сущностей. По умолчанию false.
+--- @param TabSize? string Необязательный. Определяет строку, используемую для отступов. По умолчанию четыре пробела.
+--- <br> **[ Server / Client ]**
 function _Print(Data, IsDeepPrint, TabSize)
     TabSize = TabSize or "    "
 
@@ -201,11 +196,13 @@ end
 --- Если данные являются таблицей, выводит структуру таблицы, включая ключи и значения.
 --- @param Data any Данные для вывода, могут быть любого типа.
 --- @param TabSize string|nil Необязательный. Определяет строку, используемую для отступов. По умолчанию четыре пробела.
+--- <br> **[ Server / Client ]**
 function _DeepPrint(Data, TabSize)
     _Print(Data, true, TabSize)
 end
 
 --- Перезаписывает данные подключенной таблицы другой таблицей.
+--- <br> **[ Server / Client ]**
 function _OverrideRequire(Base, RequireString)
     return _MergeTables(Base, require(RequireString))
 end
@@ -218,14 +215,14 @@ end
 --- Пример:
 --- CalcFunction = function(a, b) return a - b end
 --- ```
---- <br> **[ Server / Client ]**
---- @param A number|nil
---- @param B number|nil
+--- @param A? number
+--- @param B? number
 --- @param CalcFunction function Функция, используемая для вычислений.
---- @param Min number|nil
---- @param Max number|nil
---- @param BaseA number|nil
---- @param BaseB number|nil
+--- @param Min? number
+--- @param Max? number
+--- @param BaseA? number
+--- @param BaseB? number
+--- <br> **[ Server / Client ]**
 function _Calc(A, B, CalcFunction, Min, Max, BaseA, BaseB)
     return _Clamp(CalcFunction(A or BaseA or 0, B or BaseB or 0), Min, Max)
 end
@@ -233,17 +230,17 @@ end
 --- Возвращает значение фиксируя его в указанном диапазоне.
 --- <br> Если Min нет, то фиксирует от 0.
 --- <br> Если Max нет, то фиксирует передаваемым значением.
---- <br> **[ Server / Client ]**
 --- @param Number number
---- @param Min number|nil
---- @param Max number|nil
+--- @param Min? number
+--- @param Max? number
+--- <br> **[ Server / Client ]**
 function _Clamp(Number, Min, Max)
     return math.max(Min or 0, math.min(Max or Number, Number))
 end
 
 --- Конвертирует значение в булево значение.
---- <br> **[ Server / Client ]**
 --- @param Value number|string
+--- <br> **[ Server / Client ]**
 function _ValueToBool(Value)
 	return Value == 1 or Value == "1" or Value == true
 end
@@ -251,11 +248,12 @@ end
 --- Обрабатывает вызов функции обратного вызова с предоставленными аргументами.
 --- ```lua
 --- Примеры:
---- _HandleCallback({ Context = MyContext, FunctionName = "MyMethod", EventData = ...})
---- _HandleCallback({ FunctionName = "GlobalFunction", EventData = ...})
---- _HandleCallback({ Function  = DirectFunction, EventData = ...})
+--- _HandleCallback({ Context = MyContext, FunctionName = "MyMethod", EventData = {...}})
+--- _HandleCallback({ FunctionName = "GlobalFunction", EventData = {...}})
+--- _HandleCallback({ Function  = DirectFunction, EventData = {...}})
 --- ```
---- @param CallbackData table
+--- @param CallbackData _CallbackData
+--- <br> **[ Server / Client ]**
 function _HandleCallback(CallbackData)
     if CallbackData.Context then
         return CallbackData.Context[CallbackData.FunctionName](CallbackData.Context, CallbackData.EventData)
@@ -273,10 +271,10 @@ end
 ---     [DOTA_GAMERULES_STATE_HERO_SELECTION]       = "OnStateHeroSelection",
 --- }
 --- ```
---- **[ Server / Client ]**
 --- @param ListenerEventData table Эвент дата от ListenToGameEvent.
---- @param States table таблица со стейтами и вызываемыми функциями.
---- @param Context table контекст вызова функции.
+--- @param States table<DOTA_GameState|string|number, string> таблица со стейтами и вызываемыми функциями.
+--- @param Context table контекст вызова.
+--- **[ Server / Client ]**
 function _HandleGameStateChange(ListenerEventData, States, Context)
 	local StateID           = ListenerEventData.CustomStateID or GameRules:State_Get()
 	local StateFunction     = Context[States[StateID]]
@@ -285,9 +283,9 @@ function _HandleGameStateChange(ListenerEventData, States, Context)
 end
 
 --- Разбивает строку на отдельные значения, используя указанный разделитель, и возвращает их в виде таблицы.
---- **[ Server / Client ]**
 --- @param String string Строка, которую нужно разбить на значения.
---- @param Devider string Разделитель, по которому производится разделение строки (по умолчанию — пробел).
+--- @param Devider? string Разделитель, по которому производится разделение строки (по умолчанию — пробел).
+--- **[ Server / Client ]**
 function _ParseStringToValues(String, Devider)
     local Values = {}
 
@@ -317,10 +315,10 @@ end
 --- 	game_rules_state_change = { Context = MyContext, FunctionName = "OnGameEventStateChanged" },
 --- })
 --- ```
---- **[ Server / Client ]**
 --- @param ContextGameEvents table Контекст хранения данных активных слушателей.
 --- @param KeyName string Название ключа, по которому будут проиндексированы слушатели.
 --- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
+--- **[ Server / Client ]**
 function _RegisterGameEventListeners(ContextGameEvents, KeyName, ListenersData)
     for ListenerName, CallbackData in pairs(ListenersData or {}) do
         if not ContextGameEvents[KeyName] then ContextGameEvents[KeyName] = {} end
@@ -340,10 +338,10 @@ end
 ---     "npc_spawned",
 --- }
 --- ```
---- **[ Server / Client ]**
 --- @param ContextGameEvents table Контекст хранения данных активных слушателей.
 --- @param KeyName string Название ключа, по которому ранее были зарегистрированы слушатели.
 --- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
+--- **[ Server / Client ]**
 function _UnregisterGameEventListeners(ContextGameEvents, KeyName, Listeners)
     for _, ListenerName in pairs(Listeners or {}) do
         if ContextGameEvents[KeyName] ~= nil and ContextGameEvents[KeyName][ListenerName] ~= nil then
@@ -362,8 +360,8 @@ end
 -- ================================================================================================================================
 
 --- Проверяет, полное ли здоровье у указанного юнита.
---- <br> **[ Server / Client ]**
 --- @return boolean `true`, если здоровье юнита полное, иначе `false`.
+--- <br> **[ Server / Client ]**
 function _IsUnitHealthFull(Unit)
     return Unit:GetHealth() >= Unit:GetMaxHealth()
 end
@@ -390,9 +388,9 @@ if IsClient() then return end
 ---     ...
 --- }
 --- ```
---- **[ Server Only ]**
 --- @param Context CScriptPrecacheContext 
 --- @param Resources table
+--- **[ Server Only ]**
 function _PrecacheTable(Context, Resources)
 	for PrecacheType, Files in pairs(Resources or {}) do
 		for _, File in pairs(Files or {}) do
@@ -405,9 +403,9 @@ end
 -- ================================================================================================================================
 
 --- Возвращает список всех PlayerID игроков, принадлежащих указанной команде или всех игроков, если TeamID не указан.
---- <br> **[ Server Only ]**
 --- @param TeamID number|nil Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
 --- @return number[] Список PlayerID игроков.
+--- <br> **[ Server Only ]**
 function _GetPlayersInTeam(TeamID)
     local Players = {}
 
@@ -430,10 +428,10 @@ end
 ---     ["custom_event_name"] = { Context = self, FunctionName = "OnCustomEvent" },
 --- }
 --- ```
---- **[ Server Only ]**
 --- @param ContextClientEvents table Контекст хранения данных активных слушателей.
 --- @param KeyName string Название ключа, по которому будут проиндексированы слушатели.
 --- @param ListenersData table Данные о слушателях, содержащие имя события и соответствующие данные вызова (контекст и имя функции).
+--- **[ Server Only ]**
 function _RegisterClientEventListeners(ContextClientEvents, KeyName, ListenersData)
     for ListenerName, CallbackData in pairs(ListenersData or {}) do
         if not ContextClientEvents[KeyName] then ContextClientEvents[KeyName] = {} end
@@ -452,10 +450,10 @@ end
 ---     "custom_event_name",
 --- }
 --- ```
---- **[ Server Only ]**
 --- @param ContextClientEvents table Контекст хранения данных активных слушателей.
 --- @param KeyName string Название ключа, по которому ранее были зарегистрированы слушатели.
 --- @param Listeners table Список имен событий, для которых нужно удалить слушателей.
+--- **[ Server Only ]**
 function _UnregisterClientEventListeners(ContextClientEvents, KeyName, Listeners)
     for _, ListenerName in pairs(Listeners or {}) do
         if ContextClientEvents[KeyName] and ContextClientEvents[KeyName][ListenerName] then

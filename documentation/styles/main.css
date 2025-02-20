@@ -209,7 +209,7 @@ p, h1, h2{
 }
 
 .Text {
-    font-size: clamp(14px, 2vw, 20px);
+    font-size: clamp(14px, 2vw, 18px);
 }
 
 .Title{
@@ -219,12 +219,23 @@ p, h1, h2{
     margin-bottom: 8px;
 }
 
+.AuthorName{
+    font-weight: 500;
+    font-family: "Reaver";
+    margin-left: 8px;
+    text-decoration: none;
+    color: rgb(167, 182, 255);
+    letter-spacing: 1px;
+}
+
 body {
-    padding: clamp(32px, 5vw, 128px);
+    width: clamp(0px, 80vw, 1200px);
+    padding: 32px;
+    padding-top: 64px;
     color: #e2e7ff;
     background-color: #141517;
     font-family: "Radiance";
-    margin: 0;
+    margin: auto;
 
     > #TitileContainer{
         width: fit-content;
@@ -260,7 +271,7 @@ body {
                 font-family: "Reaver";
             }
     
-            > #AuthorName{
+            > .AuthorName{
                 font-size: clamp(12px, 1.5vw, 20px);
                 font-weight: 500;
                 opacity: 0.5;
@@ -278,10 +289,6 @@ body {
 
         > .Chapter{
             margin-top: clamp(32px, 2vw, 64px);
-
-            > .Text{
-                /* margin-top: clamp(16px, 2vw, 24px); */
-            }
         }
     }
 }

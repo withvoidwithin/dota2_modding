@@ -1,0 +1,15 @@
+name: GitHub to Discord  
+on:  
+  push:  
+    branches: [main, dev]  # Уведомления только для этих веток  
+
+jobs:  
+  notify:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Send message to Discord
+        uses: Ilshidur/action-discord@master  
+        with:  
+          args: "🚀 Новый коммит в репозитории! **${{ github.actor }}** сделал пуш в **${{ github.repository }}**\nПоследний коммит: `${{ github.event.head_commit.message }}`"  
+        env:  
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

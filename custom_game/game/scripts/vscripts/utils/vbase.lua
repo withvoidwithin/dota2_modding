@@ -1,6 +1,6 @@
 -- ============== Copyright © 2024, WITHVOIDWITHIN, All rights reserved. =============
 
--- Version: 1.7
+-- Version: 1.8
 -- Author: https://steamcommunity.com/id/withvoidwithin/
 -- Source: https://github.com/withvoidwithin/dota2_modding
 -- ===================================================================================
@@ -43,15 +43,18 @@ function _DeepCopy(Table, IsCopyMeta)
     return Copy
 end
 
---- Добавляет и заменяет существующие значения BaseTable из NewTable
---- @param BaseTable table
+--- Добавляет и заменяет существующие значения BaseTable из NewTable.
+--- <br> Если значение из NewTable = "__nil", то значение этого ключа будет удалено из BaseTable.
+--- @param BaseTable? table
 --- @param NewTable? table
 --- <br> **[ Server / Client ]**
 function _MergeTables(BaseTable, NewTable)
     if not BaseTable then BaseTable = {} end
 
     for Key, Value in pairs(NewTable or {}) do
-        if type(Value) == "table" and not IsValidEntity(Value) then
+        if Value == "__nil" then
+            BaseTable[Key] = nil
+        elseif type(Value) == "table" and not IsValidEntity(Value) then
             if not BaseTable[Key] or type(BaseTable[Key]) ~= "table" then
                 BaseTable[Key] = {}
             end
@@ -108,6 +111,7 @@ function _GetTableRandomValue(Table)
 end
 
 --- Возвращает рандомный ключ с учетов весов.
+--- <br> Формат таблицы: { key = weight }, где weight это число в виде string или nubmer.
 --- @param Table table<string|number, number|string>
 --- @return string|number
 --- <br> **[ Server / Client ]**
@@ -115,7 +119,7 @@ function _GetTableRandomKeyForWeight(Table)
     local List = {}
 
     for Key, Weight in pairs(Table) do
-        for i = 1, Weight do
+        for i = 1, tonumber(Weight) do
             table.insert(List, Key)
         end
     end
@@ -211,13 +215,9 @@ end
 -- ================================================================================================================================
 
 --- Производит вычисление двух переменных по заданной функции и ограничивает результат в диапазоне.
---- ```lua
---- Пример:
---- CalcFunction = function(a, b) return a - b end
---- ```
 --- @param A? number
 --- @param B? number
---- @param CalcFunction function Функция, используемая для вычислений.
+--- @param CalcFunction fun(a: number, b: number): number Функция, используемая для вычислений.
 --- @param Min? number
 --- @param Max? number
 --- @param BaseA? number
@@ -311,7 +311,7 @@ end
 --- ```
 --- Пример:
 --- ```lua
---- _RegisterGameEventListeners(_GetGameEventListenersContext(), "Game", {
+--- _RegisterGameEventListeners(_CONTEXT_GAME_EVENTS(), "Game", {
 --- 	game_rules_state_change = { Context = MyContext, FunctionName = "OnGameEventStateChanged" },
 --- })
 --- ```
@@ -403,7 +403,7 @@ end
 -- ================================================================================================================================
 
 --- Возвращает список всех PlayerID игроков, принадлежащих указанной команде или всех игроков, если TeamID не указан.
---- @param TeamID number|nil Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
+--- @param TeamID number? Идентификатор команды (например, DOTA_TEAM_GOODGUYS или DOTA_TEAM_BADGUYS). Если `nil`, возвращаются все игроки.
 --- @return number[] Список PlayerID игроков.
 --- <br> **[ Server Only ]**
 function _GetPlayersInTeam(TeamID)

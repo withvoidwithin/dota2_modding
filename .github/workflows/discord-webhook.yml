@@ -1,15 +1,39 @@
 name: GitHub to Discord
 on:
   push:
-    branches: [main, dev]  # Уведомления только для этих веток
+    branches: [main]  # Отправлять уведомления только из этих веток  
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Send message to Discord
-        uses: Ilshidur/action-discord@master  
-        with:
-          args: "🚀 Новый коммит в репозитории! **${{ github.actor }}** сделал пуш в **${{ github.repository }}**\nПоследний коммит: `${{ github.event.head_commit.message }}`"  
-        env:
+      - name: Send Embed to Discord
+        run: |
+          curl -X POST "$DISCORD_WEBHOOK" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "username": "GitHub Bot",
+            "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+            "embeds": [{
+              "title": "🚀 Новый коммит в репозитории!",
+              "description": "**${{ github.actor }}** сделал пуш в **${{ github.repository }}**",
+              "color": 5814783,
+              "fields": [
+                {
+                  "name": "Последний коммит",
+                  "value": "`${{ github.event.head_commit.message }}`",
+                  "inline": false
+                },
+                {
+                  "name": "Изменённые файлы",
+                  "value": "`${{ github.event.head_commit.modified }}`",
+                  "inline": false
+                }
+              ],
+              "footer": {
+                "text": "GitHub Actions | ${{ github.event.head_commit.timestamp }}"
+              }
+            }]
+          }'
+        env:  
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

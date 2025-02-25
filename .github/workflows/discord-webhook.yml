@@ -13,9 +13,12 @@ jobs:
           COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
           COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
           COMMIT_DESCRIPTION=$(echo "$COMMIT_MESSAGE" | tail -n +2 | sed ':a;N;$!ba;s/\n/\\n/g')
-
+          COMMIT_ID="${{ github.sha }}"
+          COMMIT_ID_SHORT=$(echo "$COMMIT_ID" | cut -c1-7)
+    
           echo "TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
           echo "DESCRIPTION=$COMMIT_DESCRIPTION" >> $GITHUB_ENV
+          echo "COMMIT_ID_SHORT=$COMMIT_ID_SHORT" >> $GITHUB_ENV
       
       - name: Send Embed to Discord
         run: |
@@ -27,7 +30,7 @@ jobs:
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
               "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}\n[`${{ github.sha:0:7 }}`](${{ github.event.head_commit.url }})",
+              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}\n[`${{ env.COMMIT_ID_SHORT }}`](${{ github.event.head_commit.url }})",
               "color": 16754740,
               "fields": [],
               "footer": {

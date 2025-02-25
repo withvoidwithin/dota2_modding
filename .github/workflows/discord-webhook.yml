@@ -7,16 +7,32 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Extract commit title and description
+        id: extract_commit
+        run: |
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          # Разделяем сообщение на заголовок и описание
+          COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
+          COMMIT_DESCRIPTION=$(echo "$COMMIT_MESSAGE" | tail -n +2 | sed ':a;N;$!ba;s/\n/\\n/g')
+          
+          echo "Commit Title: $COMMIT_TITLE"
+          echo "Commit Description: $COMMIT_DESCRIPTION"
+          
+          # Сохраняем результат в output
+          echo "::set-output name=title::$COMMIT_TITLE"
+          echo "::set-output name=description::$COMMIT_DESCRIPTION"
+      
       - name: Send Embed to Discord
         run: |
+          echo "Sending webhook with title: ${{ steps.extract_commit.outputs.title }} and description: ${{ steps.extract_commit.outputs.description }}"
           curl -X POST "$DISCORD_WEBHOOK" \
           -H "Content-Type: application/json" \
           -d '{
             "username": "D2_MODDING_UPDATES",
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
-              "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n${{ github.event.head_commit.message | replace('\n', '\\n') }}"
+              "title": "${{ steps.extract_commit.outputs.title }}",
+              "description": "## 🚀 Новое обновление репозитория!\n${{ steps.extract_commit.outputs.description }}",
               "color": 16754740,
               "fields": [],
               "footer": {

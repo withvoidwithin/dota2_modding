@@ -1,7 +1,7 @@
 name: GitHub to Discord
 on:
   push:
-    branches: [main]  # Отправлять уведомления только из этих веток  
+    branches: [main]  # Отправлять уведомления только из этих веток
 
 jobs:
   notify:

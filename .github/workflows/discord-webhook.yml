@@ -31,8 +31,8 @@ jobs:
             "username": "D2_MODDING_UPDATES",
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
-              "title": "${{ env.TITLE }}",
-              "description": "## 🚀 Новое обновление репозитория!\n${{ env.DESCRIPTION }}",
+              "title": "",
+              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}",
               "color": 16754740,
               "fields": [],
               "footer": {

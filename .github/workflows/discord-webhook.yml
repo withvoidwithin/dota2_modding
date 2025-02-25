@@ -18,21 +18,21 @@ jobs:
           echo "Commit Title: $COMMIT_TITLE"
           echo "Commit Description: $COMMIT_DESCRIPTION"
           
-          # Сохраняем результат в output
-          echo "::set-output name=title::$COMMIT_TITLE"
-          echo "::set-output name=description::$COMMIT_DESCRIPTION"
+          # Сохраняем результат в файлы окружения
+          echo "TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
+          echo "DESCRIPTION=$COMMIT_DESCRIPTION" >> $GITHUB_ENV
       
       - name: Send Embed to Discord
         run: |
-          echo "Sending webhook with title: ${{ steps.extract_commit.outputs.title }} and description: ${{ steps.extract_commit.outputs.description }}"
+          echo "Sending webhook with title: ${{ env.TITLE }} and description: ${{ env.DESCRIPTION }}"
           curl -X POST "$DISCORD_WEBHOOK" \
           -H "Content-Type: application/json" \
           -d '{
             "username": "D2_MODDING_UPDATES",
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
-              "title": "${{ steps.extract_commit.outputs.title }}",
-              "description": "## 🚀 Новое обновление репозитория!\n${{ steps.extract_commit.outputs.description }}",
+              "title": "${{ env.TITLE }}",
+              "description": "## 🚀 Новое обновление репозитория!\n${{ env.DESCRIPTION }}",
               "color": 16754740,
               "fields": [],
               "footer": {

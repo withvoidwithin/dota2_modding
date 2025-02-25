@@ -11,14 +11,9 @@ jobs:
         id: extract_commit
         run: |
           COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-          # Разделяем сообщение на заголовок и описание
           COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
           COMMIT_DESCRIPTION=$(echo "$COMMIT_MESSAGE" | tail -n +2 | sed ':a;N;$!ba;s/\n/\\n/g')
-          
-          echo "Commit Title: $COMMIT_TITLE"
-          echo "Commit Description: $COMMIT_DESCRIPTION"
-          
-          # Сохраняем результат в файлы окружения
+
           echo "TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
           echo "DESCRIPTION=$COMMIT_DESCRIPTION" >> $GITHUB_ENV
       
@@ -32,7 +27,7 @@ jobs:
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
               "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}",
+              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}\n[`${{ github.event.head_commit.id }}`](${{ github.event.head_commit.url }})",
               "color": 16754740,
               "fields": [],
               "footer": {

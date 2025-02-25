@@ -9,37 +9,20 @@ jobs:
     steps:
       - name: Send Embed to Discord
         run: |
-          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-          COMMIT_TITLE=$(echo "$COMMIT_MESSAGE" | head -n 1)
-          COMMIT_BODY=$(echo "$COMMIT_MESSAGE" | tail -n +2)
-          echo "COMMIT_TITLE=$COMMIT_TITLE" >> $GITHUB_ENV
-          echo "COMMIT_BODY=$COMMIT_BODY" >> $GITHUB_ENV
-
-          PAYLOAD=$(cat <<EOF
-          {
+          curl -X POST "$DISCORD_WEBHOOK" \
+          -H "Content-Type: application/json" \
+          -d '{
             "username": "D2_MODDING_UPDATES",
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
-              "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n### $COMMIT_TITLE\n$COMMIT_BODY",
-              "color": 11378687,
-              "fields": [],
-              "author": {
-                "name": "${{ github.event.head_commit.author.name }}",
-                "url": "https://github.com/withvoidwithin/dota2_modding"
-              },
+              "description": "## 🚀 Новое обновление репозитория!\n${{ github.event.head_commit.message }}",
+              "color": 16754740,
               "footer": {
                 "text": "Update by ${{ github.event.head_commit.author.name }}",
                 "icon_url": "https://avatars.githubusercontent.com/${{ github.actor }}"
               },
               "timestamp": "${{ github.event.head_commit.timestamp }}"
             }]
-          }
-          EOF
-          )
-
-          curl -X POST "$DISCORD_WEBHOOK" \
-          -H "Content-Type: application/json" \
-          -d "$PAYLOAD"
+          }'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

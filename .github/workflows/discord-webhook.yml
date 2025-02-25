@@ -16,7 +16,7 @@ jobs:
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
               "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n'"${{ github.event.head_commit.message }}"'",
+              "description": "## 🚀 Новое обновление репозитория!\n${{ github.event.head_commit.message | replace('\n', '\\n') }}"
               "color": 16754740,
               "fields": [],
               "footer": {

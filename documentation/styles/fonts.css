@@ -1,84 +1,84 @@
 /* Шрифт Radiance */
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-BLACK.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-BLACK.OTF') format('opentype');
     font-weight: 900;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-BLACKITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-BLACKITALIC.OTF') format('opentype');
     font-weight: 900;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-BOLD.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-BOLD.OTF') format('opentype');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-BOLDITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-BOLDITALIC.OTF') format('opentype');
     font-weight: 700;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-LIGHT.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-LIGHT.OTF') format('opentype');
     font-weight: 300;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-LIGHTITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-LIGHTITALIC.OTF') format('opentype');
     font-weight: 300;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-REGULAR.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-REGULAR.OTF') format('opentype');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-REGULARITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-REGULARITALIC.OTF') format('opentype');
     font-weight: 400;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-SEMIBOLD.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-SEMIBOLD.OTF') format('opentype');
     font-weight: 600;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-SEMIBOLDITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-SEMIBOLDITALIC.OTF') format('opentype');
     font-weight: 600;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-ULTRALIGHT.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-ULTRALIGHT.OTF') format('opentype');
     font-weight: 200;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Radiance';
-    src: url('documentation/fonts/RADIANCE-ULTRALIGHTITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCE-ULTRALIGHTITALIC.OTF') format('opentype');
     font-weight: 200;
     font-style: italic;
 }
@@ -86,84 +86,84 @@
 /* Шрифт RadianceCM */
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-BLACK.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-BLACK.OTF') format('opentype');
     font-weight: 900;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-BLACKITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-BLACKITALIC.OTF') format('opentype');
     font-weight: 900;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-BOLD.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-BOLD.OTF') format('opentype');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-BOLDITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-BOLDITALIC.OTF') format('opentype');
     font-weight: 700;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-ITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-ITALIC.OTF') format('opentype');
     font-weight: 400;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-LIGHT.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-LIGHT.OTF') format('opentype');
     font-weight: 300;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-LIGHTITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-LIGHTITALIC.OTF') format('opentype');
     font-weight: 300;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-REGULAR.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-REGULAR.OTF') format('opentype');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-SEMIBOLD.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-SEMIBOLD.OTF') format('opentype');
     font-weight: 600;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-SEMIBOLDITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-SEMIBOLDITALIC.OTF') format('opentype');
     font-weight: 600;
     font-style: italic;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-ULTRALIGHT.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-ULTRALIGHT.OTF') format('opentype');
     font-weight: 200;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'RadianceCM';
-    src: url('documentation/fonts/RADIANCEM-ULTRALIGHTITALIC.OTF') format('opentype');
+    src: url('../fonts/RADIANCEM-ULTRALIGHTITALIC.OTF') format('opentype');
     font-weight: 200;
     font-style: italic;
 }
@@ -171,35 +171,35 @@
 /* Шрифт Reaver */
 @font-face {
     font-family: 'Reaver';
-    src: url('documentation/fonts/REAVER-BLACK.OTF') format('opentype');
+    src: url('../fonts/REAVER-BLACK.OTF') format('opentype');
     font-weight: 900;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Reaver';
-    src: url('documentation/fonts/REAVER-BOLD.OTF') format('opentype');
+    src: url('../fonts/REAVER-BOLD.OTF') format('opentype');
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Reaver';
-    src: url('documentation/fonts/REAVER-LIGHT.OTF') format('opentype');
+    src: url('../fonts/REAVER-LIGHT.OTF') format('opentype');
     font-weight: 300;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Reaver';
-    src: url('documentation/fonts/REAVER-REGULAR.OTF') format('opentype');
+    src: url('../fonts/REAVER-REGULAR.OTF') format('opentype');
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Reaver';
-    src: url('documentation/fonts/REAVER-SEMIBOLD.OTF') format('opentype');
+    src: url('../fonts/REAVER-SEMIBOLD.OTF') format('opentype');
     font-weight: 600;
     font-style: normal;
 }

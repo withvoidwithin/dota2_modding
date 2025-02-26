@@ -1,0 +1,9 @@
+.ContextPage{
+    p {
+        font-size: clamp(14px, 1.25vw, 18px);
+    }
+
+    h2{
+        font-size: clamp(18px, 2vw, 24px);
+    }
+}

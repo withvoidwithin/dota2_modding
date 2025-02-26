@@ -1,29 +1,48 @@
-const PAGES = [
-    "intro",
-    "setup",
-    "file_structure",
-    "architecture",
-]
+const PAGES = {
+    intro: {
+        LocalizationName: "О проекте",
+    },
+    setup: {
+        LocalizationName: "Установка и настройка",
+        IsInDev: true,
+    },
+    resources: {
+        LocalizationName: "Полезные ресурсы",
+        IsInDev: true,
+    },
+    file_structure: {
+        LocalizationName: "Структура файлов",
+        IsInDev: true,
+    },
+    architecture: {
+        LocalizationName: "Архитектура",
+        IsInDev: true,
+    },
+}
 
 function InitSideBar(){
     const SideBar = document.getElementById("SideBar")
 
-    PAGES.forEach(PageName => {
+    for (let PageName in PAGES){
         const Button = document.createElement("div")
         const Title = document.createElement("a")
+        const ButtonData = PAGES[PageName]
 
         Button.id = "Page_" + PageName
-        Title.text = PageName
+        Title.text = ButtonData.LocalizationName
+
+        if(ButtonData.IsInDev) Button.classList.add('IsInDev')
 
         SideBar.appendChild(Button)
         Button.appendChild(Title)
-    })
+    }
 }
 
 async function InitPage(PageName){
     const ContextContent = document.getElementById("ContextContent");
-    // const Url = "documentation/pages/" + PageName + ".html"
     const Url = "documentation/pages/" + PageName + ".html"
+
+    if (window.location.protocol === "file:") return
 
     ContextContent.innerHTML = "";
 

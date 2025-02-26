@@ -14,8 +14,13 @@ body{
     background-color: var(--COLOR_GRAY);
 }
 
-h1, a{
+h1, h2, h3, h4, h5{
     font-family: "Reaver";
+}
+
+a, p{
+    font-family: "Radiance";
+    margin: 0;
 }
 
 .Solid{
@@ -55,7 +60,8 @@ h1, a{
             }
 
             > h1{
-                font-size: clamp(14px, 1.25vw, 20px)
+                font-family: "Reaver";
+                font-size: clamp(14px, 1.25vw, 20px);
             }
         }
 
@@ -67,7 +73,6 @@ h1, a{
             > a{
                 font-size: clamp(14px, 1.25vw, 18px);
                 color: var(--COLOR_TEXT);
-                font-family: "Radiance";
                 text-decoration: none;
 
                 &:hover{
@@ -94,8 +99,13 @@ h1, a{
 
             > div{
                 background-color: var(--COLOR_VOID);
-                padding: 4px;
+                padding: 6px;
                 border-radius: 4px;
+                font-size: 18px;
+
+                &.IsInDev{
+                    opacity: 0.32;
+                }
             }
         }
 
@@ -103,6 +113,7 @@ h1, a{
             flex-grow: 1;
             flex-shrink: 1;
             flex-basis: 0%;
+            padding: clamp(12px, 2vw, 32px);
         }
     }
 }

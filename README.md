@@ -1,4 +1,4 @@
-[Новая документация](https://withvoidwithin.github.io/dota2_modding/documentation.html) (в разработке)
+[Новая документация](https://withvoidwithin.github.io/dota2_modding) (в разработке)
 
 > [!NOTE]
 > Добро пожаловать в мой проект, посвященный моддингу Dota 2!

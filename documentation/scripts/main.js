@@ -29,12 +29,13 @@ function InitSideBar(){
     const SideBar = document.getElementById("SideBar")
 
     for (let PageName in PAGES){
+        const PageData = PAGES[PageName]
         const Button = document.createElement("div")
         const Title = document.createElement("a")
-        const PageData = PAGES[PageName]
 
-        Button.id = "Page_" + PageName
         Title.text = PageData.LocalizationName
+        Button.id = "Page_" + PageName
+        Button.onclick = () => InitPage(PageName)
 
         if(PageData.IsInDev) Button.classList.add('IsInDev')
 

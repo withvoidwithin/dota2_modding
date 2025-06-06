@@ -3,10 +3,11 @@ const PAGES = {
         HTML: "documentation/pages/intro.html",
         LocalizationName: "О проекте",
     },
-    dota_class_viewer: {
-        HTML: "documentation/pages/dota_class_viewer/main.html",
-        LocalizationName: "Dota Class Viewer",
-    },
+    // dota_class_viewer: {
+    //     HTML: "documentation/pages/dota_class_viewer/main.html",
+    //     LocalizationName: "Dota Class Viewer",
+    //     IsInDev: true,
+    // },
     setup: {
         LocalizationName: "Установка и настройка",
         IsInDev: true,
@@ -35,9 +36,9 @@ function InitSideBar(){
 
         Title.text = PageData.LocalizationName
         Button.id = "Page_" + PageName
-        Button.onclick = () => InitPage(PageName)
 
         if(PageData.IsInDev) Button.classList.add('IsInDev')
+        else Button.onclick = () => InitPage(PageName)
 
         SideBar.appendChild(Button)
         Button.appendChild(Title)

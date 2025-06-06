@@ -31,12 +31,12 @@ function InitSideBar(){
     for (let PageName in PAGES){
         const Button = document.createElement("div")
         const Title = document.createElement("a")
-        const ButtonData = PAGES[PageName]
+        const PageData = PAGES[PageName]
 
         Button.id = "Page_" + PageName
-        Title.text = ButtonData.LocalizationName
+        Title.text = PageData.LocalizationName
 
-        if(ButtonData.IsInDev) Button.classList.add('IsInDev')
+        if(PageData.IsInDev) Button.classList.add('IsInDev')
 
         SideBar.appendChild(Button)
         Button.appendChild(Title)

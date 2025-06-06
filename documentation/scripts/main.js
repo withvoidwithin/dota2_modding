@@ -1,6 +1,11 @@
 const PAGES = {
     intro: {
+        HTML: "intro.html",
         LocalizationName: "О проекте",
+    },
+    dota_class_viewer: {
+        HTML: "dota_class_viewer/main.html",
+        LocalizationName: "Dota Class Viewer",
     },
     setup: {
         LocalizationName: "Установка и настройка",
@@ -40,13 +45,13 @@ function InitSideBar(){
 
 async function InitPage(PageName){
     const ContextContent = document.getElementById("ContextContent");
-    const Url = "documentation/pages/" + PageName + ".html"
+    const PageData = PAGES[PageName]
 
     if (window.location.protocol === "file:") return
 
     ContextContent.innerHTML = "";
 
-    fetch(Url)
+    fetch(PageData.HTML)
         .then(response => response.text())
         .then(data => {
             ContextContent.innerHTML = data;

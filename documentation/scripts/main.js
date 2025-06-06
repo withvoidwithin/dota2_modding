@@ -4,7 +4,7 @@ const PAGES = {
         LocalizationName: "О проекте",
     },
     dota_class_viewer: {
-        html: "documentation/pages/dota_class_viewer/main.html",
+        HTML: "documentation/pages/dota_class_viewer/main.html",
         LocalizationName: "Dota Class Viewer",
     },
     setup: {
@@ -46,6 +46,8 @@ function InitSideBar(){
 async function InitPage(PageName){
     const ContextContent = document.getElementById("ContextContent");
     const PageData = PAGES[PageName]
+
+    console.log(PageData);
 
     if (window.location.protocol === "file:") return
 

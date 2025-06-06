@@ -1,12 +1,12 @@
 const PAGES = {
     intro: {
-        HTML: "intro.html",
+        HTML: "documentation/pages/intro.html",
         LocalizationName: "О проекте",
     },
-    // dota_class_viewer: {
-    //     HTML: "dota_class_viewer/main.html",
-    //     LocalizationName: "Dota Class Viewer",
-    // },
+    dota_class_viewer: {
+        html: "documentation/pages/dota_class_viewer/main.html",
+        LocalizationName: "Dota Class Viewer",
+    },
     setup: {
         LocalizationName: "Установка и настройка",
         IsInDev: true,

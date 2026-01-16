@@ -30,7 +30,7 @@ jobs:
             "avatar_url": "https://i.imgur.com/BCTrM9E.png",
             "embeds": [{
               "title": "",
-              "description": "## 🚀 Новое обновление репозитория!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}\n[`${{ env.COMMIT_ID_SHORT }}`](${{ github.event.head_commit.url }})",
+              "description": "## 🚀 Обновление документации!\n### ${{ env.TITLE }}\n${{ env.DESCRIPTION }}\n[`${{ env.COMMIT_ID_SHORT }}`](${{ github.event.head_commit.url }})",
               "color": 16754740,
               "fields": [],
               "footer": {

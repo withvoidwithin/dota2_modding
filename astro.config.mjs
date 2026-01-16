@@ -7,9 +7,12 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://withvoidwithin.github.io',
+	base: 'dota2_modding',
+
 	integrations: [starlight({
 		title: 'D2_MODDING',
-		social: [{ icon: 'github', label: 'GitHub', href: 'https://withvoidwithin.github.io/dota2_modding/' }],
+		social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withvoidwithin/dota2_modding' }],
 		sidebar: [
 			{
 				label: 'Guides',

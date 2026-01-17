@@ -1,6 +1,6 @@
 ---
 title: D2_MODDING
-description: D2_MODDING — база знаний для создания пользовательских игр для Dota 2.
+description: D2_MODDING — база знаний по созданию пользовательских игр (кастомок) для Dota 2 от WITHVOIDWITHIN.
 head:
   # Используем свой тег <title>
   - tag: title
@@ -8,32 +8,47 @@ head:
 
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
-  tagline: Обширная база знаний для создания пользовательских игр для Dota 2.
+  tagline:  База знаний по разработке собственных пользовательских игры для Dota 2.
   image:
-    file: ../../assets/logo.svg
+    file: '@assets/logo.svg'
+    # file: ../../assets/logo.svg
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Aside, Icon } from '@astrojs/starlight/components';
 
-## Информация
+# О проекте
 
-Напишу позже :)	
+Добро пожаловать в проект, посвященный моддингу **Dota 2**!
+Этот сайт создан как обширный ресурс для всех, кто занимается созданием собственных пользовательских игр.
 
-{/* <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
-</CardGrid> */}
+Здесь **будет** собрана различная информация о работе с функционалом инструментов: систем, редакторов, API и прочих особенностях всего SDK.
+
+<Aside type="caution" title="Эксперементальный проект">
+	Проект находится на начальной стадии разработки и поддерживается силами **одного автора**.
+</Aside>
+
+## Полезные ресурсы
+
+В интернете разбросано полно полезной информации связанной с моддингом Dota 2. Вот несколько рекомендуемых ресурсов:
+
+- [ModDota](https://moddota.com/api) — очень полезный ресурс с дампом API игры и гайдами.
+- [Valve Developer Community](https://developer.valvesoftware.com/wiki/Dota_2_Workshop_Tools) - wiki от сообщества модмейкеров.
+Крайне редко обновляется, но позволяет понять фундаментальную базу. Некоторая информация может быть **не актуальной или устаревшей**.
+
+<Aside type="danger" title="Дисклеймер">
+	Материалы, представленные на этом ресурсе, являются результатом эмпирического исследования.
+	Движок Source 2 — это закрытая экосистема, и вся информация здесь — это моя личная субъективная интерпретация работы внутренних механик API, полученная за годы практической разработки.
+</Aside>
+
+<Aside type="note" title="Лицензия использования">
+	Все ассеты, системы и кодовая реализация распространяются под **MIT License**.
+	Вы можете свободно использовать все наработки, даже в комерчиских целях, но с обязательным указанием авторства и ссылкой на оригинальный источник.
+	Также необходимо сделать пометку о любых изменениях, если они были внесены.
+
+	Copyright © 2024, [**WITHVOIDWITHIN**](https://steamcommunity.com/id/withvoidwithin/).
+</Aside>
+
+## Поддержка и Благодарность
+
+Проект создается на полном энтузиазме.
+Если ресурс оказался для вас полезен и вы хотите помочь в развитии или просто поддержать автора, то вы можете сделать это на [**Boosty**](https://boosty.to/yourlink) или в [**Steam**](https://steamcommunity.com/id/yourlink).

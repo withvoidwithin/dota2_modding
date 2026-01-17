@@ -1,0 +1,26 @@
+---
+// src/components/overrides/PageTitle.astro
+import DefaultPageTitle from '@astrojs/starlight/components/PageTitle.astro';
+import ArticleMeta from '../ArticleMeta.astro';
+
+/**
+ * В Starlight данные текущей страницы (entry) хранятся в Astro.locals.starlightRoute
+ * Это позволяет получить доступ к frontmatter из любого компонента.
+ */
+const { entry } = Astro.locals.starlightRoute;
+---
+
+<!-- 1. Рендерим стандартный заголовок Starlight -->
+<DefaultPageTitle {...Astro.props} />
+
+<!-- 2. Безопасно проверяем, существует ли entry и meta -->
+<!-- Используем optional chaining (?.) на случай, если это страница 404 или индекс -->
+{entry?.data?.meta && (
+    <ArticleMeta meta={entry.data.meta} />
+)}
+
+<style>
+    :global(h1) {
+        margin-bottom: 0 !important; 
+    }
+</style>

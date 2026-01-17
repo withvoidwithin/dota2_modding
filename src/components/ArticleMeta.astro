@@ -1,0 +1,91 @@
+---
+interface Props {
+  meta: {
+    author?: string;
+    game_version?: string;
+    date?: string | Date;
+  };
+}
+
+const { meta } = Astro.props;
+
+// Форматирование даты
+const formattedDate = meta.date 
+  ? new Date(meta.date).toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }) 
+  : null;
+---
+
+<div class="meta-container not-content">
+  <!-- Блок 1: Версия (Самый важный) -->
+  {meta.game_version && (
+    <div class="meta-item version">
+      <span class="icon">🎮</span>
+      <span class="label">Patch</span>
+      <span class="value">{meta.game_version}</span>
+    </div>
+  )}
+
+  <!-- Блок 2: Автор -->
+  {meta.author && (
+    <div class="meta-item author">
+      <span class="icon">👤</span>
+      <span class="value">{meta.author}</span>
+    </div>
+  )}
+
+  <!-- Блок 3: Дата -->
+  {formattedDate && (
+    <div class="meta-item date">
+      <span class="icon">📅</span>
+      <span class="value">{formattedDate}</span>
+    </div>
+  )}
+</div>
+
+<style>
+  /* Стили Scoped CSS, чтобы работало без Tailwind */
+  .meta-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--sl-color-gray-6); /* Цвет фона Starlight */
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    font-family: var(--sl-font-mono); /* Моноширинный шрифт для техничности */
+    font-size: 0.875rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Специфичные цвета для акцентов */
+  .version .value {
+    color: var(--sl-color-green-high); /* Ярко-зеленый для патча */
+    font-weight: bold;
+  }
+
+  .author .value {
+    color: var(--sl-color-blue-high);
+  }
+
+  .date .value {
+    color: var(--sl-color-orange-high);
+  }
+
+  .label {
+    text-transform: uppercase;
+    font-size: 0.7em;
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+  }
+</style>

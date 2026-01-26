@@ -13,7 +13,15 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'D2_MODDING',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withvoidwithin/dota2_modding' }],
+			logo: {
+				src: '@assets/logo.svg',
+				alt: 'logo',
+			},
+			social: [
+				{ icon: 'heart', label: 'Donate', href: 'https://boosty.to/withvoidwithin' },
+				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/NwjZH3wUt8' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/withvoidwithin/dota2_modding' },
+			],
 
 			sidebar: [
 				{

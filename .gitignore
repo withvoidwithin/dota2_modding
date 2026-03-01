@@ -1,0 +1,7 @@
+node_modules/
+.env
+.DS_Store
+temp/
+
+# api_dumper_mod
+content/dota_addons/api_dumper_mod/game/*.bin

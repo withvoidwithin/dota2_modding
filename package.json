@@ -1,0 +1,26 @@
+{
+    "name": "dota2_modding",
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dump": "node dumper/index.js",
+        "setup": "node scripts/setup-symlinks.js"
+    },
+    "keywords": [],
+    "author": "WITHVOIDWITHIN",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/withvoidwithin/dota2_modding.git"
+    },
+    "bugs": {
+        "url": "https://github.com/withvoidwithin/dota2_modding/issues"
+    },
+    "homepage": "https://github.com/withvoidwithin/dota2_modding#readme",
+    "description": "",
+    "dependencies": {
+        "chalk": "^5.6.2",
+        "dotenv": "^17.3.1",
+        "fs-extra": "^11.3.3"
+    }
+}

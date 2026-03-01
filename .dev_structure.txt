@@ -1,0 +1,39 @@
+/dota2-api-tracker
+├── .gitignore               # Игнорируем node_modules, build, temp
+├── package.json             # Скрипты: "dump", "setup", "build-site"
+├── README.md                # Инструкция по установке симлинков
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml       # GitHub Actions: собирает сайт при пуше
+│
+├── scripts/                 # Служебные Node.js скрипты
+│   ├── setup-symlinks.js    # [SETUP] Создает связь Repo <-> Dota Folder
+│   ├── dumper.js            # [RUN] Запуск Доты, VConsole, сбор файлов
+│   ├── parser.js            # [BUILD] Raw Txt -> JSON для сайта
+│   └── diff-engine.js       # [BUILD] Генерирует историю изменений (Changelog)
+│
+├── content/                 # Исходники контента (Аддон + Дока)
+│   ├── dota_addons/         # Папка аддона (именно её мы линкуем в игру)
+│   │   └── api_dumper_mod/
+│   │       ├── addoninfo.txt
+│   │       ├── scripts/
+│   │       │   └── vscripts/
+│   │       │       └── addon_game_mode.lua # Логика сбора из рантайма
+│   │       └── resource/
+│   │           └── panorama/ # Если нужно дампить JS/CSS через UI
+│   └── docs/                # Твоя ручная документация (.md файлы)
+│
+├── data/                    # База данных
+│   ├── raw/                 # [GIT] Сюда скрипт копирует .txt файлы
+│   │   ├── lua_api.txt
+│   │   ├── css_dump.txt
+│   │   └── runtime_heroes.json
+│   └── generated/           # [GITIGNORE] Готовые JSON для сайта (результат парсера)
+│
+└── website/                 # Фронтенд (Docusaurus/React)
+    ├── docusaurus.config.js
+    ├── src/
+    │   ├── pages/
+    │   └── components/      # Visualizers, DiffViewer
+    └── static/              # Сюда копируется data/generated при билде

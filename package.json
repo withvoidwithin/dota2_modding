@@ -3,7 +3,7 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "dump": "node dumper/index.js",
+        "init": "node dumper/init.js",
         "setup": "node scripts/setup-symlinks.js"
     },
     "keywords": [],

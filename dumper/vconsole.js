@@ -13,7 +13,7 @@ export class VConsoleClient {
         return new Promise((resolve, reject) => {
             this.client.connect(this.port, '127.0.0.1', () => {
                 this.connected = true;
-                console.log(chalk.green(`[NETCON] Connected to Dota 2 on port ${this.port}!`));
+                console.log(chalk.green(` port: ${this.port}!`));
                 resolve();
             });
 
@@ -44,7 +44,7 @@ export class VConsoleClient {
         if (!this.connected) return;
 
         this.client.write(command + '\r\n'); 
-        console.log(chalk.gray(`[NETCON] Sent: ${command}`)); // Отправляем строку и нажимаем "Enter" (\r\n)
+        console.log(chalk.gray(`[NETCON] ${command}`)); // Отправляем строку и нажимаем "Enter" (\r\n)
     }
 
     disconnect() {

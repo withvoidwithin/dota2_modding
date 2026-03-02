@@ -1,8 +1,8 @@
 local GameMode = thisEntity
-local DumperTag = "@API_DUMPER"
+local DumperTag = "@VCONSOLE"
 
 function VConsoleInitCommand(command)
 	print(DumperTag.."."..command)
 end
 
-VConsoleInitCommand("DUMP.MODIFIERS")
+VConsoleInitCommand("DUMP_MODIFIERS")

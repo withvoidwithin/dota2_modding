@@ -91,8 +91,8 @@ function LaunchAddon(){
 function InitVConsoleListener(){
     if (!STATE.vconsole) return console.error(chalk.red('[ERROR] VConsole client not found in STATE!')) 
 
-    STATE.vconsole.onLog = (line) => {
-        const cleanLine = line.trim();
+    STATE.vconsole.onLog = (log_line) => {
+        const cleanLine = log_line.trim();
         if (!cleanLine) return;
 
         // Определяем наш префикс

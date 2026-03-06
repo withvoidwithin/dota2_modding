@@ -32,8 +32,3 @@
 │   └── generated/           # [GITIGNORE] Готовые JSON для сайта (результат парсера)
 │
 └── website/                 # Фронтенд (Docusaurus/React)
-    ├── docusaurus.config.js
-    ├── src/
-    │   ├── pages/
-    │   └── components/      # Visualizers, DiffViewer
-    └── static/              # Сюда копируется data/generated при билде

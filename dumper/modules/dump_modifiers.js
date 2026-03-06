@@ -2,92 +2,76 @@ import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
-// Путь к файлу сохранения (относительно корня проекта)
-const OUTPUT_DIR = path.join(process.cwd(), 'data', 'raw');
-const OUTPUT_FILE = path.join(OUTPUT_DIR, 'modifiers.txt');
+// Оставлена только папка raw
+const DIR_RAW = path.join(process.cwd(), 'data', 'raw');
 
-/**
- * Инициализация модуля дампа модификаторов
- * @param {VConsoleClient} client - экземпляр клиента из STATE
- */
+// Путь к JSON теперь указывает в raw
+const OUTPUT_JSON = path.join(DIR_RAW, 'modifiers.json');
+
+// Инициализация модуля дампа модификаторов
 export async function init(client) {
-    process.stdout.write(chalk.cyan(': '));
+    const marker_end = '---MODIFIER_DUMP_END---';
+    const marker_start = '---MODIFIER_DUMP_START---';
+    const modifiers =[];
+    const original_listener = client.onLog;
 
-    // Сохраняем оригинальный обработчик, чтобы вернуть его позже
-    const ORIGINAL_ONLOG = client.onLog;
-    
-    const collectedModifiers = [];
-    const START_MARKER = '---MODIFIER_DUMP_START---';
-    const END_MARKER = '---MODIFIER_DUMP_END---';
+    let is_recording = false;
 
-    let isRecording = false;
-
-    // Таймер защиты (если Дота не ответит в течение 10 секунд, отменяем всё)
     const timeoutTimer = setTimeout(() => {
-        client.onLog = ORIGINAL_ONLOG;
-        console.log(chalk.red(' [MODULE] Error: Dump timed out!'));
-    }, 10000);
+        client.onLog = original_listener;
+        console.log(chalk.red('\n[MODULE] Error: Dump timed out!'));
+    }, 15000);
 
-    // Подменяем обработчик логов на свой
-    client.onLog = (line) => {
-        const cleanLine = line.trim();
+    //[ИСПРАВЛЕНО]: Переименован аргумент logLine во избежание конфликта
+    client.onLog = (logLine) => {
+        const line = logLine.trim();
 
-        // 1. Ждем маркер начала
-        if (cleanLine.includes(START_MARKER)) {
-            isRecording = true;
+        if (line.includes(marker_start)){
+            is_recording = true;
             return;
         }
 
-        // 2. Ждем маркер конца
-        if (cleanLine.includes(END_MARKER)) {
-            clearTimeout(timeoutTimer); // Удаляем таймер ошибки
-            
-            FinishDump(collectedModifiers, client, ORIGINAL_ONLOG);
+        if (line.includes(marker_end)){
+            clearTimeout(timeoutTimer);
+            FinishDump(modifiers, client, original_listener);
             return;
         }
 
-        // 3. Собираем данные, если мы в режиме записи
-        if (isRecording) {
-            // В дампе Доты модификаторы обычно идут строками "modifier_название"
-            if (cleanLine.startsWith('modif')) {
-                collectedModifiers.push(cleanLine);
+        if (is_recording){
+            // Фильтр: без пробелов и не пустая строка
+            if (line.length > 0 && !line.includes(' ')) {
+                modifiers.push(line);
             }
         }
     };
 
-    // Отправляем команды в Доту
-    // Используем небольшие задержки (setTimeout), чтобы консоль успевала переварить очередь
-    client.Send(`echo ${START_MARKER}`);
+    client.Send(`echo ${marker_start}`);
     client.Send('dump_modifier_list');
-    client.Send(`echo ${END_MARKER}`);
+    client.Send(`echo ${marker_end}`);
 }
 
-/**
- * Обработка собранных данных и сохранение
- */
-function FinishDump(data, client, originalListener) {
-    process.stdout.write(chalk.bgGreenBright.bold(' COMPLETED '));
+// Обработка и сохранение данных
+function FinishDump(data, client, original_listener) {
+    process.stdout.write(chalk.bgGreen.black.bold(' COMPLETED '));
 
-    // Сортировка по алфавиту
     data.sort();
 
     try {
-        // Проверяем наличие папки, если нет - создаем
-        if (!fs.existsSync(OUTPUT_DIR)) {
-            fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+        // Создаем только папку raw
+        if (!fs.existsSync(DIR_RAW)) {
+            fs.mkdirSync(DIR_RAW, { recursive: true });
         }
 
-        // Записываем файл (полная перезапись)
-        fs.writeFileSync(OUTPUT_FILE, data.join('\n'), 'utf8');
+        // Сохранение JSON в data/raw (TXT удален)
+        const jsonData = JSON.stringify(data, null, 4);
+        fs.writeFileSync(OUTPUT_JSON, jsonData, 'utf8');
         
-        console.log(chalk.green(` [${OUTPUT_FILE}]`));
+        console.log(chalk.green(`[Saved: raw/json]`));
+
     } catch (err) {
-        console.error(chalk.red(` [File System Error: ${err.message}]`));
+        console.error(chalk.red(`\n[File System Error: ${err.message}]`));
     }
 
-    // Возвращаем управление главному слушателю init.js
-    client.onLog = originalListener;
-    
-    // Опционально: сообщаем в консоль Доты, что мы закончили
+    client.onLog = original_listener;
     client.Print("DUMP_MODIFIERS_FINISHED");
 }

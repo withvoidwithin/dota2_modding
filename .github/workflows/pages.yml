@@ -1,0 +1,47 @@
+name: Deploy Web UI to GitHub Pages
+
+on:
+  push:
+    branches: ["main"] # Укажи свою главную ветку (main или master)
+  workflow_dispatch:   # Позволяет запускать Action вручную
+
+# Настройки прав для GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Отмена параллельных сборок, чтобы не было конфликтов
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare build directory
+        run: |
+          mkdir dist
+          # Копируем фронтенд
+          cp web/index.html dist/
+          # Копируем актуальный список модификаторов
+          cp data/raw/modifiers.txt dist/ || true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

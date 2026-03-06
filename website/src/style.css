@@ -1,0 +1,5 @@
+body { font-family: system-ui, sans-serif; background: #121212; color: #e0e0e0; padding: 20px; }
+#search { padding: 10px; width: 100%; max-width: 400px; margin-bottom: 20px; background: #1e1e1e; color: #fff; border: 1px solid #333; }
+.modifier-list { margin: 0; padding-left: 45px; display: flex; flex-direction: column; gap: 2px; }
+.modifier-item { padding: 2px 0; font-family: monospace; font-size: 14px; }
+.modifier-item::marker { color: #555; }

@@ -3,8 +3,10 @@
     "version": "0.0.1",
     "type": "module",
     "scripts": {
-        "init": "node dumper/init.js",
-        "setup": "node scripts/setup-symlinks.js"
+        "dumper_init": "node dumper/init.js",
+        "website_build": "node scripts/website_build.js",
+        "website_host": "node scripts/website_host.js",
+        "setup": "node scripts/setup_symlinks.js"
     },
     "keywords": [],
     "author": "WITHVOIDWITHIN",

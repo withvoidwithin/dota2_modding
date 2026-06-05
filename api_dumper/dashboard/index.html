@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>API Dumper</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <header>
+        <span class="title">DOTA 2 API DUMPER</span>
+        <nav class="statuses">
+            <span class="process-label">DOTA 2</span>
+            <span class="status offline" id="status-dota">OFFLINE</span>
+            <span class="separator">/</span>
+            <span class="process-label">VCONSOLE</span>
+            <span class="status offline" id="status-vconsole">OFFLINE</span>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <button class="btn-launch" id="btn-launch" onclick="launchAll()">&#9655;</button>
+        </aside>
+        <main class="content"></main>
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

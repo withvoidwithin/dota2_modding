@@ -1,0 +1,13 @@
+{
+  "name": "dota2_api_dumper",
+  "version": "1.0.0",
+  "description": "Dota 2 API Dumper with local dashboard",
+  "main": "dashboard/server.js",
+  "scripts": {
+    "init dashboard": "node dashboard/server.js"
+  },
+  "dependencies": {
+    "express": "^4.22.2",
+    "dotenv": "^16.4.5"
+  }
+}

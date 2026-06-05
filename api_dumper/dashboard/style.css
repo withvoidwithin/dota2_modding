@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;700&display=swap');
+
+:root {
+  --bg:       #1e1e1e;
+  --sidebar:  #252526;
+  --header:   #1e1e1e;
+  --border:   #2d2d2d;
+  --text:     #ffffff;
+  --dim:      #858585;
+  --online:   #4ec94e;
+  --offline:  #f44747;
+  --mono:     'Share Tech Mono', monospace;
+  --sans:     'Barlow', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 42px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.statuses {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.process-label {
+  color: var(--text);
+}
+
+.separator {
+  color: var(--dim);
+}
+
+.status.online  { color: var(--online); }
+.status.offline { color: var(--offline); }
+
+/* ── Layout ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 36px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  gap: 4px;
+}
+
+.btn-launch {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 16px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  opacity: .7;
+  transition: opacity .15s, background .15s;
+}
+
+.btn-launch:hover             { opacity: 1; background: rgba(255,255,255,.08); }
+.btn-launch:disabled          { opacity: .15; cursor: not-allowed; background: none; color: var(--dim); }
+
+/* ── Content ── */
+.content {
+  flex: 1;
+}

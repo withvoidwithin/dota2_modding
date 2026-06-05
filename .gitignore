@@ -1,6 +1,4 @@
-.env
-node_modules/
-website/dist/
+api_dumper/node_modules/
 
-# api_dumper_mod
-content/dota_addons/api_dumper_mod/game/*.bin
+dota_addon/game/tools_asset_info.bin
+dota_addon/game/tools_thumbnail_cache*

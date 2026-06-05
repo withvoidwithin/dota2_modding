@@ -1,0 +1,10 @@
+{
+    "files.exclude": {
+        "api_dumper/node_modules": true,
+
+        "dota_addon/game/panorama_debugger.cfg*": true,
+        "dota_addon/game/panorama/": true,
+        "dota_addon/game/tools_asset_info.bin": true,
+        "dota_addon/game/tools_thumbnail_cache*": true,
+    }
+}

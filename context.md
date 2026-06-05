@@ -9,9 +9,10 @@
 DOTA2_MODDING/                  # Корень репозитория
 ├── api_dumper/                 # Node.js дашборд
 │   ├── dashboard/
-│   │   ├── server.js           # Express сервер
-│   │   ├── processes.js        # Проверка запущенных процессов через tasklist
-│   │   ├── launcher.js         # Запуск dota2.exe и vconsole2.exe
+│   │   ├── core/
+│   │   │   ├── server.js       # Express сервер
+│   │   │   ├── processes.js    # Проверка запущенных процессов через tasklist
+│   │   │   └── launcher.js     # Запуск dota2.exe и vconsole2.exe
 │   │   ├── index.html          # UI дашборда
 │   │   ├── style.css           # Стили
 │   │   └── app.js              # Клиентский JS (polling, обновление UI)

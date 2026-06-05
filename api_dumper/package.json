@@ -4,7 +4,8 @@
   "description": "Dota 2 API Dumper with local dashboard",
   "main": "dashboard/server.js",
   "scripts": {
-    "init dashboard": "node dashboard/server.js"
+    "init": "node dashboard/core/server.js",
+    "dev": "node --watch dashboard/core/server.js"
   },
   "dependencies": {
     "express": "^4.22.2",

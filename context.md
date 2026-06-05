@@ -12,17 +12,18 @@ DOTA2_MODDING/                  # Корень репозитория
 │   │   ├── core/
 │   │   │   ├── server.js       # Express сервер
 │   │   │   ├── processes.js    # Проверка запущенных процессов через tasklist
-│   │   │   └── launcher.js     # Запуск dota2.exe и vconsole2.exe
+│   │   │   ├── launcher.js     # Запуск dota2.exe и vconsole2.exe
+│   │   │   └── netcon.js       # TCP-клиент netcon, SSE-события, отправка команд
 │   │   ├── index.html          # UI дашборда
 │   │   ├── style.css           # Стили
-│   │   └── app.js              # Клиентский JS (polling, обновление UI)
+│   │   └── app.js              # Клиентский JS (polling, SSE, обновление UI)
 │   ├── .env                    # Переменные окружения
 │   ├── package.json
 │   └── package-lock.json
 └── dota_addon/                 # Аддон Dota 2 (Lua + Panorama)
-    ├── content/
-    ├── game/
-    └── setup_symlinks.js
+├── content/
+├── game/
+└── setup_symlinks.js
 ```
 
 ## Зависимости
@@ -33,8 +34,8 @@ DOTA2_MODDING/                  # Корень репозитория
 ## Как запустить
 ```bash
 cd api_dumper
-npm init dashboard  # node dashboard/server.js
-npm run dev         # node --watch dashboard/server.js
+npm run init  # node dashboard/core/server.js
+npm run dev   # node --watch dashboard/core/server.js
 ```
 
 ## Разработка
@@ -48,10 +49,13 @@ Express сервер, раздача статики, структура файл
 Кнопка запуска Dota 2 с параметрами (-console, -novid и т.д.)
 Статус отображается в дашборде
 
-### Этап 3 — Netcon
-Модуль подключения к netcon по TCP
-Слушатель входящих сообщений
-Отправка команд в консоль
+### ✅ Этап 3 — Netcon
+Модуль подключения к netcon по TCP (netcon.js)
+Авто-коннект при запуске сервера, переподключение каждые 2 секунды при обрыве
+Статус netcon (connected/disconnected) добавлен в /api/processes
+SSE-поток /api/netcon/stream — стриминг логов на клиент в реальном времени
+Эндпоинт POST /api/netcon/command — отправка команд в консоль Dota
+Лог-панель и поле ввода команд в UI дашборда
 
 ### Этап 4 — Модули дампа
 Каждый модуль: кнопка → команда → парсинг → сохранение в JSON
@@ -87,11 +91,14 @@ Express сервер, раздача статики, структура файл
 ### Соглашения по коду
 - Стили только в style.css
 - Клиентский JS только в app.js
-- Серверная логика разбита по модулям: processes.js, launcher.js и т.д.
+- Серверная логика разбита по модулям: processes.js, launcher.js, netcon.js и т.д.
 - Все настройки только через .env, не хардкодить
 
 ### Важные решения принятые в процессе
-- server.js лежит в dashboard/, а не в корне api_dumper/
+- server.js лежит в dashboard/core/, а не в корне api_dumper/
 - Кнопка запуска запускает оба процесса сразу (Dota + VConsole)
 - Защита от двойного запуска на уровне сервера (checkProcesses перед launch)
-- Polling каждую секунду
+- Polling каждую секунду для статусов процессов
+- SSE для стриминга netcon-логов (вместо polling)
+- Netcon авто-коннектится при старте сервера, не ждёт команды от клиента
+- Цветовая маркировка логов через префиксы из Lua-аддона: [DUMPER:INFO], [DUMPER:WARN], [DUMPER:ERROR], [DUMPER:DATA]

@@ -5,11 +5,21 @@ const path = require("path");
 const { checkProcesses } = require("./processes");
 const { launchDota, launchVconsole } = require("./launcher");
 const netcon = require("./netcon");
+const dumpManager = require("./dump_manager");
+const modifierList = require("./dumps/modifier_list");
 
 const app = express();
 const PORT = process.env.DASHBOARD_SERVER_PORT;
 
 app.use(express.static(path.join(__dirname, "..")));
+
+app.get("/api/config", (req, res) => {
+    res.json({
+        consoleTag: process.env.CONSOLE_TAG,
+        consoleSubtagLua: process.env.CONSOLE_SUBTAG_LUA,
+        consoleSubtagDashboard: process.env.CONSOLE_SUBTAG_DASHBOARD,
+    });
+});
 
 app.get("/api/processes", (req, res) => {
     checkProcesses((err, status) => {
@@ -44,6 +54,13 @@ app.post("/api/netcon/command", express.json(), (req, res) => {
     res.json({ ok: true });
 });
 
+app.post("/api/dump/modifier_list", (req, res) => {
+    if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
+    const result = dumpManager.startDump(modifierList);
+    if (!result.ok) return res.status(409).json({ error: result.error });
+    res.json({ ok: true });
+});
+
 app.get("/api/netcon/stream", (req, res) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
@@ -56,7 +73,14 @@ app.get("/api/netcon/stream", (req, res) => {
         res.write(`data: ${JSON.stringify(event)}\n\n`);
     });
 
-    req.on("close", remove);
+    const removeDump = dumpManager.addListener((event) => {
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+    });
+
+    req.on("close", () => {
+        remove();
+        removeDump();
+    });
 });
 
 app.listen(PORT, () => {

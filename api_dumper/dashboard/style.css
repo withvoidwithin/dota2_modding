@@ -11,6 +11,9 @@
   --offline:  #f44747;
   --mono:     'Share Tech Mono', monospace;
   --sans:     'Barlow', sans-serif;
+  --tag:      #9881FF;
+  --tag-lua:  #98C8FF;
+  --tag-dash: #FFE9A2;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -133,6 +136,10 @@ header {
   word-break: break-all;
 }
 
+.tag-base { color: var(--tag); }
+.tag-lua  { color: var(--tag-lua); }
+.tag-dash { color: var(--tag-dash); }
+
 /* ── Command bar ── */
 .cmd-bar {
   display: flex;
@@ -162,3 +169,42 @@ header {
 .cmd-input::placeholder {
   color: var(--dim);
 }
+
+/* ── Dump panel ── */
+.dump-panel {
+  width: 140px;
+  background: var(--sidebar);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 8px 6px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.dump-panel-header {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  padding: 2px 4px 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+
+.btn-dump {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 5px 8px;
+  text-align: left;
+  border-radius: 2px;
+  opacity: .8;
+  transition: opacity .15s, background .15s;
+}
+
+.btn-dump:hover              { opacity: 1; background: rgba(255,255,255,.06); }
+.btn-dump:disabled           { opacity: .25; cursor: not-allowed; background: none; }
+.btn-dump.dumping            { color: var(--online); border-color: var(--online); opacity: 1; }

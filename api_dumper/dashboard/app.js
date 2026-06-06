@@ -2,7 +2,10 @@ let config = {};
 
 fetch("/api/config")
     .then(res => res.json())
-    .then(data => { config = data; });
+    .then(data => {
+        config = data;
+        init();
+    });
 
 function updateStatus(id, online) {
     const el = document.getElementById(id);
@@ -79,43 +82,45 @@ function appendLog(text) {
     log.scrollTop = log.scrollHeight;
 }
 
-const sse = new EventSource("/api/netcon/stream");
-sse.onmessage = (e) => {
-    const event = JSON.parse(e.data);
+function init() {
+    const sse = new EventSource("/api/netcon/stream");
+    sse.onmessage = (e) => {
+        const event = JSON.parse(e.data);
 
-    if (event.type === "log") {
-        appendLog(event.text);
-    }
-
-    if (event.type === "dump_start") {
-        const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
-        if (btn) {
-            btn.classList.add("dumping");
-            btn.disabled = true;
+        if (event.type === "log") {
+            appendLog(event.text);
         }
-    }
 
-    if (event.type === "dump_end") {
-        const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
-        if (btn) {
-            btn.classList.remove("dumping");
+        if (event.type === "dump_start") {
+            const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
+            if (btn) {
+                btn.classList.add("dumping");
+                btn.disabled = true;
+            }
         }
-        appendLog(`${config.consoleTag}:${config.consoleSubtagDashboard} DUMP ${event.module} — ${event.count} entries saved`);
-    }
-};
 
-poll();
-setInterval(poll, 1000);
+        if (event.type === "dump_end") {
+            const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
+            if (btn) {
+                btn.classList.remove("dumping");
+            }
+            appendLog(`${config.consoleTag}:${config.consoleSubtagDashboard} DUMP ${event.module} — ${event.count} entries saved`);
+        }
+    };
 
-document.getElementById("cmd-input").addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
-    const input = e.target;
-    const command = input.value.trim();
-    if (!command) return;
-    fetch("/api/netcon/command", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command }),
+    poll();
+    setInterval(poll, 1000);
+
+    document.getElementById("cmd-input").addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        const input = e.target;
+        const command = input.value.trim();
+        if (!command) return;
+        fetch("/api/netcon/command", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ command }),
+        });
+        input.value = "";
     });
-    input.value = "";
-});
+}

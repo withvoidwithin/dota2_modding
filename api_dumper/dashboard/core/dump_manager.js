@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const netcon = require("./netcon");
 
-const DATA_ROOT = path.resolve(__dirname, "../../..", process.env.DATA_PATH);
+const { DATA_DIR: DATA_ROOT } = require("../../../config");
 const listeners = new Set();
 
 let session = null;

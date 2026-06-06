@@ -22,6 +22,7 @@ function poll() {
             updateStatus("status-netcon", data.netcon);
 
             document.getElementById("btn-launch").disabled = data.dota && data.vconsole;
+            document.getElementById("btn-launch-map").disabled = !data.netcon;
 
             document.querySelectorAll(".btn-dump").forEach(btn => {
                 if (!btn.classList.contains("dumping")) {
@@ -34,6 +35,14 @@ function poll() {
 function launchAll() {
     fetch("/api/launch/dota", { method: "POST" });
     fetch("/api/launch/vconsole", { method: "POST" });
+}
+
+function launchMap() {
+    fetch("/api/netcon/command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command: `dota_launch_custom_game ${config.addonName} ${config.addonMapName}` }),
+    });
 }
 
 function startDump(moduleName) {

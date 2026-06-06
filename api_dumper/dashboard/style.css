@@ -101,6 +101,35 @@ header {
 .btn-launch:hover             { opacity: 1; background: rgba(255,255,255,.08); }
 .btn-launch:disabled          { opacity: .15; cursor: not-allowed; background: none; color: var(--dim); }
 
+/* ── Tooltips ── */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: #000000;
+  border: 1px solid var(--dim);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
 /* ── Content ── */
 .content {
   flex: 1;

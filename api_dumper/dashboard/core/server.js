@@ -19,6 +19,8 @@ app.get("/api/config", (req, res) => {
         consoleTag: process.env.CONSOLE_TAG,
         consoleSubtagLua: process.env.CONSOLE_SUBTAG_LUA,
         consoleSubtagDashboard: process.env.CONSOLE_SUBTAG_DASHBOARD,
+        addonName: process.env.DOTA_ADDON_NAME,
+        addonMapName: process.env.DOTA_ADDON_MAP_NAME,
     });
 });
 

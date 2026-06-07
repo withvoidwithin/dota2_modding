@@ -1,54 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>modifier_list — Dota 2 API Dumper</title>
-  <link rel="stylesheet" href="../../assets/style.css" />
+    <meta charset="UTF-8" />
+    <title>modifier_list — Dota 2 API Dumper</title>
+    <link rel="stylesheet" href="../../assets/style.css" />
+    <script src="../../assets/site-header.js" defer></script>
 </head>
+
 <body>
 
-  <header>
-    <span class="header-title"><a href="../../">DOTA 2 API DUMPER</a></span>
-    <nav>
-      <a href="./" class="active">modifier_list</a>
-    </nav>
-  </header>
+    <header>
+        <site-header base="../../" active="modifier_list"></site-header>
+    </header>
 
-  <main>
-    <div class="panel">
-      <div class="panel-header">
-        <span>MODIFIER LIST</span>
-        <span id="count"></span>
-      </div>
-      <div class="panel-body" id="list"></div>
-    </div>
-  </main>
+    <main>
+        <div class="panel">
+            <div class="panel-header">
+                <span>MODIFIER LIST</span>
+                <span id="count"></span>
+            </div>
+            <div class="panel-body" id="list"></div>
+        </div>
+    </main>
 
-  <script>
-    fetch("../../data/modifier_list/data.json")
-      .then(res => res.json())
-      .then(json => {
-        document.getElementById("count").textContent = json.meta.count + " entries";
+    <script>
+        fetch("../../data/modifier_list/data.json")
+            .then(res => res.json())
+            .then(json => {
+                document.getElementById("count").textContent = json.meta.count + " entries";
 
-        const list = document.getElementById("list");
-        json.data.forEach((name, i) => {
-          const el = document.createElement("div");
-          el.className = "list-item";
+                const list = document.getElementById("list");
+                json.data.forEach((name, i) => {
+                    const el = document.createElement("div");
+                    el.className = "list-item";
 
-          const idx = document.createElement("span");
-          idx.className = "list-item-index";
-          idx.textContent = i + 1;
+                    const idx = document.createElement("span");
+                    idx.className = "list-item-index";
+                    idx.textContent = i + 1;
 
-          el.appendChild(idx);
-          el.appendChild(document.createTextNode(name));
-          list.appendChild(el);
-        });
-      })
-      .catch(() => {
-        document.getElementById("list").innerHTML =
-          '<div class="state-dim">Failed to load data.</div>';
-      });
-  </script>
+                    el.appendChild(idx);
+                    el.appendChild(document.createTextNode(name));
+                    list.appendChild(el);
+                });
+            })
+            .catch(() => {
+                document.getElementById("list").innerHTML =
+                    '<div class="state-dim">Failed to load data.</div>';
+            });
+    </script>
 
 </body>
+
 </html>

@@ -42,6 +42,10 @@ header {
   flex-shrink: 0;
 }
 
+site-header {
+  display: contents;
+}
+
 .header-title {
   font-size: 14px;
   font-weight: 700;

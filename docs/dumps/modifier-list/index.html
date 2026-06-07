@@ -31,10 +31,16 @@
         document.getElementById("count").textContent = json.meta.count + " entries";
 
         const list = document.getElementById("list");
-        json.data.forEach(name => {
+        json.data.forEach((name, i) => {
           const el = document.createElement("div");
           el.className = "list-item";
-          el.textContent = name;
+
+          const idx = document.createElement("span");
+          idx.className = "list-item-index";
+          idx.textContent = i + 1;
+
+          el.appendChild(idx);
+          el.appendChild(document.createTextNode(name));
           list.appendChild(el);
         });
       })

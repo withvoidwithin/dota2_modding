@@ -121,6 +121,12 @@ main {
   background: rgba(255,255,255,.04);
 }
 
+.list-item-index {
+  color: var(--dim);
+  margin-right: 12px;
+  user-select: none;
+}
+
 /* ── State ── */
 .state-dim {
   font-family: var(--mono);

@@ -8,21 +8,21 @@ const REPO_RAW = "https://raw.githubusercontent.com/withvoidwithin/dota2_modding
 // ── Исключения (поддерживаются: точные пути, папки, glob * и **) ──
 const EXCLUDE = [
     // IDE настройки
-    ".vscode/**",
     ".idea/**",
+    ".vscode/**",
 
     // служебные
     ".git",
     ".git/**",
+    ".gitignore",
+    "**/node_modules/**",
     "node_modules",
     "node_modules/**",
-    "**/node_modules/**",
 
     // зависимости и локи
     "**/package-lock.json",
 
     // данные дампов (генерируются автоматически)
-    "data/**",
     "docs/data/**",
 
     // кеш аддона
@@ -30,8 +30,8 @@ const EXCLUDE = [
     "dota_addon/**/*.sqlite3",
 
     // бинарные файлы аддона
-    "dota_addon/game/maps/**",
     "dota_addon/content/maps/**",
+    "dota_addon/game/maps/**",
 ];
 
 // ── Утилиты ────────────────────────────────────────────────────

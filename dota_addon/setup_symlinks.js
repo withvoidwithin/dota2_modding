@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../api_dumper/.env') });
 
 // Путь к вашей папке Dota 2
-const DOTA2_PATH = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\dota 2 beta';
-const ADDON_NAME = 'api_dumper'; // Имя вашего аддона в игре
+const DOTA2_PATH = process.env.DOTA_PATH;
+const ADDON_NAME = process.env.DOTA_ADDON_NAME;
 
 // Исходные пути в вашем проекте (вычисляются автоматически относительно места запуска скрипта)
 const CONTENT_SRC = path.resolve(__dirname, 'content');

@@ -2,6 +2,7 @@ const net = require("net");
 
 const HOST = "127.0.0.1";
 const RECONNECT_INTERVAL = 2000;
+const PORT = parseInt(process.env.DOTA_NETCON_PORT);
 
 let socket = null;
 let connected = false;
@@ -29,10 +30,8 @@ function emit(event) {
 function tryConnect() {
     if (socket) return;
 
-    const port = parseInt(process.env.DOTA_NETCON_PORT);
     socket = new net.Socket();
-
-    socket.connect(port, HOST, () => {
+    socket.connect(PORT, HOST, () => {
         connected = true;
         emit({ type: "status", connected: true });
     });

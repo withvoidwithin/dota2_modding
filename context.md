@@ -8,9 +8,6 @@
 ```
 DOTA2_MODDING/                          # Корень репозитория
 ├── config.js                           # Корневые константы проекта (DATA_DIR)
-├── data/                               # Дампы в JSON (результат работы модулей)
-│   └── modifier_list/
-│       └── data.json
 ├── api_dumper/                         # Node.js дашборд
 │   ├── dashboard/
 │   │   ├── core/
@@ -27,6 +24,17 @@ DOTA2_MODDING/                          # Корень репозитория
 │   ├── .env                            # Переменные окружения
 │   ├── package.json
 │   └── package-lock.json
+├── docs/                               # Статический сайт (GitHub Pages)
+│   ├── data/                           # Дампы в JSON (результат работы модулей)
+│   │   └── modifier_list/
+│   │       └── data.json
+│   ├── assets/
+│   │   └── style.css
+│   ├── dumps/
+│   │   └── modifier-list/
+│   │       └── index.html
+│   ├── index.html
+│   └── package.json
 └── dota_addon/                         # Аддон Dota 2 (Lua + Panorama)
     ├── content/
     ├── game/
@@ -63,7 +71,7 @@ npm run dev   # node --watch dashboard/core/server.js
 - Для работы netcon нужны оба процессы: Dota 2 И VConsole
 - Кнопки модулей дампа блокируются если netcon офлайн
 - Сбор данных двумя способами: через netcon (TCP) и через HTTP с Lua аддона
-- Дампы сохраняются в DOTA2_MODDING/data/<module_name>/data.json
+- Дампы сохраняются в DOTA2_MODDING/docs/data/<module_name>/data.json
 
 ## Соглашения по коду
 - Стили только в style.css

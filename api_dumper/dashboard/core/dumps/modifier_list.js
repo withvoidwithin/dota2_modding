@@ -3,7 +3,6 @@ const command = "dump_modifier_list";
 
 function parseLines(lines) {
     const data = lines
-        .map(l => l.trim())
         .filter(l => l.length > 0)
         .sort();
 

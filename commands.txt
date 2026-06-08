@@ -1,7 +1,8 @@
 // dump_modifier_list
 // dump_panorama_css_properties
+// dump_panorama_events
+// cvarlist
 
-dump_panorama_events
 dump_response_symbols
 
 dumpstringtable genericprecache sv verbose
@@ -24,8 +25,6 @@ dumpstringtable CombatLogNames sv verbose
 dumpstringtable ResponseKeys sv verbose
 dumpstringtable LuaModifiers sv verbose
 dumpstringtable ParticleAssets sv verbose
-
-cvarlist
 
 animevents_dump
 

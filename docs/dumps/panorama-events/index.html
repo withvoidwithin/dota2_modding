@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>panorama_events — Dota 2 API Dumper</title>
+    <link rel="stylesheet" href="../../assets/style.css" />
+    <script src="../../assets/site-header.js" defer></script>
+    <style>
+        .event-meta {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+        .event-panel-yes { color: var(--online); }
+        .event-panel-no  { color: var(--offline); }
+        .event-description {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+        .list-item {
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <site-header base="../../" active="panorama_events"></site-header>
+    </header>
+
+    <main>
+        <div class="panel">
+            <div class="panel-header">
+                <span>PANORAMA EVENTS</span>
+                <span id="count"></span>
+            </div>
+            <div class="panel-body" id="list"></div>
+        </div>
+    </main>
+
+    <script>
+        fetch("../../data/panorama_events/data.json")
+            .then(res => res.json())
+            .then(json => {
+                document.getElementById("count").textContent = json.meta.count + " entries";
+
+                const list = document.getElementById("list");
+                json.data.forEach((item, i) => {
+                    const el = document.createElement("div");
+                    el.className = "list-item";
+
+                    const idx = document.createElement("span");
+                    idx.className = "list-item-index";
+                    idx.textContent = i + 1;
+
+                    const sig = document.createElement("span");
+                    sig.textContent = item.signature;
+
+                    const meta = document.createElement("div");
+                    meta.className = "event-meta";
+
+                    const panelSpan = document.createElement("span");
+                    panelSpan.className = item.panelEvent ? "event-panel-yes" : "event-panel-no";
+                    panelSpan.textContent = item.panelEvent ? "panel event" : "not a panel event";
+                    meta.appendChild(panelSpan);
+
+                    el.appendChild(idx);
+                    el.appendChild(sig);
+                    el.appendChild(meta);
+
+                    if (item.description) {
+                        const desc = document.createElement("div");
+                        desc.className = "event-description";
+                        desc.textContent = item.description;
+                        el.appendChild(desc);
+                    }
+
+                    list.appendChild(el);
+                });
+            })
+            .catch(() => {
+                document.getElementById("list").innerHTML =
+                    '<div class="state-dim">Failed to load data.</div>';
+            });
+    </script>
+
+</body>
+
+</html>

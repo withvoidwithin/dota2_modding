@@ -10,6 +10,7 @@ class SiteHeader extends HTMLElement {
       <nav>
         <a href="${base}dumps/modifier-list/" ${active === 'modifier_list' ? 'class="active"' : ''}>modifier_list</a>
         <a href="${base}dumps/panorama-css-properties/" ${active === 'panorama_css_properties' ? 'class="active"' : ''}>panorama_css_properties</a>
+        <a href="${base}dumps/panorama-events/" ${active === 'panorama_events' ? 'class="active"' : ''}>panorama_events</a>
       </nav>
     `;
   }

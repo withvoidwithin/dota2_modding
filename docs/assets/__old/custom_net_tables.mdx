@@ -1,0 +1,169 @@
+---
+title: CustomNetTables
+description: Руководство по работе с CustomNetTables в Dota 2 Workshop Tools.
+template: doc
+meta:
+  author: WITHVOIDWITHIN
+  game_version: "7.40b"
+  date: 2026-01-19
+---
+
+import { Card, CardGrid, Aside, Icon } from '@astrojs/starlight/components';
+
+## 1. Определение
+
+**CustomNetTables** — это система хранения и синхронизации данных между сервером и клиентами в **Dota 2**.
+По сути, это распределенное **Key-Value** хранилище, где сервер имеет права на **запись и чтение**, а клиенты — только на **чтение**.
+
+Данные в **CustomNetTables** реплицируются **всем** игрокам!
+Если вы будете передавать по **CustomNetTables** приватные данные, предназначенные конкретному игроку, то имейте в виду, что теоретический читер сможет их получить.
+
+### 1.1 Теория использования
+
+Процесс записи и синхронизации данных выглядит следующим образом:
+
+1.  **Lua Server** записывает данные по **названию таблицы** и **ключу**.
+2.  Движок сравнивает новые данные с текущими. И только если данные **изменились**, формируется сетевой пакет и отправляется клиентам.
+3.  Клиент получает пакет, заменяет локальные данные по названию таблицы и ключу на новые и вызывает подписчиков события (Listeners) в **Panorama**, если они были зарегистрированы ранее.
+* В случае, если игрок отключится, а затем вернется на сервер, то актуальные данные **CustomNetTables** автоматически синхронизируются с его локальным хранилищем.
+
+## 2. Декларация таблиц
+
+Сами данные не хранятся в файле `your_addon\scripts\custom_net_tables.txt`. Это лишь место для регистрации названий таблиц, которые будут *прослушиваться* на сервере и клиенте.
+Без этого вы не сможете записывать и читать данные из **CustomNetTables** в реальном времени.
+
+```txt
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	custom_net_tables =
+	[
+        "my_table_name",
+        "players_info",
+	]
+}
+```
+
+``<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->``
+
+Вот эта часть в начале файла — это лишь маркировка для определенной версии кодировки парсеров Valve, используемых в их KV (txt) файлах.
+Изменять ее не нужно. Рекомендуется указывать ее на первой строчке всех kv файлов.
+
+## 3. Server API (Lua)
+
+В Lua работа происходит через глобальный класс `CustomNetTables`.
+И он объявляется к моменту стадии `DOTA_GAMERULES_STATE_CUSTOM_GAME_SETUP`. То-есть он не существует на этапе инициализации аддона.
+
+Аргументы методов:
+```lua
+
+--- @param table_name string
+--- @param key string
+--- @param data table|nil
+--- **[Server Only]**
+CustomNetTables:SetTableValue(table_name, key, data)
+
+--- @param table_name string
+--- @param key string
+--- **[Server / Client]**
+CustomNetTables:GetTableValue(table_name, key)
+```
+
+Примеры использования:
+```lua
+-- 1.
+CustomNetTables:SetTableValue("game_info", "score", { radiant = 12, dire = 5 })
+
+-- 2.
+local player_id = 0
+local player_data = {
+    gold = 1500,
+    hero = "npc_dota_hero_invoker",
+    items = { "item_blink", "item_force_staff" }
+}
+
+CustomNetTables:SetTableValue("player_info", tostring(player_id), player_data)
+```
+
+### 3.1 Очистка данных
+Специфического метода `Remove` в **API** для **CustomNetTables** — нет.
+Для полного удаления данных по ключу можно передать `nil` вместо таблицы данных. И клиенты в действительности получат этот `nil` и удалят данные локально, но при этом зарегистрированные слушатели в **Panorama** **не отработают**!
+
+## 4. Panorama API
+
+На стороне клиента в **Panorama** мы можем получать данные и регистрировать слушатели с обратным вызовом при изменении данных.
+В качестве `key` можно передать не только `string` но и `number`.
+
+```js
+const player_data = CustomNetTables.GetTableValue("player_info", 0);
+const players = CustomNetTables.GetAllTableValues("player_info");
+
+$.Msg(`gold: ${data.gold}, hero: ${data.hero}`);
+$.Msg(players);
+```
+
+```js
+const listener_id = CustomNetTables.SubscribeNetTableListener("player_info", function(table_name, key, data){
+    $.Msg(`table_name: ${table_name}, key: ${key}`);
+    $.Msg(data)
+})
+```
+
+При получении всех данных одной таблицы методом `CustomNetTables.GetAllTableValues` возвращается определенная структура:
+```json
+[
+    {
+        "key": "0",
+        "value":
+        {
+            "gold": 1500,
+            "hero": "npc_dota_hero_invoker",
+            "items":
+            {
+                "1": "item_blink",
+                "2": "item_force_staff"
+            }
+        }
+    },
+]
+```
+Где `key` — это наш ключ таблицы, а `value` — это данные.
+
+Удалить слушатель можно через метод `CustomNetTables.UnsubscribeNetTableListener` передав первым аргументом ID зарегистрированного слушателя.
+```js
+const listener_id = CustomNetTables.SubscribeNetTableListener("player_info", Callback)
+
+CustomNetTables.UnsubscribeNetTableListener(listener_id)
+```
+
+### 4.1 Конвертация данных
+Внутри движка данные сериализуются в JSON-подобный формат.
+В Lua индексы начинаются с 1, но в JS они станут ключами объекта.
+
+Lua:
+```lua
+CustomNetTables:SetTableValue("my_table", "key", {"q", "w", "e"})
+```
+
+Panorama:
+```js
+const data = CustomNetTables.GetTableValue("my_table", "key");
+
+data = 
+{
+    "1": "q",
+    "2": "w",
+    "3": "e",
+}
+
+```
+Чтобы снова вернуть их в массив, можно использовать `Object.values(data)`.
+
+## 5. Особенности
+
+<Aside type="tip" title="Совет">
+    Старайтесь разделять данные по разным **таблицам** и **ключам**, чтобы снизить нагрузку на Net трафик. Не храните все таблицы в условном "**general**" по ключу "**all_data**".
+</Aside>
+<Aside type="danger" title="Ограничение по весу данных">
+    Если попытаться записать в **CustomNetTables** данные больше чем на **1280000 bytes**, то немениумо произойдет краш.
+    ![Ошибка](@assets/documentation/custom_net_tables/userdata_size_limits.png)
+</Aside>

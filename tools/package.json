@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "get-links": "node get_ai_context_links.js"
-  }
-}

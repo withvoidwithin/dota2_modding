@@ -1,9 +1,10 @@
+// dump_modifier_list
+
 dump_panorama_css_properties
 dump_panorama_events
 dump_response_symbols
 
 dumpstringtable genericprecache sv verbose
-dumpstringtable instancebaseline sv verbose
 dumpstringtable instancebaseline sv verbose
 dumpstringtable lightstyles sv verbose
 dumpstringtable userinfo sv verbose
@@ -33,3 +34,4 @@ cl_dump_response_symbols
 cl_dumpentity <ent_index> (runtime)
 
 panorama_dump_symbols 0
+panorama_dump_symbols 1

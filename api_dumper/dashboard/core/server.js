@@ -2,14 +2,17 @@ require("dotenv").config({ path: require("path").join(__dirname, "../../.env") }
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 
 const { checkProcesses } = require("./processes");
 const { launchDota, launchVconsole } = require("./launcher");
 const netcon = require("./netcon");
 const dumpManager = require("./dump_manager");
-const modifierList = require("./dumps/modifier_list");
-const panoramaCssProperties = require("./dumps/panorama_css_properties");
-const panoramaEvents = require("./dumps/panorama_events");
+
+const dumpsDir = path.join(__dirname, "dumps");
+const dumpModules = fs.readdirSync(dumpsDir)
+    .filter(f => f.endsWith(".js"))
+    .map(f => require(path.join(dumpsDir, f)));
 
 const app = express();
 const PORT = process.env.DASHBOARD_SERVER_PORT;
@@ -59,25 +62,13 @@ app.post("/api/netcon/command", express.json(), (req, res) => {
     res.json({ ok: true });
 });
 
-app.post("/api/dump/modifier_list", (req, res) => {
-    if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
-    const result = dumpManager.startDump(modifierList);
-    if (!result.ok) return res.status(409).json({ error: result.error });
-    res.json({ ok: true });
-});
-
-app.post("/api/dump/panorama_css_properties", (req, res) => {
-    if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
-    const result = dumpManager.startDump(panoramaCssProperties);
-    if (!result.ok) return res.status(409).json({ error: result.error });
-    res.json({ ok: true });
-});
-
-app.post("/api/dump/panorama_events", (req, res) => {
-    if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
-    const result = dumpManager.startDump(panoramaEvents);
-    if (!result.ok) return res.status(409).json({ error: result.error });
-    res.json({ ok: true });
+dumpModules.forEach(module => {
+    app.post(`/api/dump/${module.name}`, (req, res) => {
+        if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
+        const result = dumpManager.startDump(module);
+        if (!result.ok) return res.status(409).json({ error: result.error });
+        res.json({ ok: true });
+    });
 });
 
 app.get("/api/netcon/stream", (req, res) => {

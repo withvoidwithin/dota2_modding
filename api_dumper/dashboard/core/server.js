@@ -8,6 +8,7 @@ const { launchDota, launchVconsole } = require("./launcher");
 const netcon = require("./netcon");
 const dumpManager = require("./dump_manager");
 const modifierList = require("./dumps/modifier_list");
+const panoramaCssProperties = require("./dumps/panorama_css_properties");
 
 const app = express();
 const PORT = process.env.DASHBOARD_SERVER_PORT;
@@ -60,6 +61,13 @@ app.post("/api/netcon/command", express.json(), (req, res) => {
 app.post("/api/dump/modifier_list", (req, res) => {
     if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
     const result = dumpManager.startDump(modifierList);
+    if (!result.ok) return res.status(409).json({ error: result.error });
+    res.json({ ok: true });
+});
+
+app.post("/api/dump/panorama_css_properties", (req, res) => {
+    if (!netcon.getStatus()) return res.status(503).json({ error: "Netcon not connected" });
+    const result = dumpManager.startDump(panoramaCssProperties);
     if (!result.ok) return res.status(409).json({ error: result.error });
     res.json({ ok: true });
 });

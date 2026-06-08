@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>panorama_css_properties — Dota 2 API Dumper</title>
+    <link rel="stylesheet" href="../../assets/style.css" />
+    <script src="../../assets/site-header.js" defer></script>
+    <style>
+        .prop-description {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+        .prop-description pre {
+            font-family: var(--mono);
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 4px;
+            color: var(--text);
+            opacity: .7;
+        }
+        .list-item {
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <site-header base="../../" active="panorama_css_properties"></site-header>
+    </header>
+
+    <main>
+        <div class="panel">
+            <div class="panel-header">
+                <span>PANORAMA CSS PROPERTIES</span>
+                <span id="count"></span>
+            </div>
+            <div class="panel-body" id="list"></div>
+        </div>
+    </main>
+
+    <script>
+        fetch("../../data/panorama_css_properties/data.json")
+            .then(res => res.json())
+            .then(json => {
+                document.getElementById("count").textContent = json.meta.count + " entries";
+
+                const list = document.getElementById("list");
+                json.data.forEach((item, i) => {
+                    const el = document.createElement("div");
+                    el.className = "list-item";
+
+                    const idx = document.createElement("span");
+                    idx.className = "list-item-index";
+                    idx.textContent = i + 1;
+
+                    const nameSpan = document.createElement("span");
+                    nameSpan.textContent = item.name;
+
+                    el.appendChild(idx);
+                    el.appendChild(nameSpan);
+
+                    if (item.description && item.description !== "<Needs a description>") {
+                        const desc = document.createElement("div");
+                        desc.className = "prop-description";
+                        desc.innerHTML = item.description;
+                        el.appendChild(desc);
+                    }
+
+                    list.appendChild(el);
+                });
+            })
+            .catch(() => {
+                document.getElementById("list").innerHTML =
+                    '<div class="state-dim">Failed to load data.</div>';
+            });
+    </script>
+
+</body>
+
+</html>

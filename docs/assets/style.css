@@ -95,7 +95,7 @@ a.nav-item:hover {
 
 /* ── Dump sidebar ── */
 .dump-sidebar {
-  width: 168px;
+  width: 256px;
   flex-shrink: 0;
   border-right: 1px solid var(--border);
   overflow-y: auto;
@@ -112,6 +112,7 @@ a.nav-item:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color .15s, background .15s;
+  display: block;
 }
 
 .dump-sidebar-item:hover {

@@ -6,7 +6,9 @@
     <title>panorama_css_properties — Dota 2 API Dumper</title>
     <link rel="stylesheet" href="../../assets/style.css" />
     <script src="../../assets/site-header.js" defer></script>
+    <script src="../../assets/dump-sidebar.js" defer></script>
     <style>
+        dump-sidebar { display: contents; }
         .prop-description {
             font-family: var(--sans);
             font-size: 12px;
@@ -22,19 +24,20 @@
             color: var(--text);
             opacity: .7;
         }
-        .list-item {
-            padding: 8px 12px;
-        }
+        .list-item { padding: 8px 12px; }
     </style>
 </head>
 
 <body>
 
     <header>
-        <site-header base="../../" active="panorama_css_properties"></site-header>
+        <site-header base="../../" active-section="dumps"></site-header>
     </header>
 
-    <main>
+    <div class="page-layout">
+        <aside class="dump-sidebar">
+            <dump-sidebar></dump-sidebar>
+        </aside>
         <div class="panel">
             <div class="panel-header">
                 <span>PANORAMA CSS PROPERTIES</span>
@@ -42,7 +45,7 @@
             </div>
             <div class="panel-body" id="list"></div>
         </div>
-    </main>
+    </div>
 
     <script>
         fetch("../../data/panorama_css_properties/data.json")

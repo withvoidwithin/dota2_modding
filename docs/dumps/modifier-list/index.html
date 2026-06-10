@@ -6,43 +6,76 @@
     <title>modifier_list — Dota 2 API Dumper</title>
     <link rel="stylesheet" href="../../assets/style.css" />
     <script src="../../assets/site-header.js" defer></script>
+    <script src="../../assets/dump-sidebar.js" defer></script>
+    <style>
+        dump-sidebar { display: contents; }
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 11px;
+        }
+        .search-input::placeholder { color: var(--dim); }
+    </style>
 </head>
 
 <body>
 
     <header>
-        <site-header base="../../" active="modifier_list"></site-header>
+        <site-header base="../../" active-section="dumps"></site-header>
     </header>
 
-    <main>
+    <div class="page-layout">
+        <aside class="dump-sidebar">
+            <dump-sidebar></dump-sidebar>
+        </aside>
         <div class="panel">
             <div class="panel-header">
-                <span>MODIFIER LIST</span>
+                <input type="text" id="search" class="search-input" placeholder="search..." autocomplete="off" />
                 <span id="count"></span>
             </div>
             <div class="panel-body" id="list"></div>
         </div>
-    </main>
+    </div>
 
     <script>
+        let allData = [];
+
+        function render(data) {
+            const list = document.getElementById("list");
+            list.innerHTML = "";
+            document.getElementById("count").textContent = data.length + " entries";
+
+            data.forEach((name, i) => {
+                const el = document.createElement("div");
+                el.className = "list-item";
+
+                const idx = document.createElement("span");
+                idx.className = "list-item-index";
+                idx.textContent = i + 1;
+
+                el.appendChild(idx);
+                el.appendChild(document.createTextNode(name));
+                list.appendChild(el);
+            });
+        }
+
+        document.getElementById("search").addEventListener("input", (e) => {
+            const terms = e.target.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+            const filtered = terms.length === 0
+                ? allData
+                : allData.filter(name => terms.every(t => name.toLowerCase().includes(t)));
+            render(filtered);
+        });
+
         fetch("../../data/modifier_list/data.json")
             .then(res => res.json())
             .then(json => {
-                document.getElementById("count").textContent = json.meta.count + " entries";
-
-                const list = document.getElementById("list");
-                json.data.forEach((name, i) => {
-                    const el = document.createElement("div");
-                    el.className = "list-item";
-
-                    const idx = document.createElement("span");
-                    idx.className = "list-item-index";
-                    idx.textContent = i + 1;
-
-                    el.appendChild(idx);
-                    el.appendChild(document.createTextNode(name));
-                    list.appendChild(el);
-                });
+                allData = json.data;
+                render(allData);
             })
             .catch(() => {
                 document.getElementById("list").innerHTML =

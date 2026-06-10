@@ -6,19 +6,19 @@
     <title>cvarlist — Dota 2 API Dumper</title>
     <link rel="stylesheet" href="../../assets/style.css" />
     <script src="../../assets/site-header.js" defer></script>
+    <script src="../../assets/dump-sidebar.js" defer></script>
     <style>
+        dump-sidebar { display: contents; }
         .cvar-meta {
             font-family: var(--mono);
             font-size: 11px;
             color: var(--dim);
             margin-top: 3px;
         }
-
         .cvar-value {
             color: var(--text);
             opacity: .7;
         }
-
         .cvar-flag {
             display: inline-block;
             border: 1px solid var(--border);
@@ -27,27 +27,26 @@
             margin-right: 4px;
             font-size: 10px;
         }
-
         .cvar-description {
             font-family: var(--sans);
             font-size: 12px;
             color: var(--dim);
             margin-top: 3px;
         }
-
-        .list-item {
-            padding: 8px 12px;
-        }
+        .list-item { padding: 8px 12px; }
     </style>
 </head>
 
 <body>
 
     <header>
-        <site-header base="../../" active="cvarlist"></site-header>
+        <site-header base="../../" active-section="dumps"></site-header>
     </header>
 
-    <main>
+    <div class="page-layout">
+        <aside class="dump-sidebar">
+            <dump-sidebar></dump-sidebar>
+        </aside>
         <div class="panel">
             <div class="panel-header">
                 <span>CVARLIST</span>
@@ -55,7 +54,7 @@
             </div>
             <div class="panel-body" id="list"></div>
         </div>
-    </main>
+    </div>
 
     <script>
         fetch("../../data/cvarlist/data.json")

@@ -1,18 +1,16 @@
-/* Styles for docs */
-
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;700&display=swap');
 
 :root {
-  --bg:       #1e1e1e;
-  --surface:  #252526;
-  --border:   #2d2d2d;
-  --text:     #ffffff;
-  --dim:      #858585;
-  --online:   #4ec94e;
-  --offline:  #f44747;
-  --accent:   #9881FF;
-  --mono:     'Share Tech Mono', monospace;
-  --sans:     'Barlow', sans-serif;
+  --bg:      #1e1e1e;
+  --surface: #252526;
+  --border:  #2d2d2d;
+  --text:    #ffffff;
+  --dim:     #858585;
+  --online:  #4ec94e;
+  --offline: #f44747;
+  --accent:  #9881FF;
+  --mono:    'Share Tech Mono', monospace;
+  --sans:    'Barlow', sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -21,9 +19,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 a {
@@ -35,7 +34,7 @@ a {
 header {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   padding: 0 16px;
   height: 42px;
   border-bottom: 1px solid var(--border);
@@ -46,45 +45,82 @@ site-header {
   display: contents;
 }
 
-.header-title {
+.header-logo {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: .06em;
+  white-space: nowrap;
 }
 
-.header-title a:hover {
+.header-logo a:hover {
   color: var(--accent);
 }
 
-nav {
+.header-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   font-family: var(--mono);
   font-size: 12px;
 }
 
-nav a {
-  color: var(--dim);
+.nav-item {
   padding: 4px 8px;
   border-radius: 2px;
+  color: var(--dim);
   transition: color .15s, background .15s;
 }
 
-nav a:hover {
+a.nav-item:hover {
   color: var(--text);
   background: rgba(255,255,255,.06);
 }
 
-nav a.active {
+.nav-item--active {
   color: var(--accent);
 }
 
-/* ── Layout ── */
-main {
+.nav-item--disabled {
+  opacity: .3;
+  cursor: not-allowed;
+  user-select: none;
+}
+
+/* ── Page layout (sidebar + content) ── */
+.page-layout {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Dump sidebar ── */
+.dump-sidebar {
+  width: 168px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.dump-sidebar-item {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--dim);
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color .15s, background .15s;
+}
+
+.dump-sidebar-item:hover {
+  color: var(--text);
+  background: rgba(255,255,255,.04);
+}
+
+.dump-sidebar-item.active {
+  color: var(--accent);
 }
 
 /* ── Panel ── */
@@ -92,6 +128,7 @@ main {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
 }
 
 .panel-header {
@@ -131,10 +168,26 @@ main {
   user-select: none;
 }
 
-/* ── State ── */
+/* ── States ── */
 .state-dim {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--dim);
   padding: 16px 12px;
+}
+
+/* ── Index page ── */
+.page-index-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-index-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .15em;
+  color: var(--dim);
+  opacity: .25;
 }

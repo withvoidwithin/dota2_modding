@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dumps — Dota 2 Modding</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script src="../assets/site-header.js" defer></script>
+    <style>
+        /* ── Rich list items ── */
+        .list-item--rich {
+            padding: 8px 12px;
+        }
+
+        .item-sub {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+
+        .item-description {
+            font-family: var(--sans);
+            font-size: 12px;
+            color: var(--dim);
+            margin-top: 3px;
+        }
+
+        .item-description pre {
+            font-family: var(--mono);
+            font-size: 11px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 4px;
+            color: var(--text);
+            opacity: .7;
+        }
+
+        /* ── cvarlist ── */
+        .cvar-value {
+            color: var(--text);
+            opacity: .7;
+        }
+
+        .cvar-flag {
+            display: inline-block;
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 0 4px;
+            margin-left: 6px;
+            font-size: 10px;
+        }
+
+        /* ── panorama_events ── */
+        .event-panel-yes { color: var(--online); }
+        .event-panel-no  { color: var(--offline); }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <site-header base="../" active-section="dumps"></site-header>
+    </header>
+
+    <div class="page-layout">
+        <aside class="dump-sidebar" id="dump-sidebar"></aside>
+        <div class="panel">
+            <div class="panel-header">
+                <span id="dump-title"></span>
+                <span id="dump-count"></span>
+            </div>
+            <div class="panel-body" id="dump-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // ── DOM helpers ───────────────────────────────────────────────
+        function mkEl(tag, className) {
+            const el = document.createElement(tag);
+            if (className) el.className = className;
+            return el;
+        }
+
+        function mkIdx(n) {
+            const el = mkEl('span', 'list-item-index');
+            el.textContent = n;
+            return el;
+        }
+
+        // ── Renderers ─────────────────────────────────────────────────
+        function renderModifierList(data) {
+            return data.map((name, i) => {
+                const el = mkEl('div', 'list-item');
+                el.appendChild(mkIdx(i + 1));
+                el.appendChild(document.createTextNode(name));
+                return el;
+            });
+        }
+
+        function renderPanoramaCssProperties(data) {
+            return data.map((item, i) => {
+                const el = mkEl('div', 'list-item list-item--rich');
+                el.appendChild(mkIdx(i + 1));
+
+                const name = mkEl('span');
+                name.textContent = item.name;
+                el.appendChild(name);
+
+                if (item.description && item.description !== '<Needs a description>') {
+                    const desc = mkEl('div', 'item-description');
+                    desc.innerHTML = item.description; // may contain <pre> markup from the engine
+                    el.appendChild(desc);
+                }
+
+                return el;
+            });
+        }
+
+        function renderPanoramaEvents(data) {
+            return data.map((item, i) => {
+                const el = mkEl('div', 'list-item list-item--rich');
+                el.appendChild(mkIdx(i + 1));
+
+                const sig = mkEl('span');
+                sig.textContent = item.signature;
+                el.appendChild(sig);
+
+                const sub = mkEl('div', 'item-sub');
+                const panel = mkEl('span', item.panelEvent ? 'event-panel-yes' : 'event-panel-no');
+                panel.textContent = item.panelEvent ? 'panel event' : 'not a panel event';
+                sub.appendChild(panel);
+                el.appendChild(sub);
+
+                if (item.description) {
+                    const desc = mkEl('div', 'item-description');
+                    desc.textContent = item.description;
+                    el.appendChild(desc);
+                }
+
+                return el;
+            });
+        }
+
+        function renderCvarlist(data) {
+            return data.map((item, i) => {
+                const el = mkEl('div', 'list-item list-item--rich');
+                el.appendChild(mkIdx(i + 1));
+
+                const name = mkEl('span');
+                name.textContent = item.name;
+                el.appendChild(name);
+
+                const sub = mkEl('div', 'item-sub');
+                const val = mkEl('span', 'cvar-value');
+                val.textContent = item.value;
+                sub.appendChild(val);
+
+                (item.flags || []).forEach(f => {
+                    const flag = mkEl('span', 'cvar-flag');
+                    flag.textContent = f;
+                    sub.appendChild(flag);
+                });
+                el.appendChild(sub);
+
+                if (item.description) {
+                    const desc = mkEl('div', 'item-description');
+                    desc.textContent = item.description;
+                    el.appendChild(desc);
+                }
+
+                return el;
+            });
+        }
+
+        // ── Dump registry ─────────────────────────────────────────────
+        const DUMPS = [
+            { id: 'modifier_list',           label: 'modifier_list',           render: renderModifierList },
+            { id: 'panorama_css_properties', label: 'panorama_css_properties', render: renderPanoramaCssProperties },
+            { id: 'panorama_events',         label: 'panorama_events',         render: renderPanoramaEvents },
+            { id: 'cvarlist',                label: 'cvarlist',                render: renderCvarlist },
+        ];
+
+        function findDump(id) {
+            return DUMPS.find(d => d.id === id) ?? DUMPS[0];
+        }
+
+        // ── Sidebar ───────────────────────────────────────────────────
+        function buildSidebar(activeId) {
+            const sidebar = document.getElementById('dump-sidebar');
+            sidebar.innerHTML = '';
+            DUMPS.forEach(dump => {
+                const el = mkEl('div', 'dump-sidebar-item' + (dump.id === activeId ? ' active' : ''));
+                el.textContent = dump.label;
+                el.addEventListener('click', () => { window.location.hash = dump.id; });
+                sidebar.appendChild(el);
+            });
+        }
+
+        // ── Load & render ─────────────────────────────────────────────
+        async function loadDump(id) {
+            const dump = findDump(id);
+
+            buildSidebar(dump.id);
+
+            document.getElementById('dump-title').textContent = dump.label.toUpperCase().replace(/_/g, ' ');
+            document.getElementById('dump-count').textContent = '';
+
+            const listEl = document.getElementById('dump-list');
+            listEl.innerHTML = '<div class="state-dim">Loading...</div>';
+
+            try {
+                const res = await fetch(`../data/${dump.id}/data.json`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const json = await res.json();
+
+                document.getElementById('dump-count').textContent = `${json.meta.count} entries`;
+
+                listEl.innerHTML = '';
+                const fragment = document.createDocumentFragment();
+                dump.render(json.data).forEach(el => fragment.appendChild(el));
+                listEl.appendChild(fragment);
+            } catch {
+                listEl.innerHTML = '<div class="state-dim">Failed to load data.</div>';
+            }
+        }
+
+        // ── Hash routing ──────────────────────────────────────────────
+        function getHashId() {
+            const hash = window.location.hash.slice(1);
+            return DUMPS.some(d => d.id === hash) ? hash : DUMPS[0].id;
+        }
+
+        window.addEventListener('hashchange', () => loadDump(getHashId()));
+        loadDump(getHashId());
+    </script>
+
+</body>
+
+</html>

@@ -1,9 +1,34 @@
+// Added
+// ---------------------------------------
+
 // dump_modifier_list
 // dump_panorama_css_properties
 // dump_panorama_events
-//  
+// cvarlist
+
+// Research
+// ---------------------------------------
+
+animevents_dump
+cl_dota_dump_modifier_stringtable
+cl_dump_response_symbols
 
 dump_response_symbols
+
+cl_pclass
+cl_pdump
+
+cl_rr_dump_rules
+
+// RUNTIME
+// ---------------------------------------
+
+cl_dumpentity <ent_index> (runtime)
+cl_showents
+
+panorama_dump_symbols 0
+panorama_dump_symbols 1
+
 
 dumpstringtable genericprecache sv verbose
 dumpstringtable instancebaseline sv verbose
@@ -26,11 +51,4 @@ dumpstringtable ResponseKeys sv verbose
 dumpstringtable LuaModifiers sv verbose
 dumpstringtable ParticleAssets sv verbose
 
-animevents_dump
-
 cl_dump_response_symbols
-
-cl_dumpentity <ent_index> (runtime)
-
-panorama_dump_symbols 0
-panorama_dump_symbols 1

@@ -1,5 +1,7 @@
-const name = "cvarlist";
-const command = "cvarlist";
+const name       = "cvarlist";
+const command    = "cvarlist";
+const outputPath = "cvarlist.json";
+const layout     = "cvarlist";
 
 function parseLines(lines) {
     const data = [];
@@ -35,4 +37,4 @@ function parseLines(lines) {
     };
 }
 
-module.exports = { name, command, process: parseLines };
+module.exports = { name, command, outputPath, layout, process: parseLines };

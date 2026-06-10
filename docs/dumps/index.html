@@ -3,7 +3,86 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="refresh" content="0; url=modifier-list/" />
+    <title>Dumps — Dota 2 Modding</title>
+    <link rel="stylesheet" href="../assets/style.css" />
+    <script src="../assets/site-header.js" defer></script>
+    <script src="../assets/dump-sidebar.js" defer></script>
 </head>
+
+<body>
+
+    <header>
+        <site-header base="../" active-section="dumps"></site-header>
+    </header>
+
+    <div class="page-layout">
+        <aside class="dump-sidebar">
+            <dump-sidebar base="../"></dump-sidebar>
+        </aside>
+        <div class="panel" id="panel">
+            <div class="panel-header">
+                <span id="panel-title"></span>
+                <span id="panel-count"></span>
+            </div>
+            <div class="panel-body" id="panel-body">
+                <div class="state-dim">Select a dump from the sidebar.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDump() {
+            const params  = new URLSearchParams(window.location.search);
+            const body    = document.getElementById("panel-body");
+            const title   = document.getElementById("panel-title");
+            const count   = document.getElementById("panel-count");
+
+            let manifest = [];
+            try {
+                manifest = await fetch("../manifest.json").then(r => r.json());
+            } catch {
+                body.innerHTML = '<div class="state-dim">Failed to load manifest.</div>';
+                return;
+            }
+
+            const dumpId = params.get("dump") ?? manifest[0]?.label;
+            if (!dumpId) return;
+
+            const entry = manifest.find(e => e.label === dumpId);
+            if (!entry) return;
+
+            let json;
+            try {
+                json = await fetch(`../data/${entry.dataPath}`).then(r => r.json());
+            } catch {
+                title.textContent = dumpId;
+                body.innerHTML = '<div class="state-dim">Failed to load data.</div>';
+                return;
+            }
+
+            if (json.meta.layout) {
+                try {
+                    const mod = await import(`../assets/layout/dumps/${json.meta.layout}.js`);
+                    mod.render(json, document.getElementById("panel"));
+                    return;
+                } catch (e) {
+                    console.error("Layout load failed:", e);
+                }
+            }
+
+            // Default: raw JSON view
+            title.textContent = dumpId.toUpperCase().replace(/_/g, " ");
+            count.textContent = json.meta.count + " entries";
+            body.innerHTML = "";
+            const pre = document.createElement("pre");
+            pre.style.cssText = "padding:12px;white-space:pre-wrap;word-break:break-all;font-size:11px;font-family:var(--mono);color:var(--dim);";
+            pre.textContent = JSON.stringify(json.data, null, 2);
+            body.appendChild(pre);
+        }
+
+        loadDump();
+    </script>
+
+</body>
 
 </html>

@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const netcon = require("./netcon");
 
-const { DATA_DIR: DATA_ROOT } = require("../../../config");
+const { DATA_DIR, MANIFEST_PATH } = require("../../../config");
 const listeners = new Set();
 
 let session = null;
@@ -46,7 +46,9 @@ function startDump(module) {
             removeNetconListener();
 
             const result = module.process(lines);
-            saveDump(moduleName, result);
+            result.meta.outputPath = module.outputPath;
+            result.meta.layout = module.layout ?? null;
+            saveDump(module, result);
             emitDumpEvent({ type: "dump_end", module: moduleName, count: result.meta.count });
             return;
         }
@@ -63,10 +65,30 @@ function startDump(module) {
     return { ok: true };
 }
 
-function saveDump(moduleName, result) {
-    const dir = path.join(DATA_ROOT, moduleName);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, "data.json"), JSON.stringify(result, null, 2), "utf8");
+function saveDump(module, result) {
+    const filePath = path.join(DATA_DIR, module.outputPath);
+    fs.mkdirSync(path.dirname(filePath), { recursive: true });
+    fs.writeFileSync(filePath, JSON.stringify(result, null, 2), "utf8");
+    updateManifest(module);
+}
+
+function updateManifest(module) {
+    let manifest = [];
+    try {
+        manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"));
+    } catch {}
+
+    const entry = {
+        label:    module.name,
+        dataPath: module.outputPath,
+        layout:   module.layout ?? null,
+    };
+
+    const idx = manifest.findIndex(e => e.dataPath === module.outputPath);
+    if (idx >= 0) manifest[idx] = entry;
+    else manifest.push(entry);
+
+    fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), "utf8");
 }
 
 module.exports = { startDump, addListener };

@@ -1,8 +1,10 @@
 {
   "meta": {
     "module": "panorama_css_properties",
-    "timestamp": "2026-06-08T04:28:48.243Z",
-    "count": 139
+    "timestamp": "2026-06-10T07:53:10.930Z",
+    "count": 139,
+    "outputPath": "panorama/css.json",
+    "layout": "panorama-css-properties"
   },
   "data": [
     {

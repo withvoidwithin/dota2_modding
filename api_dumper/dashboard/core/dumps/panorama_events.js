@@ -1,5 +1,7 @@
-const name = "panorama_events";
-const command = "dump_panorama_events";
+const name       = "panorama_events";
+const command    = "dump_panorama_events";
+const outputPath = "panorama/events.json";
+const layout     = "panorama-events";
 
 function parseLines(lines) {
     const entries = [];
@@ -31,4 +33,4 @@ function parseLines(lines) {
     };
 }
 
-module.exports = { name, command, process: parseLines };
+module.exports = { name, command, outputPath, layout, process: parseLines };

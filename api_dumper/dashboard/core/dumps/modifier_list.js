@@ -1,5 +1,7 @@
-const name = "modifier_list";
-const command = "dump_modifier_list";
+const name       = "modifier_list";
+const command    = "dump_modifier_list";
+const outputPath = "vscripts/CDOTA_Buff/modifier_list.json";
+const layout     = "modifier-list";
 
 function parseLines(lines) {
     const data = lines
@@ -16,4 +18,4 @@ function parseLines(lines) {
     };
 }
 
-module.exports = { name, command, process: parseLines };
+module.exports = { name, command, outputPath, layout, process: parseLines };

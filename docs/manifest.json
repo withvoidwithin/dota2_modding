@@ -1,0 +1,22 @@
+[
+  {
+    "label": "modifier_list",
+    "dataPath": "vscripts/CDOTA_Buff/modifier_list.json",
+    "layout": "modifier-list"
+  },
+  {
+    "label": "panorama_css_properties",
+    "dataPath": "panorama/css.json",
+    "layout": "panorama-css-properties"
+  },
+  {
+    "label": "panorama_events",
+    "dataPath": "panorama/events.json",
+    "layout": "panorama-events"
+  },
+  {
+    "label": "cvarlist",
+    "dataPath": "cvarlist.json",
+    "layout": "cvarlist"
+  }
+]

@@ -1,8 +1,10 @@
 {
   "meta": {
     "module": "modifier_list",
-    "timestamp": "2026-06-07T23:17:20.367Z",
-    "count": 3369
+    "timestamp": "2026-06-10T16:19:30.692Z",
+    "count": 3369,
+    "outputPath": "vscripts/CDOTA_Buff/modifier_list.json",
+    "layout": "modifier-list"
   },
   "data": [
     "magnataur_shockwave_intrinsic",

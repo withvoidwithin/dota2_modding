@@ -1,5 +1,7 @@
-const name = "panorama_css_properties";
-const command = "dump_panorama_css_properties";
+const name       = "panorama_css_properties";
+const command    = "dump_panorama_css_properties";
+const outputPath = "panorama/css.json";
+const layout     = "panorama-css-properties";
 
 function parseLines(lines) {
     const entries = [];
@@ -32,4 +34,4 @@ function parseLines(lines) {
     };
 }
 
-module.exports = { name, command, process: parseLines };
+module.exports = { name, command, outputPath, layout, process: parseLines };

@@ -1,19 +1,20 @@
 class DumpSidebar extends HTMLElement {
-    connectedCallback() {
-        const dumps = [
-            { id: 'modifier-list',           label: 'modifier_list' },
-            { id: 'panorama-css-properties', label: 'panorama_css_properties' },
-            { id: 'panorama-events',         label: 'panorama_events' },
-            { id: 'cvarlist',                label: 'cvarlist' },
-        ];
+    async connectedCallback() {
+        const base = this.getAttribute("base") ?? "../";
 
-        const currentPath = window.location.pathname;
+        let dumps = [];
+        try {
+            const res = await fetch(`${base}manifest.json`);
+            dumps = await res.json();
+        } catch {}
 
-        this.innerHTML = dumps.map(({ id, label }) => {
-            const active = currentPath.includes(`/${id}/`) ? ' active' : '';
-            return `<a class="dump-sidebar-item${active}" href="../${id}/">${label}</a>`;
-        }).join('');
+        const active = new URLSearchParams(window.location.search).get("dump") ?? "";
+
+        this.innerHTML = dumps.map(({ label }) => {
+            const isActive = label === active ? " active" : "";
+            return `<a class="dump-sidebar-item${isActive}" href="?dump=${label}">${label}</a>`;
+        }).join("");
     }
 }
 
-customElements.define('dump-sidebar', DumpSidebar);
+customElements.define("dump-sidebar", DumpSidebar);

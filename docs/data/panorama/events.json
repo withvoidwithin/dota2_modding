@@ -1,8 +1,10 @@
 {
   "meta": {
     "module": "panorama_events",
-    "timestamp": "2026-06-08T19:58:51.353Z",
-    "count": 82
+    "timestamp": "2026-06-10T07:53:20.153Z",
+    "count": 82,
+    "outputPath": "panorama/events.json",
+    "layout": "panorama-events"
   },
   "data": [
     {

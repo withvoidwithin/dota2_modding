@@ -1,12 +1,11 @@
 const { spawn } = require("child_process");
 const path = require("path");
 
-const DOTA_PATH = process.env.DOTA_PATH;
-const DOTA_NETCON_PORT = process.env.DOTA_NETCON_PORT;
-const DOTA_ADDON_NAME = process.env.DOTA_ADDON_NAME;
+const env = require("./lib/env");
 
-const PATH_DOTA_EXE = path.join(DOTA_PATH, "game", "bin", "win64", "dota2.exe");
-const PATH_VCONSOLE_EXE = path.join(DOTA_PATH, "game", "bin", "win64", "vconsole2.exe");
+const BIN_DIR = path.join(env.dotaPath, "game", "bin", "win64");
+const PATH_DOTA_EXE = path.join(BIN_DIR, "dota2.exe");
+const PATH_VCONSOLE_EXE = path.join(BIN_DIR, "vconsole2.exe");
 
 const DOTA_EXE_ARGS = [
     "-dev",
@@ -14,16 +13,20 @@ const DOTA_EXE_ARGS = [
     "-insecure",
     "-console",
     "-novid",
-    "-netconport", DOTA_NETCON_PORT,
-    "-addon", DOTA_ADDON_NAME,
+    "-netconport", String(env.netconPort),
+    "-addon", env.addonName,
 ];
 
+function launchDetached(exe, args = []) {
+    spawn(exe, args, { detached: true, stdio: "ignore" }).unref();
+}
+
 function launchDota() {
-    spawn(PATH_DOTA_EXE, DOTA_EXE_ARGS, { detached: true, stdio: "ignore" }).unref();
+    launchDetached(PATH_DOTA_EXE, DOTA_EXE_ARGS);
 }
 
 function launchVconsole() {
-    spawn(PATH_VCONSOLE_EXE, [], { detached: true, stdio: "ignore" }).unref();
+    launchDetached(PATH_VCONSOLE_EXE);
 }
 
 module.exports = { launchDota, launchVconsole };

@@ -1,32 +1,36 @@
-require("dotenv").config({ path: require("path").join(__dirname, "../../.env") });
-
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
+const env = require("./lib/env");
 const { checkProcesses } = require("./processes");
 const { launchDota, launchVconsole } = require("./launcher");
 const netcon = require("./netcon");
 const dumpManager = require("./dump_manager");
 
+// Dump modules are discovered from the folder — dropping a new file in dumps/
+// auto-registers its route and exposes it to the dashboard via /api/dumps.
 const dumpsDir = path.join(__dirname, "dumps");
 const dumpModules = fs.readdirSync(dumpsDir)
     .filter(f => f.endsWith(".js"))
     .map(f => require(path.join(dumpsDir, f)));
 
 const app = express();
-const PORT = process.env.DASHBOARD_SERVER_PORT;
-
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "..")));
 
 app.get("/api/config", (req, res) => {
     res.json({
-        consoleTag: process.env.CONSOLE_TAG,
-        consoleSubtagLua: process.env.CONSOLE_SUBTAG_LUA,
-        consoleSubtagDashboard: process.env.CONSOLE_SUBTAG_DASHBOARD,
-        addonName: process.env.DOTA_ADDON_NAME,
-        addonMapName: process.env.DOTA_ADDON_MAP_NAME,
+        consoleTag: env.consoleTag,
+        consoleSubtagLua: env.consoleSubtagLua,
+        consoleSubtagDashboard: env.consoleSubtagDashboard,
+        addonName: env.addonName,
+        addonMapName: env.addonMapName,
     });
+});
+
+app.get("/api/dumps", (req, res) => {
+    res.json(dumpModules.map(m => ({ name: m.name })));
 });
 
 app.get("/api/processes", (req, res) => {
@@ -54,11 +58,10 @@ app.post("/api/launch/vconsole", (req, res) => {
     });
 });
 
-app.post("/api/netcon/command", express.json(), (req, res) => {
+app.post("/api/netcon/command", (req, res) => {
     const { command } = req.body;
     if (!command) return res.status(400).json({ error: "No command" });
-    const ok = netcon.send(command);
-    if (!ok) return res.status(503).json({ error: "Netcon not connected" });
+    if (!netcon.send(command)) return res.status(503).json({ error: "Netcon not connected" });
     res.json({ ok: true });
 });
 
@@ -77,22 +80,13 @@ app.get("/api/netcon/stream", (req, res) => {
     res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
-    res.write(`data: ${JSON.stringify({ type: "status", connected: netcon.getStatus() })}\n\n`);
+    const send = (event) => res.write(`data: ${JSON.stringify(event)}\n\n`);
+    send({ type: "status", connected: netcon.getStatus() });
 
-    const remove = netcon.addListener((event) => {
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
-    });
-
-    const removeDump = dumpManager.addListener((event) => {
-        res.write(`data: ${JSON.stringify(event)}\n\n`);
-    });
-
-    req.on("close", () => {
-        remove();
-        removeDump();
-    });
+    const unsubscribe = [netcon.addListener(send), dumpManager.addListener(send)];
+    req.on("close", () => unsubscribe.forEach(fn => fn()));
 });
 
-app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}`);
+app.listen(env.serverPort, () => {
+    console.log(`http://localhost:${env.serverPort}`);
 });

@@ -1,7 +1,7 @@
 {
   "meta": {
     "module": "cvarlist",
-    "timestamp": "2026-06-10T07:53:29.326Z",
+    "timestamp": "2026-06-24T08:42:51.321Z",
     "count": 5229,
     "outputPath": "cvarlist.json",
     "layout": "cvarlist"
@@ -10233,7 +10233,7 @@
     },
     {
       "name": "dota_dashboard_launch_count",
-      "value": "3084",
+      "value": "3114",
       "flags": [
         "cl",
         "a",

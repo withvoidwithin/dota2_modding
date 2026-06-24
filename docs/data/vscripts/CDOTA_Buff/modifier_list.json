@@ -1,12 +1,14 @@
 {
   "meta": {
     "module": "modifier_list",
-    "timestamp": "2026-06-10T16:19:30.692Z",
-    "count": 3369,
+    "timestamp": "2026-06-24T08:55:11.710Z",
+    "count": 3371,
     "outputPath": "vscripts/CDOTA_Buff/modifier_list.json",
     "layout": "modifier-list"
   },
   "data": [
+    "dota_foreboding_modifier",
+    "dota_foreboding_modifier2",
     "magnataur_shockwave_intrinsic",
     "modifer_hoodwink_acorn_shot_tree_thinker",
     "modifer_pine_cone_acorn_shot_tree_thinker",

@@ -1,11 +1,38 @@
 let config = {};
 
-fetch("/api/config")
-    .then(res => res.json())
-    .then(data => {
-        config = data;
-        init();
+const api = {
+    get: (url) => fetch(url).then(res => res.json()),
+    post: (url, body) => fetch(url, {
+        method: "POST",
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+    }),
+};
+
+const sendCommand = (command) => api.post("/api/netcon/command", { command });
+const startDump   = (moduleName) => api.post(`/api/dump/${moduleName}`);
+const dumpButton  = (moduleName) => document.getElementById(`btn-dump-${moduleName.replace(/_/g, "-")}`);
+
+boot();
+
+async function boot() {
+    config = await api.get("/api/config");
+    renderDumpButtons(await api.get("/api/dumps"));
+    init();
+}
+
+function renderDumpButtons(modules) {
+    const panel = document.getElementById("dump-panel");
+    modules.forEach(({ name }) => {
+        const btn = document.createElement("button");
+        btn.className = "btn-dump";
+        btn.id = `btn-dump-${name.replace(/_/g, "-")}`;
+        btn.textContent = name;
+        btn.disabled = true;
+        btn.addEventListener("click", () => startDump(name));
+        panel.appendChild(btn);
     });
+}
 
 function updateStatus(id, online) {
     const el = document.getElementById(id);
@@ -13,44 +40,63 @@ function updateStatus(id, online) {
     el.className = "status " + (online ? "online" : "offline");
 }
 
-function poll() {
-    fetch("/api/processes")
-        .then(res => res.json())
-        .then(data => {
-            updateStatus("status-dota", data.dota);
-            updateStatus("status-vconsole", data.vconsole);
-            updateStatus("status-netcon", data.netcon);
-
-            document.getElementById("btn-launch").disabled = data.dota && data.vconsole;
-            document.getElementById("btn-launch-map").disabled = !data.netcon;
-
-            document.querySelectorAll(".btn-dump").forEach(btn => {
-                if (!btn.classList.contains("dumping")) {
-                    btn.disabled = !data.netcon;
-                }
-            });
-        });
-}
-
-function launchAll() {
-    fetch("/api/launch/dota", { method: "POST" });
-    fetch("/api/launch/vconsole", { method: "POST" });
-}
-
-function launchMap() {
-    fetch("/api/netcon/command", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ command: `dota_launch_custom_game ${config.addonName} ${config.addonMapName}` }),
+function applyNetconState(online) {
+    updateStatus("status-netcon", online);
+    document.getElementById("btn-launch-map").disabled = !online;
+    document.querySelectorAll(".btn-dump").forEach(btn => {
+        if (!btn.classList.contains("dumping")) btn.disabled = !online;
     });
 }
 
-function startDump(moduleName) {
-    fetch(`/api/dump/${moduleName}`, { method: "POST" });
+function poll() {
+    api.get("/api/processes")
+        .then(data => {
+            updateStatus("status-dota", data.dota);
+            updateStatus("status-vconsole", data.vconsole);
+            document.getElementById("btn-launch").disabled = data.dota && data.vconsole;
+            applyNetconState(data.netcon);
+        })
+        .catch(() => {});
 }
 
+function launchAll() {
+    api.post("/api/launch/dota");
+    api.post("/api/launch/vconsole");
+}
+
+function launchMap() {
+    sendCommand(`dota_launch_custom_game ${config.addonName} ${config.addonMapName}`);
+}
+
+// Incoming netcon lines are buffered and flushed once per animation frame, so a
+// flood (e.g. cvarlist = thousands of lines) costs one DOM insert + one reflow
+// per frame instead of one synchronous reflow per line.
+const LOG_MAX_LINES = 5000;
+const logQueue = [];
+let logFlushQueued = false;
+
 function appendLog(text) {
+    logQueue.push(text);
+    if (logFlushQueued) return;
+    logFlushQueued = true;
+    requestAnimationFrame(flushLog);
+}
+
+function flushLog() {
+    logFlushQueued = false;
     const log = document.getElementById("netcon-log");
+
+    const frag = document.createDocumentFragment();
+    for (const text of logQueue) frag.appendChild(buildLogLine(text));
+    logQueue.length = 0;
+    log.appendChild(frag);
+
+    while (log.childElementCount > LOG_MAX_LINES) log.removeChild(log.firstChild);
+
+    log.scrollTop = log.scrollHeight;
+}
+
+function buildLogLine(text) {
     const line = document.createElement("div");
     line.className = "log-line";
 
@@ -72,7 +118,7 @@ function appendLog(text) {
 
         if (subtag) {
             const spanSub = document.createElement("span");
-            if (subtag === config.consoleSubtagLua)       spanSub.className = "tag-lua";
+            if (subtag === config.consoleSubtagLua)            spanSub.className = "tag-lua";
             else if (subtag === config.consoleSubtagDashboard) spanSub.className = "tag-dash";
             spanSub.textContent = ":" + subtag;
             line.appendChild(spanSub);
@@ -87,8 +133,7 @@ function appendLog(text) {
         line.textContent = text;
     }
 
-    log.appendChild(line);
-    log.scrollTop = log.scrollHeight;
+    return line;
 }
 
 function init() {
@@ -96,24 +141,30 @@ function init() {
     sse.onmessage = (e) => {
         const event = JSON.parse(e.data);
 
-        if (event.type === "log") {
-            appendLog(event.text);
+        if (event.type === "status") {
+            applyNetconState(event.connected);
+            return;
         }
 
+        if (event.type === "log") {
+            appendLog(event.text);
+            return;
+        }
+
+        const btn = event.module && dumpButton(event.module);
+
         if (event.type === "dump_start") {
-            const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
-            if (btn) {
-                btn.classList.add("dumping");
-                btn.disabled = true;
-            }
+            if (btn) { btn.classList.add("dumping"); btn.disabled = true; }
         }
 
         if (event.type === "dump_end") {
-            const btn = document.getElementById(`btn-dump-${event.module.replace(/_/g, "-")}`);
-            if (btn) {
-                btn.classList.remove("dumping");
-            }
+            if (btn) btn.classList.remove("dumping");
             appendLog(`${config.consoleTag}:${config.consoleSubtagDashboard} DUMP ${event.module} — ${event.count} entries saved`);
+        }
+
+        if (event.type === "dump_error") {
+            if (btn) btn.classList.remove("dumping");
+            appendLog(`${config.consoleTag}:${config.consoleSubtagDashboard} DUMP ${event.module} FAILED — ${event.error}`);
         }
     };
 
@@ -122,14 +173,9 @@ function init() {
 
     document.getElementById("cmd-input").addEventListener("keydown", (e) => {
         if (e.key !== "Enter") return;
-        const input = e.target;
-        const command = input.value.trim();
+        const command = e.target.value.trim();
         if (!command) return;
-        fetch("/api/netcon/command", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ command }),
-        });
-        input.value = "";
+        sendCommand(command);
+        e.target.value = "";
     });
 }

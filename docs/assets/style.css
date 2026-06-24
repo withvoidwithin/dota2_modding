@@ -169,6 +169,60 @@ a.nav-item:hover {
   user-select: none;
 }
 
+.list-item--block { padding: 8px 12px; }
+
+.list-item-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  margin-top: 3px;
+}
+
+.list-item-value { opacity: .7; }
+
+.list-item-flag {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0 4px;
+  margin-right: 4px;
+  font-size: 10px;
+}
+
+.list-item-desc {
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--dim);
+  margin-top: 3px;
+}
+
+.tag-on  { color: var(--online); }
+.tag-off { color: var(--offline); }
+
+/* ── Search (panel header) ── */
+.search-input {
+  flex: 1;
+  margin-right: 8px;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.search-input::placeholder { color: var(--dim); }
+
+/* ── Raw JSON fallback view ── */
+.raw-json {
+  padding: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+}
+
 /* ── States ── */
 .state-dim {
   font-family: var(--mono);

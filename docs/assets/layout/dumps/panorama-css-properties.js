@@ -1,31 +1,17 @@
+import { header, item, desc, fill } from "./_shared.js";
+
 export function render(json, panel) {
-    const header = panel.querySelector(".panel-header");
-    const body   = panel.querySelector(".panel-body");
+    header(panel, "PANORAMA CSS PROPERTIES", json.meta.count);
 
-    header.innerHTML = `<span>PANORAMA CSS PROPERTIES</span><span>${json.meta.count} entries</span>`;
+    const rows = json.data.map((prop, i) => {
+        const el = item(i);
+        el.appendChild(document.createTextNode(prop.name));
 
-    json.data.forEach((item, i) => {
-        const el = document.createElement("div");
-        el.className = "list-item";
-        el.style.padding = "8px 12px";
-
-        const idx = document.createElement("span");
-        idx.className = "list-item-index";
-        idx.textContent = i + 1;
-
-        const nameSpan = document.createElement("span");
-        nameSpan.textContent = item.name;
-
-        el.appendChild(idx);
-        el.appendChild(nameSpan);
-
-        if (item.description && item.description !== "<Needs a description>") {
-            const desc = document.createElement("div");
-            desc.style.cssText = "font-family:var(--sans);font-size:12px;color:var(--dim);margin-top:3px;";
-            desc.innerHTML = item.description;
-            el.appendChild(desc);
+        if (prop.description && prop.description !== "<Needs a description>") {
+            desc(el, prop.description, { html: true });
         }
-
-        body.appendChild(el);
+        return el;
     });
+
+    fill(panel, rows);
 }

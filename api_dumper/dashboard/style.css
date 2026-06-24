@@ -203,7 +203,7 @@ header {
 
 /* ── Dump panel ── */
 .dump-panel {
-  width: 140px;
+  width: max-content;
   background: var(--sidebar);
   border-left: 1px solid var(--border);
   display: flex;
@@ -231,6 +231,7 @@ header {
   cursor: pointer;
   padding: 5px 8px;
   text-align: left;
+  white-space: nowrap;
   border-radius: 2px;
   opacity: .8;
   transition: opacity .15s, background .15s;

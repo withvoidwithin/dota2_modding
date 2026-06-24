@@ -1,25 +1,32 @@
 const fs = require("fs");
 const path = require("path");
-const netcon = require("./netcon");
 
+const netcon = require("./netcon");
+const env = require("./lib/env");
+const createEmitter = require("./lib/emitter");
 const { DATA_DIR, MANIFEST_PATH } = require("../../../config");
-const listeners = new Set();
+
+// Hard cap so a dump that never sees its end marker (netcon hiccup, no output)
+// can't block every future dump forever.
+const DUMP_TIMEOUT = 60000;
+
+const emitter = createEmitter();
 
 let session = null;
 
-function emitDumpEvent(event) {
-    listeners.forEach(fn => fn(event));
-}
-
-function addListener(fn) {
-    listeners.add(fn);
-    return () => listeners.delete(fn);
+// Tears down the active session and releases its netcon listener + timer.
+function clearSession() {
+    if (!session) return;
+    clearTimeout(session.timer);
+    session.removeListener();
+    session = null;
 }
 
 function startDump(module) {
     if (session) return { ok: false, error: "Dump already in progress" };
+    if (!netcon.getStatus()) return { ok: false, error: "Netcon not connected" };
 
-    const tag = `${process.env.CONSOLE_TAG}:${process.env.CONSOLE_SUBTAG_DASHBOARD}`;
+    const tag = `${env.consoleTag}:${env.consoleSubtagDashboard}`;
 
     session = {
         module: module.name,
@@ -27,42 +34,56 @@ function startDump(module) {
         collecting: false,
         startMarker: `${tag} DUMP_START:${module.name}`,
         endMarker: `${tag} DUMP_END:${module.name}`,
+        removeListener: null,
+        timer: null,
     };
 
-    const removeNetconListener = netcon.addListener((event) => {
-        if (event.type !== "log") return;
-        const line = event.text.trim();
+    session.removeListener = netcon.addListener(onEvent);
+    session.timer = setTimeout(() => abort("Dump timed out"), DUMP_TIMEOUT);
+
+    function onEvent(event) {
+        if (event.type === "status" && !event.connected) return abort("Netcon disconnected");
+        if (event.type !== "log" || !session) return;
+
+        const line = event.text;
 
         if (line.includes(session.startMarker)) {
             session.collecting = true;
-            emitDumpEvent({ type: "dump_start", module: session.module });
+            emitter.emit({ type: "dump_start", module: session.module });
             return;
         }
 
         if (line.includes(session.endMarker)) {
             const lines = session.lines;
             const moduleName = session.module;
-            session = null;
-            removeNetconListener();
-
-            const result = module.process(lines);
-            result.meta.outputPath = module.outputPath;
-            result.meta.layout = module.layout ?? null;
-            saveDump(module, result);
-            emitDumpEvent({ type: "dump_end", module: moduleName, count: result.meta.count });
+            clearSession();
+            finish(module, lines, moduleName);
             return;
         }
 
-        if (session && session.collecting) {
-            session.lines.push(line);
-        }
-    });
+        if (session.collecting) session.lines.push(line);
+    }
 
     netcon.send(`echo ${session.startMarker}`);
     netcon.send(module.command);
     netcon.send(`echo ${session.endMarker}`);
 
     return { ok: true };
+}
+
+function abort(reason) {
+    if (!session) return;
+    const moduleName = session.module;
+    clearSession();
+    emitter.emit({ type: "dump_error", module: moduleName, error: reason });
+}
+
+function finish(module, lines, moduleName) {
+    const result = module.process(lines);
+    result.meta.outputPath = module.outputPath;
+    result.meta.layout = module.layout ?? null;
+    saveDump(module, result);
+    emitter.emit({ type: "dump_end", module: moduleName, count: result.meta.count });
 }
 
 function saveDump(module, result) {
@@ -91,4 +112,4 @@ function updateManifest(module) {
     fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), "utf8");
 }
 
-module.exports = { startDump, addListener };
+module.exports = { startDump, addListener: emitter.add };

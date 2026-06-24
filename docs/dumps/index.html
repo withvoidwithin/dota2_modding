@@ -75,7 +75,7 @@
             count.textContent = json.meta.count + " entries";
             body.innerHTML = "";
             const pre = document.createElement("pre");
-            pre.style.cssText = "padding:12px;white-space:pre-wrap;word-break:break-all;font-size:11px;font-family:var(--mono);color:var(--dim);";
+            pre.className = "raw-json";
             pre.textContent = JSON.stringify(json.data, null, 2);
             body.appendChild(pre);
         }

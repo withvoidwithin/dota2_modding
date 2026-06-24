@@ -1,8 +1,7 @@
-export function render(json, panel) {
-    const header = panel.querySelector(".panel-header");
-    const body   = panel.querySelector(".panel-body");
+import { item, fill } from "./_shared.js";
 
-    header.innerHTML = `
+export function render(json, panel) {
+    panel.querySelector(".panel-header").innerHTML = `
         <input type="text" id="dump-search" class="search-input" placeholder="search..." autocomplete="off" />
         <span id="dump-count"></span>
     `;
@@ -10,18 +9,12 @@ export function render(json, panel) {
     const allData = json.data;
 
     function renderList(data) {
-        body.innerHTML = "";
         document.getElementById("dump-count").textContent = data.length + " entries";
-        data.forEach((name, i) => {
-            const el  = document.createElement("div");
-            el.className = "list-item";
-            const idx = document.createElement("span");
-            idx.className = "list-item-index";
-            idx.textContent = i + 1;
-            el.appendChild(idx);
+        fill(panel, data.map((name, i) => {
+            const el = item(i, { block: false });
             el.appendChild(document.createTextNode(name));
-            body.appendChild(el);
-        });
+            return el;
+        }));
     }
 
     document.getElementById("dump-search").addEventListener("input", (e) => {

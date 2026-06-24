@@ -1,13 +1,10 @@
-// Added
+// Static
 // ---------------------------------------
 
-// dump_modifier_list
-// dump_panorama_css_properties
-// dump_panorama_events
-// cvarlist
-
-// Research
-// ---------------------------------------
+dump_modifier_list
+dump_panorama_css_properties
+dump_panorama_events
+cvarlist
 
 animevents_dump
 cl_dota_dump_modifier_stringtable
@@ -20,7 +17,7 @@ cl_pdump
 
 cl_rr_dump_rules
 
-// RUNTIME
+// Runtime Parse
 // ---------------------------------------
 
 cl_dumpentity <ent_index> (runtime)

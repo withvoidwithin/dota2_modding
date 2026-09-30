@@ -12,6 +12,26 @@ let dataRoot = null;
 let manifest = null;
 /** Class shown in the view, marked in the navigation tree. */
 let currentClass = null;
+
+// Sidebar sections are open by default; the ones a visitor collapses are remembered in this browser.
+const COLLAPSED_KEY = "dota2modding.nav.collapsed";
+const collapsed = loadCollapsed();
+
+function loadCollapsed() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? "[]"));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCollapsed() {
+  try {
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsed]));
+  } catch {
+    // Storage unavailable (private mode, blocked): the state lives for this page only.
+  }
+}
 /** @type {Map<string, VscriptsModel>} dataset id → loaded model */
 const models = new Map();
 
@@ -35,6 +55,9 @@ function el(tag, attrs = {}, ...children) {
 }
 
 const link = (route, text) => el("a", { href: `#/${route}` }, text);
+/** Collapsible sidebar section with a stable id; open unless the visitor collapsed it before. */
+const collapsible = (id, attrs, summary, ...content) =>
+  el("details", { ...attrs, "data-id": id, open: !collapsed.has(id) }, summary, content);
 /** Replaces the children of a node; nested arrays are flattened and empty values skipped. */
 const fill = (parent, ...nodes) => parent.replaceChildren(...nodes.flat(Infinity).filter((node) => node !== null && node !== undefined && node !== false));
 const show = (...nodes) => fill(view, ...nodes);
@@ -414,17 +437,18 @@ function renderNav(model) {
     hits.length ? null : el("p", { class: "muted" }, "Nothing found"));
     return;
   }
-  const group = (title, names, route, open) =>
-    el("details", { class: "group", open }, el("summary", {}, `${title} (${names.length})`), el("ul", {}, names.map((name) => el("li", {}, link(`${model.id}/${route(name)}`, name)))));
+  const group = (title, names, route) =>
+    collapsible(`${model.id}:group:${title}`, { class: "group" }, el("summary", {}, `${title} (${names.length})`),
+      el("ul", {}, names.map((name) => el("li", {}, link(`${model.id}/${route(name)}`, name)))));
   const sorted = (map) => [...map.keys()].sort((a, b) => a.localeCompare(b));
   fill(nav,
     el("ul", {}, el("li", {}, link(model.id, "Overview")), el("li", {}, link(`${model.id}/functions`, "Global functions")),
       el("li", {}, link(`${model.id}/instances`, "Instances")), el("li", {}, link(`${model.id}/constants`, "Constants"))),
     model.sides.map((side) => classTree(model, side)),
-    group("Value types", sorted(model.valueTypes), (name) => `type/${name}`, true),
-    group("Enums", sorted(model.enums), (name) => `enum/${name}`, false),
-    group("Functions", sorted(model.functions), (name) => `function/${name}`, false),
-    group("Core Lua", sorted(model.lua), (name) => `global/${name}`, false),
+    group("Value types", sorted(model.valueTypes), (name) => `type/${name}`),
+    group("Enums", sorted(model.enums), (name) => `enum/${name}`),
+    group("Functions", sorted(model.functions), (name) => `function/${name}`),
+    group("Core Lua", sorted(model.lua), (name) => `global/${name}`),
   );
   if (currentClass) revealInNav(currentClass);
 }
@@ -452,10 +476,10 @@ function classTree(model, side) {
   const node = (name) => {
     const derived = (children.get(name) ?? []).sort(byName);
     if (!derived.length) return el("li", {}, classLink(name));
-    return el("li", {}, el("details", {}, el("summary", {}, classLink(name)), el("ul", {}, derived.map(node))));
+    return el("li", {}, collapsible(`${model.id}:${side}:${name}`, {}, el("summary", {}, classLink(name)), el("ul", {}, derived.map(node))));
   };
   const title = model.sides.length > 1 ? `${side[0].toUpperCase()}${side.slice(1)} classes` : "Classes";
-  return el("details", { class: "group", open: true }, el("summary", {}, `${title} (${names.length})`),
+  return collapsible(`${model.id}:classes:${side}`, { class: "group" }, el("summary", {}, `${title} (${names.length})`),
     el("ul", { class: "tree" }, roots.sort(byName).map(node)));
 }
 
@@ -543,6 +567,14 @@ async function start() {
   document.getElementById("repo").href = manifest.repository;
   document.getElementById("datasets").replaceChildren(...manifest.datasets.map((dataset) =>
     el("a", { href: `#/${dataset.id}`, "data-id": dataset.id }, dataset.title)));
+  // "toggle" does not bubble; a capturing listener on the sidebar still sees it.
+  nav.addEventListener("toggle", (event) => {
+    const id = event.target.dataset?.id;
+    if (!id) return;
+    if (event.target.open) collapsed.delete(id);
+    else collapsed.add(id);
+    saveCollapsed();
+  }, true);
   let timer = null;
   search.addEventListener("input", () => {
     clearTimeout(timer);

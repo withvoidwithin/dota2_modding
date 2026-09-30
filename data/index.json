@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/withvoidwithin/dota2_modding",
+  "datasets": [
+    {
+      "id": "vscripts",
+      "kind": "vscripts-api",
+      "title": "VScripts API",
+      "description": "Lua API of the server and client VMs: functions, classes, enums, constants.",
+      "files": {
+        "server": "vscripts/server.json",
+        "client": "vscripts/client.json"
+      },
+      "annotations": "annotations/lua"
+    }
+  ]
+}

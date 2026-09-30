@@ -1,8 +1,0 @@
-{
-  "name": "dota2_api_dumper_site",
-  "version": "1.0.0",
-  "description": "Dota 2 API Dumper static site",
-  "scripts": {
-    "host": "node host.js"
-  }
-}

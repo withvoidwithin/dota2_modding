@@ -1,5 +1,6 @@
 // Browser for the Dota 2 modding data: reads data/index.json and the dumps it lists, renders everything
 // client-side. Routes live in the hash: #/<dataset>/<page>/<name>[/<member>].
+import { SEARCH_LIMIT, VscriptsModel, matchesWords, queryWords } from "./model.js";
 
 // The deployed site has data/ next to it; a local server started at the repository root has it one level up.
 const DATA_ROOTS = ["data/", "../data/"];
@@ -7,15 +8,20 @@ const DATA_ROOTS = ["data/", "../data/"];
 // Steam's own ISteamApps/UpToDateCheck does not fit: it reports only the oldest still compatible version (any
 // recent version is "up to date"), and api.steampowered.com sends no CORS headers.
 const STEAM_INFO_URL = (appId) => `https://api.steamcmd.net/v1/info/${appId}`;
+const SITE_TITLE = "Dota 2 Modding";
 
+const app = document.body;
 const view = document.getElementById("view");
 const nav = document.getElementById("nav");
 const search = document.getElementById("search");
+const menuButton = document.querySelector(".top__menu");
 
 let dataRoot = null;
 let manifest = null;
-/** Class shown in the view, marked in the navigation tree. */
-let currentClass = null;
+/** @type {Map<string, VscriptsModel>} dataset id → loaded model */
+const models = new Map();
+/** Model of the dataset in the route; null on Home. */
+let currentModel = null;
 
 // Sidebar sections are open by default; the ones a visitor collapses are remembered in this browser.
 const COLLAPSED_KEY = "dota2modding.nav.collapsed";
@@ -36,8 +42,38 @@ function saveCollapsed() {
     // Storage unavailable (private mode, blocked): the state lives for this page only.
   }
 }
-/** @type {Map<string, VscriptsModel>} dataset id → loaded model */
-const models = new Map();
+
+// Theme: the system's unless the visitor picked the other one; the pick is data-theme on <html>, restored by
+// the inline script of index.html before the first paint.
+const THEME_KEY = "dota2modding.theme";
+const themeButton = document.querySelector(".theme-toggle");
+const systemLight = matchMedia("(prefers-color-scheme: light)");
+const systemTheme = () => (systemLight.matches ? "light" : "dark");
+const shownTheme = () => document.documentElement.dataset.theme || systemTheme();
+
+/** The button shows the theme it switches to. */
+function renderThemeButton() {
+  const next = shownTheme() === "dark" ? "light" : "dark";
+  const label = `Switch to ${next} theme`;
+  themeButton.replaceChildren(icon(next === "dark" ? "moon" : "sun", "lg"));
+  themeButton.setAttribute("aria-label", label);
+  themeButton.title = label;
+}
+
+/** Switches to the other theme; picking the system's one forgets the pick, so the page follows the system again. */
+function toggleTheme() {
+  const next = shownTheme() === "dark" ? "light" : "dark";
+  const picked = next === systemTheme() ? null : next;
+  if (picked) document.documentElement.dataset.theme = picked;
+  else delete document.documentElement.dataset.theme;
+  try {
+    if (picked) localStorage.setItem(THEME_KEY, picked);
+    else localStorage.removeItem(THEME_KEY);
+  } catch {
+    // Storage unavailable: the theme holds for this page only.
+  }
+  renderThemeButton();
+}
 
 // ---------------------------------------------------------------------------------------------------------
 // DOM helpers
@@ -58,13 +94,81 @@ function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-const link = (route, text) => el("a", { href: `#/${route}` }, text);
+/** Replaces the children of a node; nested arrays are flattened and empty values skipped. */
+const fill = (parent, ...nodes) => parent.replaceChildren(...nodes.flat(Infinity).filter((node) => node !== null && node !== undefined && node !== false));
+/** Shows a page in the main area. */
+const show = (...nodes) => fill(view, el("div", { class: "page" }, nodes));
 /** Collapsible sidebar section with a stable id; open unless the visitor collapsed it before. */
 const collapsible = (id, attrs, summary, ...content) =>
   el("details", { ...attrs, "data-id": id, open: !collapsed.has(id) }, summary, content);
-/** Replaces the children of a node; nested arrays are flattened and empty values skipped. */
-const fill = (parent, ...nodes) => parent.replaceChildren(...nodes.flat(Infinity).filter((node) => node !== null && node !== undefined && node !== false));
-const show = (...nodes) => fill(view, ...nodes);
+const count = (value) => el("span", { class: "count" }, value);
+const code = (text) => el("code", {}, text);
+const capitalize = (text) => text[0].toUpperCase() + text.slice(1);
+
+/** Long engine identifiers break after "_" first: CDOTA_<wbr>BaseNPC_<wbr>Hero. */
+const breaks = (name) => name.split(/(?<=_)/).flatMap((part, i) => (i ? [el("wbr"), part] : [part]));
+
+// Line icons, 16×16, stroked by the stylesheet: a string is a path, an array is a circle (cx, cy, r).
+const ICONS = {
+  overview: ["M2.5 2.5h11v11h-11zM2.5 6h11M6 6v7.5"],
+  function: ["M11 2.5c-1.8 0-2.4.8-2.7 2.6l-1.3 6.8c-.3 1.6-.9 2.1-2.5 2.1M5.5 6.5h5"],
+  instance: ["M8 2l5.5 3v6L8 14l-5.5-3V5zM2.5 5L8 8l5.5-3M8 8v6"],
+  constant: ["M6.2 2.5l-1.2 11M11 2.5l-1.2 11M3 6h10.5M2.5 10h10.5"],
+  arrow: ["M3 8h10M9 4l4 4-4 4"],
+  external: ["M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v4H2.5V4h4"],
+  spinner: ["M8 2.5a5.5 5.5 0 1 1-5.5 5.5"],
+  check: ["M3.5 8.5l3 3 6-7"],
+  warning: ["M8 2.2l6.2 11.3H1.8z", "M8 6.5v3M8 11.6v.1"],
+  question: [[8, 8, 6], "M6.3 6.4a1.8 1.8 0 1 1 2.6 1.6c-.6.3-.9.7-.9 1.3M8 11.3v.1"],
+  download: ["M8 2.5v8M4.5 7L8 10.5 11.5 7M3 13.5h10"],
+  file: ["M4 2h5l3 3v9H4zM9 2v3h3"],
+  braces: ["M6 2.5c-1.4 0-2 .6-2 2V6c0 1-.5 1.6-1.5 2 1 .4 1.5 1 1.5 2v1.5c0 1.4.6 2 2 2M10 2.5c1.4 0 2 .6 2 2V6c0 1 .5 1.6 1.5 2-1 .4-1.5 1-1.5 2v1.5c0 1.4-.6 2-2 2"],
+  extension: ["M2.5 2.5h4.5V7H2.5zM9 9h4.5v4.5H9zM2.5 9h4.5v4.5H2.5zM11.2 2l2.8 2.8-2.8 2.8-2.8-2.8z"],
+  copy: ["M5.5 5.5h7v7h-7z", "M10.5 5.5v-2h-7v7h2"],
+  filter: ["M2.5 3.5h11l-4.2 5v4.2l-2.6 1.3V8.5z"],
+  info: [[8, 8, 6], "M8 7.3v3.7M8 5v.1"],
+  missing: ["M4 2h5l3 3v9H4zM9 2v3h3M6.4 8.4l3.2 3.2M9.6 8.4l-3.2 3.2"],
+  error: ["M5.5 2h5L14 5.5v5L10.5 14h-5L2 10.5v-5z", "M8 5v3.5M8 11v.1"],
+  search: [[7, 7, 4.5], "M10.5 10.5L14 14"],
+  enter: ["M13 3.5V8a1.5 1.5 0 0 1-1.5 1.5H3M6 6.5l-3 3 3 3"],
+  sun: [[8, 8, 3], "M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"],
+  moon: ["M13.5 9.6A5.5 5.5 0 1 1 6.4 2.5a4.5 4.5 0 0 0 7.1 7.1z"],
+};
+
+const SVG = "http://www.w3.org/2000/svg";
+
+/** Icon by name; `size` is "sm" or "lg". Built from the constant shapes above, never from data. */
+function icon(name, size) {
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("class", size ? `i i--${size}` : "i");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  for (const shape of ICONS[name]) {
+    const node = document.createElementNS(SVG, Array.isArray(shape) ? "circle" : "path");
+    if (Array.isArray(shape)) [["cx", shape[0]], ["cy", shape[1]], ["r", shape[2]]].forEach(([key, value]) => node.setAttribute(key, value));
+    else node.setAttribute("d", shape);
+    svg.append(node);
+  }
+  return svg;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Data
+
+async function fetchJson(path) {
+  const response = await fetch(dataRoot + path);
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  return response.json();
+}
+
+async function loadModel(dataset) {
+  if (!models.has(dataset.id)) {
+    const dumps = {};
+    for (const [side, path] of Object.entries(dataset.files)) dumps[side] = await fetchJson(path);
+    models.set(dataset.id, new VscriptsModel(dataset, dumps));
+  }
+  return models.get(dataset.id);
+}
 
 let steamBuild = null;
 
@@ -81,517 +185,899 @@ function currentSteamBuild() {
   return steamBuild;
 }
 
-const formatDate = (seconds) => new Date(seconds * 1000).toISOString().slice(0, 10);
+// Dates are shown as YYYY.MM.DD everywhere.
+const MONTHS = "JanFebMarAprMayJunJulAugSepOctNovDec";
+const ymd = (year, month, day) => `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}`;
+/** Steam time (Unix seconds), UTC. */
+const steamDate = (seconds) => {
+  const date = new Date(seconds * 1000);
+  return ymd(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+};
+/** VersionDate of steam.inf ("Sep 29 2026"); any other text is shown as it is. */
+function versionDate(text) {
+  const [, month, day, year] = /^([A-Z][a-z]{2}) +(\d{1,2}) +(\d{4})$/.exec(text ?? "") ?? [];
+  const index = month ? MONTHS.indexOf(month) : -1;
+  return index >= 0 && index % 3 === 0 ? ymd(year, index / 3 + 1, day) : text;
+}
+/** Dates of the dumps, without repeats. */
+const buildDates = (builds) => [...new Set(Object.values(builds).map((build) => versionDate(build.versionDate)))];
+/** Steam build ids of the dumps, without repeats; "unknown" for a dump made before builds were recorded. */
+const buildIds = (builds) => [...new Set(Object.values(builds).map((build) => build.steamBuildId ?? "unknown"))];
+const codes = (ids) => ids.map((id, i) => [i ? ", " : "", code(id)]);
 
-/** Line telling whether the data comes from the current Steam build of the game; filled when Steam answers. */
-function freshnessNote(model) {
-  const note = el("p", { class: "status" }, "Checking the current Dota 2 build…");
-  const dumped = [...new Set(model.sides.map((side) => model.builds[side].steamBuildId))];
-  currentSteamBuild().then((current) => {
-    if (!current) {
-      fill(note, "Could not check the current Dota 2 build.");
-    } else if (dumped.length === 1 && dumped[0] === current.id) {
-      note.classList.add("ok");
-      fill(note, `Up to date: the data comes from the current Dota 2 build ${current.id} (${formatDate(current.time)}).`);
-    } else {
-      note.classList.add("stale");
-      fill(note, `A new Dota 2 build is out: ${current.id} (${formatDate(current.time)}). The data comes from build `,
-        dumped.map((id) => id ?? "unknown").join(", "), " — waiting for a new dump.");
-    }
-  });
-  return note;
+/** "Build 123 · 2026.09.29", or every build when the dumps come from different ones. */
+function buildLine(builds) {
+  const ids = buildIds(builds);
+  const dates = buildDates(builds);
+  return ids.length === 1
+    ? ["Build ", code(ids[0]), dates.length === 1 ? ` · ${dates[0]}` : null]
+    : ["Builds ", codes(ids)];
 }
 
-async function fetchJson(path) {
-  const response = await fetch(dataRoot + path);
-  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-  return response.json();
-}
-
-// ---------------------------------------------------------------------------------------------------------
-// VScripts API model: the server and client dumps merged, every declaration knows the sides it exists on.
-
-class VscriptsModel {
-  constructor(dataset, dumps) {
-    this.id = dataset.id;
-    this.dataset = dataset;
-    this.sides = Object.keys(dumps);
-    this.builds = Object.fromEntries(this.sides.map((side) => [side, dumps[side].build]));
-    const merge = (pick) => {
-      const result = new Map();
-      for (const side of this.sides) {
-        for (const [name, value] of Object.entries(pick(dumps[side].api) ?? {})) {
-          if (!result.has(name)) result.set(name, { name, value, sides: new Set() });
-          result.get(name).sides.add(side);
-        }
-      }
-      return result;
-    };
-
-    this.functions = merge((api) => api.functions);
-    this.instances = merge((api) => api.instances);
-    this.enums = merge((api) => api.enums);
-    this.valueTypes = merge((api) => api.valueTypes);
-
-    this.classes = new Map();
-    for (const side of this.sides) {
-      for (const [name, cls] of Object.entries(dumps[side].api.classes ?? {})) {
-        if (!this.classes.has(name)) {
-          this.classes.set(name, { name, sides: new Set(), bases: new Set(), baseOn: {}, members: new Map() });
-        }
-        const model = this.classes.get(name);
-        model.sides.add(side);
-        if (cls.base) {
-          model.bases.add(cls.base);
-          model.baseOn[side] = cls.base;
-        }
-        for (const [kind, source] of [["bound", cls.methods], ["plain", cls.extra]]) {
-          for (const [member, fn] of Object.entries(source ?? {})) {
-            if (!model.members.has(member)) model.members.set(member, { name: member, kind, fn, sides: new Set() });
-            model.members.get(member).sides.add(side);
-          }
-        }
-      }
-    }
-    for (const model of this.classes.values()) {
-      model.derived = [...this.classes.values()].filter((other) => other.bases.has(model.name)).map((other) => other.name).sort();
-      model.instances = [...this.instances.values()].filter((instance) => instance.value === model.name).map((instance) => instance.name);
-    }
-
-    // Other globals. A Lua function defined inside the body of another one exists only because that
-    // function ran (helpers of ScriptFunctionHelp and the like): a side effect, not API.
-    const globals = merge((api) => api.globals);
-    const luaFunctions = [...globals.values()].filter((global) => global.value.type === "function" && global.value.fn.lines);
-    const nested = new Set(luaFunctions.filter((inner) => luaFunctions.some((outer) =>
-      outer !== inner && outer.value.fn.source === inner.value.fn.source &&
-      outer.value.fn.lines[0] < inner.value.fn.lines[0] && inner.value.fn.lines[1] <= outer.value.fn.lines[1])).map((global) => global.name));
-    this.lua = new Map();
-    this.constants = new Map();
-    for (const global of globals.values()) {
-      if (nested.has(global.name) || this.valueTypes.has(global.name)) continue;
-      if (global.value.type === "function" || global.value.type === "table") this.lua.set(global.name, global);
-      else if (global.value.value !== undefined) this.constants.set(global.name, global);
-    }
-
-    this.index = this.buildIndex();
-  }
-
-  /** Search entries: what can be found by name and where it leads. */
-  buildIndex() {
-    const entries = [];
-    const add = (name, kind, route, label = name) =>
-      entries.push({ name: name.toLowerCase(), text: label.toLowerCase(), label, kind, route });
-    for (const cls of this.classes.values()) {
-      add(cls.name, "class", `class/${cls.name}`);
-      for (const member of cls.members.keys()) add(member, "method", `class/${cls.name}/${member}`, `${cls.name}:${member}`);
-    }
-    for (const type of this.valueTypes.values()) {
-      add(type.name, "type", `type/${type.name}`);
-      for (const [member, kind] of Object.entries(type.value.members)) {
-        if (kind === "function" && !member.startsWith("__")) add(member, "method", `type/${type.name}/${member}`, `${type.name}:${member}`);
-      }
-    }
-    for (const fn of this.functions.keys()) add(fn, "function", `function/${fn}`);
-    for (const instance of this.instances.values()) add(instance.name, "instance", `class/${instance.value}`, `${instance.name} → ${instance.value}`);
-    for (const enumeration of this.enums.values()) {
-      add(enumeration.name, "enum", `enum/${enumeration.name}`);
-      for (const value of Object.keys(enumeration.value)) add(value, "enum value", `enum/${enumeration.name}/${value}`);
-    }
-    for (const global of this.lua.values()) {
-      add(global.name, global.value.type === "table" ? "table" : "Lua", `global/${global.name}`);
-      for (const [member, info] of Object.entries(global.value.members ?? {})) {
-        if (info.type === "function") add(member, "Lua", `global/${global.name}/${member}`, `${global.name}.${member}`);
-      }
-    }
-    for (const constant of this.constants.keys()) add(constant, "constant", `constants/${constant}`);
-    return entries;
-  }
-
-  isType(name) {
-    return this.classes.has(name) || this.valueTypes.has(name) || this.enums.has(name);
-  }
-
-  typeRoute(name) {
-    if (this.classes.has(name)) return `class/${name}`;
-    if (this.valueTypes.has(name)) return `type/${name}`;
-    return `enum/${name}`;
-  }
+function footer(builds) {
+  const ids = builds ? buildIds(builds) : [];
+  return el("footer", { class: "foot" }, "Unofficial project, not affiliated with Valve.",
+    ids.length ? [` Data from Dota 2 build${ids.length > 1 ? "s" : ""} `, codes(ids), ` (${buildDates(builds).join(", ")}).`] : null);
 }
 
 // ---------------------------------------------------------------------------------------------------------
 // Rendering pieces
 
-function sidePills(model, sides) {
-  if (sides.size === model.sides.length) return null;
-  return [...sides].map((side) => el("span", { class: `pill ${side}` }, side === "server" ? "server" : "client"));
+function sideTag(side, title = `Exists on the ${side} VM only`) {
+  return el("span", { class: `side-tag side-tag--${side}`, title }, side);
 }
 
-function typeNode(model, type) {
-  return model.isType(type) ? link(`${model.id}/${model.typeRoute(type)}`, type) : type;
+/** Tags of the sides a thing exists on; nothing when they are the sides of its context (the dataset or the class). */
+function sideTags(model, sides, context = new Set(model.sides)) {
+  if (sides.size === context.size && [...sides].every((side) => context.has(side))) return null;
+  return model.sides.filter((side) => sides.has(side)).map((side) => sideTag(side));
 }
 
-/** Signature of a function described by the engine: name(param: type, …): returns. */
-function boundSignature(model, name, fn) {
-  const params = fn.params.map((param, index) => [
-    index ? ", " : "", param.name || `${param.type.replace(/\W/g, "") || "arg"}_${index + 1}`, ": ", typeNode(model, param.type),
-  ]);
-  const returns = fn.returns && fn.returns !== "void" ? [": ", typeNode(model, fn.returns)] : [];
-  return el("code", { class: "sig" }, name, "(", params, ")", returns);
+/** Type in a signature or a table: a link to its page unless it is the page shown (`here`). */
+function typeNode(model, type, here) {
+  if (type === "<unknown>") return el("span", { class: "sig__type is-unknown" }, type);
+  if (model.isType(type) && type !== here) return el("a", { class: "sig__type", href: `#/${model.id}/${model.typeRoute(type)}` }, type);
+  return el("span", { class: "sig__type" }, type);
 }
 
-/** Signature of a Lua-defined or native function: only parameter names are known. */
-function plainSignature(name, fn, method) {
-  if (fn.native) return el("code", { class: "sig" }, name, "(...)");
-  const params = method && fn.params[0] === "self" ? fn.params.slice(1) : fn.params;
-  return el("code", { class: "sig" }, name, `(${[...params, ...(fn.vararg ? ["..."] : [])].join(", ")})`);
+/**
+ * What a signature shows: parameters ({ name, type?, anon }) and the return type or null.
+ *   bound   — function described by the engine (FDesc): names and types, a name may be missing;
+ *   plain   — Lua-defined or native function: names only, native ones take anything;
+ *   probe   — value type method found by trying a sample: types only;
+ *   unknown — value type method the probe could not call.
+ */
+function signatureParts(sig, fn, { method = false, owner } = {}) {
+  if (sig === "bound") {
+    return {
+      params: fn.params.map((param, index) => ({
+        name: param.name || `${param.type.replace(/\W/g, "") || "arg"}_${index + 1}`, type: param.type, anon: !param.name,
+      })),
+      returns: fn.returns && fn.returns !== "void" ? fn.returns : null,
+    };
+  }
+  if (sig === "plain") {
+    if (fn.native) return { params: [{ name: "...", anon: true }], returns: null };
+    const params = method && fn.params[0] === "self" ? fn.params.slice(1) : fn.params;
+    return { params: [...params, ...(fn.vararg ? ["..."] : [])].map((name) => ({ name })), returns: null };
+  }
+  if (sig === "probe") {
+    const operand = (kind) => (kind === "self" ? owner : "number");
+    return {
+      params: fn.params.map((kind, i) => ({ name: `arg${i + 1}`, type: operand(kind), anon: true })),
+      returns: fn.result === "nil" ? null : fn.result,
+    };
+  }
+  return { params: [{ name: "...", anon: true }], returns: null };
 }
 
-/** Signature of a class member; `name` may be a link. */
-function memberSignature(model, name, member) {
-  return member.kind === "bound" ? boundSignature(model, name, member.fn) : plainSignature(name, member.fn, true);
+/** Code signature; `name` is a node, a string or null (search previews show the parameters only). */
+function signature(model, name, { params, returns }, { here, extraClass = "" } = {}) {
+  const punct = (text) => el("span", { class: "sig__p" }, text);
+  const text = `${name?.textContent ?? name ?? ""}(${params.map((p) => (p.type ? `${p.name}: ${p.type}` : p.name)).join(", ")})` +
+    (returns ? `: ${returns}` : "");
+  // One parameter per line: always past 72 characters, on phones past 38 (the stylesheet decides).
+  const size = text.length > 72 ? " sig--long" : text.length > 38 ? " sig--mid" : "";
+  return el("code", { class: `sig${size}${extraClass}` },
+    typeof name === "string" ? el("span", { class: "sig__name" }, name) : name,
+    punct("("),
+    params.map((param, i) => el("span", { class: "sig__param" },
+      el("span", { class: param.anon ? "sig__pname is-anon" : "sig__pname" }, param.name),
+      param.type ? [punct(": "), typeNode(model, param.type, here)] : null,
+      i < params.length - 1 ? punct(", ") : null)),
+    el("span", { class: "sig__end" }, punct(")"), returns ? [punct(": "), typeNode(model, returns, here)] : null));
 }
 
-function sourceNote(fn) {
-  return fn.source ? el("div", { class: "note" }, `Defined in ${fn.source.replace(/\\/g, "/")}:${fn.lines[0]}`) : null;
+/** Description of the engine; the "Args: …" / "Params: …" tail it often carries goes to its own line. */
+function description(desc) {
+  if (!desc) return null;
+  const tail = desc.search(/\b(Args|Params):/);
+  if (tail < 0) return el("p", { class: "member__desc" }, desc);
+  const head = desc.slice(0, tail).trim();
+  return [head ? el("p", { class: "member__desc" }, head) : null, el("p", { class: "member__args" }, desc.slice(tail).trim())];
 }
 
-/** A documented member; `id` (for #/…/<member> links) is omitted for members listed on another class's page. */
-function memberBlock(model, id, signature, sides, fn) {
-  return el("div", { class: "member", id: id === null ? null : `m-${id}` },
-    signature, " ", sidePills(model, sides),
-    fn?.desc ? el("div", { class: "desc" }, fn.desc) : null,
-    fn ? sourceNote(fn) : null);
+const sourceNote = (fn) => (fn?.source
+  ? el("p", { class: "member__note" }, "Defined in ", code(`${fn.source.replace(/\\/g, "/")}:${fn.lines[0]}`))
+  : null);
+
+/**
+ * A documented member. `id` makes it a target of #/…/<member> links; members listed on another class's page
+ * have none. `href` is where its name leads.
+ */
+function memberBlock(model, { id, name, href, parts, sides, context, fn, here }) {
+  return el("article", { class: "member", id: id == null ? null : `m-${id}`, "data-name": name },
+    el("div", { class: "member__head" },
+      signature(model, href ? el("a", { class: "sig__name", href: `#/${href}` }, name) : name, parts, { here }),
+      sideTags(model, sides, context)),
+    description(fn?.desc),
+    sourceNote(fn));
 }
 
+/** Marks the member of the route, opens the section it is in and scrolls to it. */
 function focusMember(member) {
-  if (!member) return;
+  if (!member) return false;
   const node = document.getElementById(`m-${member}`);
-  if (!node) return;
-  node.classList.add("focus");
+  if (!node) return false;
+  for (let details = node.closest("details"); details; details = details.parentElement.closest("details")) details.open = true;
+  node.classList.add("is-focus");
   node.scrollIntoView({ block: "center" });
+  return true;
+}
+
+function pageHead({ eyebrow, title, sans = false, tags, lead, facts = [], more }) {
+  document.title = `${title} — ${SITE_TITLE}`;
+  const shown = facts.filter(Boolean);
+  return el("header", { class: "page-head" },
+    eyebrow ? el("p", { class: "eyebrow" }, eyebrow) : null,
+    el("h1", { class: sans ? "page-title page-title--sans" : "page-title" }, sans ? title : el("span", { class: "ident" }, breaks(title)), tags),
+    lead ? el("p", { class: "lead" }, lead) : null,
+    shown.length ? el("dl", { class: "facts" }, shown.map(([term, value]) => el("div", {}, el("dt", {}, term), el("dd", {}, value)))) : null,
+    more);
+}
+
+const block = (title, total, ...content) =>
+  el("section", { class: "block" }, el("h2", { class: "block__title" }, title, total === null ? null : [" ", count(total)]), content);
+
+/** A table in its frame. `columns`: [label, class?]; rows are <tr> nodes. */
+function table(kind, columns, rows) {
+  return el("div", { class: "table-wrap" },
+    el("table", { class: `table table--${kind}` },
+      el("thead", {}, el("tr", {}, columns.map(([label, cls]) => el("th", { scope: "col", class: cls }, label)))),
+      el("tbody", {}, rows)));
+}
+
+/** Sticky toolbar with a name filter; `onInput` gets the words of the query (queryWords). */
+function filterToolbar(id, label, placeholder, onInput, ...more) {
+  const input = el("input", { id, class: "filter__input", type: "search", placeholder, autocomplete: "off", spellcheck: "false",
+    oninput: () => onInput(queryWords(input.value)) });
+  return el("div", { class: "toolbar" },
+    el("div", { class: "filter" }, icon("filter"), el("label", { class: "vh", for: id }, label), input),
+    more);
+}
+
+/**
+ * Filters the members of a page by name: hides what does not match, the blocks and sections left empty,
+ * opens the sections with matches; `empty` is shown when nothing matches.
+ */
+function filterMembers(root, words, empty) {
+  const filtering = words.length > 0;
+  let shown = 0;
+  for (const member of root.querySelectorAll(".member[data-name]")) {
+    const hit = matchesWords(member.dataset.name.toLowerCase(), words);
+    member.hidden = !hit;
+    if (hit) shown++;
+  }
+  for (const section of root.querySelectorAll(".section:not(.section--plain)")) {
+    const any = section.querySelector(".member:not([hidden])");
+    section.hidden = filtering && !any;
+    if (filtering) section.open = Boolean(any);
+  }
+  for (const part of root.querySelectorAll(".block")) part.hidden = filtering && !part.querySelector(".member:not([hidden])");
+  empty.hidden = shown > 0;
 }
 
 // ---------------------------------------------------------------------------------------------------------
 // Pages
 
 function pageHome() {
+  document.title = SITE_TITLE;
+  const repo = manifest.repository;
+  const card = (attrs, kind, title, desc, stats, foot, footIcon) =>
+    el("a", attrs, el("span", { class: "dcard__kind" }, kind), el("span", { class: "dcard__title" }, title),
+      el("span", { class: "dcard__desc" }, desc), stats, el("span", { class: "dcard__foot" }, foot, icon(footIcon)));
+  const builds = manifest.datasets.find((dataset) => dataset.summary)?.summary.builds;
   show(
-    el("h1", {}, "Dota 2 Modding"),
-    el("p", { class: "muted" }, "Data for Dota 2 custom game development, taken from the game itself."),
-    el("div", { class: "cards" }, manifest.datasets.map((dataset) =>
-      el("a", { class: "card", href: `#/${dataset.id}` }, el("strong", {}, dataset.title), el("span", { class: "muted" }, dataset.description)))),
+    el("header", { class: "hero" },
+      el("h1", { class: "hero__title" }, SITE_TITLE),
+      el("p", { class: "lead" }, "Data for Dota 2 custom game development, taken from the game itself.")),
+    block("Datasets", null, el("div", { class: "cards" }, manifest.datasets.map((dataset) => {
+      const { summary } = dataset;
+      const stats = summary && el("span", { class: "dcard__stats" },
+        [["classes", summary.classes], ["functions", summary.functions], ["enums", summary.enums], ["constants", summary.constants]]
+          .filter(([, value]) => value !== undefined).map(([label, value]) => el("span", {}, el("b", {}, value), ` ${label}`)));
+      return card({ class: "dcard", href: `#/${dataset.id}` }, capitalize(Object.keys(dataset.files).join(" + ")), dataset.title,
+        dataset.description, stats, summary ? buildLine(summary.builds) : "Open", "arrow");
+    }))),
+    block("Use it in your editor", null, el("div", { class: "cards" },
+      card({ class: "dcard dcard--quiet", href: `${repo}/tree/main/extension` }, "VS Code extension", "Dota 2 VScripts Annotations",
+        "Dota 2 VScripts Lua API definitions for EmmyLua, taken from the game itself.", null, "Needs EmmyLua", "external"),
+      card({ class: "dcard dcard--quiet", href: repo }, "Repository", repo.split("/").pop(),
+        "Raw JSON dumps, EmmyLua annotations and the source of this site.", null, "MIT license", "external"))),
+    footer(builds),
   );
+}
+
+/** Banner telling whether the data comes from the current Steam build of the game; filled when Steam answers. */
+function freshnessStatus(model) {
+  const dumped = buildIds(model.builds);
+  const dumpedBuild = [`build${dumped.length > 1 ? "s" : ""} `, codes(dumped)];
+  const box = el("div", { role: "status" });
+  const render = (state, iconName, title, text, steam, differs = false) => {
+    box.className = `status status--${state}`;
+    fill(box,
+      el("span", { class: "status__icon" }, icon(iconName, "lg")),
+      el("div", { class: "status__body" }, el("p", { class: "status__title" }, title), el("p", { class: "status__text" }, text)),
+      el("dl", { class: "status__builds" },
+        el("div", {}, el("dt", {}, "Dump"), el("dd", {}, dumped.join(", "))),
+        el("div", {}, el("dt", {}, "Steam"), el("dd", { class: differs ? "is-diff" : null }, steam))));
+  };
+  render("checking", "spinner", "Checking against Steam…", "Asking Steam for the public build of Dota 2.", "…");
+  currentSteamBuild().then((current) => {
+    if (!current) {
+      render("error", "question", "Could not reach Steam",
+        ["The data is from ", dumpedBuild, "; whether it is the latest is unknown."], "—");
+    } else if (dumped.length === 1 && dumped[0] === current.id) {
+      render("ok", "check", "Matches the current build",
+        ["Dumped from build ", code(current.id), `, the public Dota 2 build on Steam since ${steamDate(current.time)}.`], current.id);
+    } else {
+      render("stale", "warning", "A newer build is out",
+        ["Steam serves build ", code(current.id), ` since ${steamDate(current.time)}; the data is from `, dumpedBuild,
+          ". A new dump is pending."], current.id, true);
+    }
+  });
+  return box;
+}
+
+/** .emmyrc.json snippet with a Copy button. */
+function emmyrcBlock(library) {
+  const p = (text) => el("span", { class: "tok-p" }, text);
+  const key = (text) => el("span", { class: "tok-key" }, `"${text}"`);
+  const pre = el("pre", { tabindex: "0" }, el("code", {},
+    p("{"), "\n  ", key("workspace"), p(": {"), "\n    ", key("library"), p(": ["),
+    el("span", { class: "tok-str" }, `"<path to the repository>/${library}"`), p("]"), "\n  ", p("}"), "\n", p("}")));
+  const label = document.createTextNode("Copy");
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent);
+      label.textContent = "Copied";
+      setTimeout(() => (label.textContent = "Copy"), 1400);
+    } catch {
+      // Clipboard blocked: the text stays selectable.
+    }
+  };
+  return el("figure", { class: "codeblock" },
+    el("figcaption", { class: "codeblock__head" }, el("span", { class: "codeblock__name" }, ".emmyrc.json"),
+      el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: copy }, icon("copy", "sm"), label)),
+    pre);
 }
 
 function pageOverview(model) {
   const { dataset } = model;
-  const files = Object.entries(dataset.files);
-  const annotationsUrl = `${manifest.repository}/tree/main/${dataset.annotations}`;
+  const repo = manifest.repository;
+  const stat = (value, label, route) => el("li", {}, route
+    ? el("a", { class: "stat", href: `#/${model.id}/${route}` }, el("span", { class: "stat__num" }, value), el("span", { class: "stat__label" }, label))
+    : el("div", { class: "stat" }, el("span", { class: "stat__num" }, value), el("span", { class: "stat__label" }, label)));
+  const download = (iconName, title, text, links) => el("div", { class: "dl" },
+    el("span", { class: "dl__icon" }, icon(iconName)),
+    el("div", {}, el("p", { class: "dl__title" }, title), el("p", { class: "dl__text" }, text)),
+    el("div", { class: "dl__links" }, links));
+  const button = (href, iconName, text) => el("a", { class: "btn btn--sm", href }, icon(iconName, "sm"), text);
   show(
-    el("h1", {}, dataset.title),
-    el("p", {}, dataset.description),
-    el("h2", {}, "Game build"),
-    freshnessNote(model),
-    el("table", {},
-      el("tr", {}, el("th", {}, "Side"), el("th", {}, "Steam build"), el("th", {}, "Version"), el("th", {}, "Revision"), el("th", {}, "Date")),
-      model.sides.map((side) => el("tr", {}, el("td", {}, side), el("td", {}, model.builds[side].steamBuildId ?? "—"),
-        el("td", {}, model.builds[side].clientVersion), el("td", {}, model.builds[side].sourceRevision), el("td", {}, model.builds[side].versionDate)))),
-    el("h2", {}, "Contents"),
-    el("div", { class: "meta" },
-      el("span", {}, `classes: ${model.classes.size}`),
-      el("span", {}, link(`${model.id}/functions`, `functions: ${model.functions.size}`)),
-      el("span", {}, link(`${model.id}/instances`, `instances: ${model.instances.size}`)),
-      el("span", {}, `enums: ${model.enums.size}`),
-      el("span", {}, link(`${model.id}/constants`, `constants: ${model.constants.size}`)),
-      el("span", {}, `core Lua: ${model.lua.size}`)),
-    el("p", {}, "Marked ", el("span", { class: "pill server" }, "server"), " or ", el("span", { class: "pill client" }, "client"),
-      " — exists on that side only; unmarked — on both."),
-    el("h2", {}, "Download"),
-    el("p", {}, "Raw dumps: ", files.map(([side, path], i) => [i ? ", " : "", el("a", { href: dataRoot + path }, `${side}.json`)]),
-      ". Format — ", el("a", { href: `${manifest.repository}/tree/main/data/${model.id}` }, "described in the repository"), "."),
-    el("p", {}, "EmmyLua annotations: ", el("a", { href: annotationsUrl }, dataset.annotations),
-      ". Add them as a library in the project's .emmyrc.json:"),
-    el("pre", {}, el("code", {}, `{\n  "workspace": {\n    "library": ["<path to the repository>/${dataset.annotations}"]\n  }\n}`)),
+    pageHead({ eyebrow: "Dataset", title: dataset.title, sans: true, lead: dataset.description }),
+    freshnessStatus(model),
+    block("Game build", null, table("build",
+      [["Side"], ["Steam build", "num"], ["Version", "num"], ["Revision", "num"], ["Date"]],
+      model.sides.map((side) => {
+        const build = model.builds[side];
+        return el("tr", {},
+          el("td", {}, sideTag(side, `${capitalize(side)} VM`)),
+          el("td", { class: "num", "data-label": "Steam build" }, code(build.steamBuildId ?? "—")),
+          el("td", { class: "num", "data-label": "Version" }, code(build.clientVersion)),
+          el("td", { class: "num", "data-label": "Revision" }, code(build.sourceRevision)),
+          el("td", { "data-label": "Date" }, versionDate(build.versionDate)));
+      }))),
+    block("Contents", null, el("ul", { class: "stats" },
+      stat(model.classes.size, "classes"),
+      stat(model.functions.size, "functions", "functions"),
+      stat(model.instances.size, "instances", "instances"),
+      stat(model.enums.size, "enums"),
+      stat(model.constants.size, "constants", "constants"),
+      stat(model.lua.size, "core Lua"))),
+    block("Sides", null, el("ul", { class: "legend" },
+      model.sides.map((side) => el("li", {}, sideTag(side), el("span", {}, `Exists on the ${side} VM only.`))),
+      el("li", {}, el("span", { class: "legend__none" }, "no mark"), el("span", {}, "Exists on both sides.")))),
+    block("Download", null,
+      el("div", { class: "downloads" },
+        download("download", "Raw dumps",
+          ["JSON, keys sorted. Format — ", el("a", { href: `${repo}/tree/main/data/${model.id}` }, "described in the repository"), "."],
+          Object.entries(dataset.files).map(([side, path]) => button(dataRoot + path, "file", `${side}.json`))),
+        download("braces", "EmmyLua annotations", ["LuaCATS definitions: ", code("shared/"), ", ", code("server/"), ", ", code("client/"), "."],
+          button(`${repo}/tree/main/${dataset.annotations}`, "external", dataset.annotations)),
+        download("extension", "VS Code extension", "Dota 2 VScripts Annotations connects the same annotations to EmmyLua for you.",
+          button(`${repo}/tree/main/extension`, "external", "Extension"))),
+      el("p", { class: "block__note downloads__note" }, "Without the extension, add the annotations as a library in the project’s ",
+        code(".emmyrc.json"), ":"),
+      emmyrcBlock(dataset.annotations)),
+    footer(model.builds),
   );
+}
+
+/** Inheritance chain of a class: one per side when the bases differ between sides. */
+function inheritanceChains(model, cls) {
+  const chains = model.sides.filter((side) => cls.sides.has(side))
+    .map((side) => ({ side, chain: model.chain(cls.name, side) }))
+    .filter(({ chain }) => chain.length > 1);
+  if (!chains.length) return null;
+  const same = chains.every(({ chain }) => chain.join() === chains[0].chain.join());
+  return (same ? chains.slice(0, 1) : chains).map(({ side, chain }) =>
+    el("nav", { class: "chain", "aria-label": same ? "Inheritance" : `Inheritance on the ${side}` },
+      el("span", { class: "chain__label" }, "Inheritance", same ? null : sideTag(side)),
+      el("ol", {}, chain.map((name, i) => (i === chain.length - 1
+        ? el("li", { "aria-current": "page" }, breaks(name))
+        : el("li", {}, model.classes.has(name) ? el("a", { href: `#/${model.id}/class/${name}` }, breaks(name)) : breaks(name)))))));
 }
 
 function pageClass(model, name, member) {
   const cls = model.classes.get(name);
-  if (!cls) return pageMissing(name);
-  const ancestors = [];
-  const queue = [...cls.bases];
-  while (queue.length) {
-    const base = queue.shift();
-    if (ancestors.includes(base) || !model.classes.has(base)) continue;
-    ancestors.push(base);
-    queue.push(...model.classes.get(base).bases);
+  if (!cls) return pageNotFound(model, "class", name);
+  const own = [...cls.members.values()].sort((a, b) => a.name.localeCompare(b.name));
+  const inherited = model.inherited(cls);
+  const inheritedCount = inherited.reduce((sum, group) => sum + group.members.length, 0);
+  const method = (m, owner, id) => memberBlock(model, {
+    id, name: m.name, href: `${model.id}/class/${owner}/${m.name}`, parts: signatureParts(m.kind, m.fn, { method: true }),
+    sides: m.sides, context: cls.sides, fn: m.fn, here: cls.name,
+  });
+  const sections = inherited.map(({ ancestor, members }) => el("details", { class: "section" },
+    el("summary", { class: "section__head" },
+      el("span", { class: "section__title" }, "Inherited from ", code(breaks(ancestor))), count(members.length)),
+    el("div", { class: "section__body members members--compact" }, members.map((m) => method(m, ancestor, null)))));
+  const empty = el("p", { class: "empty__hint", hidden: true }, "No methods match the filter.");
+  const page = [
+    pageHead({
+      eyebrow: "Class", title: cls.name, tags: sideTags(model, cls.sides),
+      facts: [
+        ["Methods", inheritedCount ? `${own.length} own · ${inheritedCount} inherited` : `${own.length} own`],
+        cls.instances.length ? [cls.instances.length > 1 ? "Instances" : "Instance", cls.instances.map((instance, i) => [i ? ", " : "", code(instance)])] : null,
+      ],
+      more: [
+        inheritanceChains(model, cls),
+        cls.derived.length ? el("details", { class: "section section--plain" },
+          el("summary", { class: "section__head" }, el("span", { class: "section__title" }, "Derived classes"), count(cls.derived.length)),
+          el("ul", { class: "section__body column" }, cls.derived.map((derived) =>
+            el("li", {}, el("a", { href: `#/${model.id}/class/${derived}`, title: derived }, derived))))) : null,
+      ],
+    }),
+    own.length + inheritedCount ? filterToolbar("member-filter", "Filter methods", `Filter ${own.length + inheritedCount} methods by name`,
+      (words) => filterMembers(view, words, empty),
+      sections.length ? [
+        el("span", { class: "toolbar__spacer" }),
+        el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = true)) }, "Expand inherited"),
+        el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = false)) }, "Collapse"),
+      ] : null) : null,
+    block("Methods", own.length, own.length
+      ? el("div", { class: "members" }, own.map((m) => method(m, cls.name, m.name)))
+      : el("p", { class: "block__note" }, "No own methods.")),
+    sections.length ? block("Inherited", inheritedCount, el("div", { class: "sections" }, sections)) : null,
+    empty,
+  ];
+  show(page);
+  // An own member of the route, else an inherited one: it has no id here, so find it by name.
+  if (member && !focusMember(member)) {
+    const node = [...view.querySelectorAll(".member[data-name]")].find((m) => m.dataset.name === member);
+    if (node) {
+      node.id = `m-${member}`;
+      focusMember(member);
+    }
   }
-  const members = [...cls.members.values()].sort((a, b) => a.name.localeCompare(b.name));
-  show(
-    el("h1", {}, cls.name, " ", sidePills(model, cls.sides)),
-    el("div", { class: "meta" },
-      cls.bases.size ? el("span", {}, "base: ", [...cls.bases].map((base, i) => [i ? ", " : "", typeNode(model, base)])) : null,
-      cls.instances.length ? el("span", {}, "instance: ", cls.instances.join(", ")) : null,
-      el("span", {}, `methods: ${members.length}`)),
-    cls.derived.length ? el("details", { class: "section" }, el("summary", {}, `Derived classes (${cls.derived.length})`),
-      el("ul", { class: "column" }, cls.derived.map((derived) => el("li", {}, typeNode(model, derived))))) : null,
-    el("h2", {}, "Methods"),
-    members.length ? members.map((m) => memberBlock(model, m.name, memberSignature(model, m.name, m), m.sides, m.fn))
-      : el("p", { class: "muted" }, "No own methods."),
-    inheritedSections(model, cls, ancestors),
-  );
-  currentClass = cls.name;
-  if (!search.value.trim()) revealInNav(cls.name);
-  focusMember(member);
 }
 
-/** Collapsed "Inherited from" sections, nearest ancestor first; a method overridden closer is not repeated. */
-function inheritedSections(model, cls, ancestors) {
-  const seen = new Set(cls.members.keys());
-  return ancestors.map((ancestor) => {
-    const inherited = [...model.classes.get(ancestor).members.values()]
-      .filter((m) => !seen.has(m.name))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    for (const m of inherited) seen.add(m.name);
-    if (!inherited.length) return null;
-    return el("details", { class: "section" },
-      el("summary", {}, `Inherited from ${ancestor} (${inherited.length})`),
-      inherited.map((m) => memberBlock(model, null,
-        memberSignature(model, link(`${model.id}/class/${ancestor}/${m.name}`, m.name), m), m.sides, m.fn)));
-  });
-}
+// Value type fields: coordinates, then colour channels, then the rest by name.
+const FIELD_ORDER = "xyzwrgba";
+const fieldRank = (field) => (field.length === 1 && FIELD_ORDER.includes(field) ? FIELD_ORDER.indexOf(field) : FIELD_ORDER.length);
+
+// Lua metamethods by event name: symbol and what it does.
+const OPERATORS = {
+  add: ["+", "add"], sub: ["-", "subtract"], mul: ["*", "multiply"], div: ["/", "divide"], mod: ["%", "modulo"],
+  pow: ["^", "power"], unm: ["-", "negate"], len: ["#", "length"], concat: ["..", "concatenate"],
+  eq: ["==", "equal"], lt: ["<", "less than"], le: ["<=", "less or equal"],
+};
 
 function pageValueType(model, name, member) {
   const type = model.valueTypes.get(name);
-  if (!type) return pageMissing(name);
-  const { members, probe } = type.value;
+  if (!type) return pageNotFound(model, "value type", name);
+  const { probe } = type.value;
   const operand = (kind) => (kind === "self" ? name : "number");
-  const methods = Object.keys(members).filter((key) => members[key] === "function" && !key.startsWith("__")).sort();
+  const fields = Object.entries(probe?.fields ?? {}).sort(([a], [b]) => fieldRank(a) - fieldRank(b) || a.localeCompare(b));
+  const operators = new Map();
+  for (const op of probe?.operators ?? []) {
+    if (!operators.has(op.op)) operators.set(op.op, []);
+    operators.get(op.op).push(op);
+  }
+  const methods = model.typeMethods(type);
+  const typed = (kind) => typeNode(model, operand(kind), name);
   show(
-    el("h1", {}, name, " ", sidePills(model, type.sides)),
-    probe ? el("p", { class: "muted" }, "Fields, operators and signatures were found by trying a sample made by ",
-      el("code", {}, `${name}()`), "; parameter names are unknown.") : null,
-    probe && Object.keys(probe.fields).length ? [el("h2", {}, "Fields"), el("table", {},
-      Object.entries(probe.fields).map(([field, kind]) => el("tr", {}, el("td", {}, el("code", {}, field)), el("td", {}, typeNode(model, kind)))))] : null,
-    probe?.operators?.length ? [el("h2", {}, "Operators"), el("table", {}, probe.operators.map((op) => el("tr", {},
-      el("td", {}, el("code", {}, op.left === undefined ? `${op.op} ${name}` : `${operand(op.left)} ${op.op} ${operand(op.right)}`)),
-      el("td", {}, "→ ", typeNode(model, op.result)))))] : null,
-    el("h2", {}, "Methods"),
-    methods.map((m) => {
-      const probed = probe?.methods?.[m];
-      const signature = probed
-        ? el("code", { class: "sig" }, m, "(", probed.params.map((kind, i) => [i ? ", " : "", `arg${i + 1}: `, typeNode(model, operand(kind))]), ")",
-          probed.result === "nil" ? [] : [": ", typeNode(model, probed.result)])
-        : el("code", { class: "sig" }, `${m}(...)`);
-      return memberBlock(model, m, signature, type.sides, null);
+    pageHead({
+      eyebrow: "Value type", title: name, tags: sideTags(model, type.sides),
+      more: probe ? el("div", { class: "callout", role: "note" }, icon("info"),
+        el("p", {}, "Fields, operators and signatures were found by trying a sample made by ", code(`${name}()`),
+          "; parameter names are unknown.")) : null,
     }),
+    fields.length ? block("Fields", fields.length, table("fields", [["Field"], ["Type"]],
+      fields.map(([field, kind]) => el("tr", {}, el("td", {}, code(field)), el("td", {}, typeNode(model, kind, name)))))) : null,
+    operators.size ? block("Operators", probe.operators.length, table("ops", [["Operator"], ["Forms"], ["Result"]],
+      [...operators].map(([op, forms]) => {
+        const [symbol, label] = OPERATORS[op] ?? [op, op];
+        const results = [...new Set(forms.map((form) => form.result))];
+        return el("tr", {},
+          el("td", {}, el("code", { class: "op-sym" }, symbol), " ", el("span", { class: "muted" }, label)),
+          el("td", {}, el("div", { class: "forms" }, forms.map((form) => (form.left === undefined
+            ? el("code", {}, symbol, typed("self"))
+            : el("code", {}, typed(form.left), ` ${symbol} `, typed(form.right)))))),
+          el("td", {}, results.map((result, i) => [i ? " " : "", el("code", {}, typeNode(model, result, name))])));
+      }))) : null,
+    block("Methods", methods.length, el("div", { class: "members" }, methods.map((method) => {
+      const probed = probe?.methods?.[method];
+      return memberBlock(model, {
+        id: method, name: method, href: `${model.id}/type/${name}/${method}`,
+        parts: signatureParts(probed ? "probe" : "unknown", probed, { owner: name }),
+        sides: type.sides, context: type.sides, here: name,
+      });
+    }))),
   );
   focusMember(member);
 }
 
-function pageFunction(model, name) {
-  const fn = model.functions.get(name);
-  if (!fn) return pageMissing(name);
-  show(el("h1", {}, name, " ", sidePills(model, fn.sides)), memberBlock(model, name, boundSignature(model, name, fn.value), fn.sides, fn.value));
-}
-
-function pageFunctions(model) {
+function pageFunctions(model, name) {
+  if (name && !model.functions.has(name)) return pageNotFound(model, "function", name);
   const all = [...model.functions.values()].sort((a, b) => a.name.localeCompare(b.name));
-  show(el("h1", {}, "Global functions"), all.map((fn) => memberBlock(model, fn.name, boundSignature(model, fn.name, fn.value), fn.sides, fn.value)));
+  const empty = el("p", { class: "empty__hint", hidden: true }, "No functions match the filter.");
+  show(
+    pageHead({ title: "Global functions", sans: true, lead: "Functions the engine puts in the global scope of the Lua VM." }),
+    filterToolbar("function-filter", "Filter functions", `Filter ${all.length} functions by name`, (words) => filterMembers(view, words, empty)),
+    block("Functions", all.length, el("div", { class: "members" }, all.map((fn) => memberBlock(model, {
+      id: fn.name, name: fn.name, href: `${model.id}/function/${fn.name}`, parts: signatureParts("bound", fn.value),
+      sides: fn.sides, fn: fn.value,
+    })))),
+    empty,
+  );
+  focusMember(name);
 }
 
 function pageInstances(model) {
-  show(el("h1", {}, "Instances"), el("table", {}, [...model.instances.values()].sort((a, b) => a.name.localeCompare(b.name)).map((instance) =>
-    el("tr", {}, el("td", {}, el("code", {}, instance.name), " ", sidePills(model, instance.sides)), el("td", {}, typeNode(model, instance.value))))));
+  const all = [...model.instances.values()].sort((a, b) => a.name.localeCompare(b.name));
+  show(
+    pageHead({ title: "Instances", sans: true, lead: "Objects the engine puts in the global scope, with their classes." }),
+    table("instances", [["Name"], ["Class"], ["Side", "side-col"]], all.map((instance) => el("tr", { id: `m-${instance.name}` },
+      el("td", {}, code(instance.name)),
+      el("td", {}, el("code", {}, typeNode(model, instance.value))),
+      el("td", { class: "side-col" }, sideTags(model, instance.sides))))),
+  );
+}
+
+/** Common prefix of enum value names up to its last "_": DOTA_GAMERULES_STATE_ of DOTA_GAMERULES_STATE_INIT… */
+function commonPrefix(names) {
+  if (names.length < 2) return "";
+  let prefix = names[0];
+  for (const name of names) while (!name.startsWith(prefix)) prefix = prefix.slice(0, -1);
+  prefix = prefix.slice(0, prefix.lastIndexOf("_") + 1);
+  return names.some((name) => name === prefix) ? "" : prefix;
 }
 
 function pageEnum(model, name, member) {
   const enumeration = model.enums.get(name);
-  if (!enumeration) return pageMissing(name);
+  if (!enumeration) return pageNotFound(model, "enum", name);
   const values = Object.entries(enumeration.value).sort((a, b) => (a[1].value ?? 0) - (b[1].value ?? 0));
+  const prefix = commonPrefix(values.map(([value]) => value));
+  const described = values.some(([, info]) => info.desc);
   show(
-    el("h1", {}, name, " ", sidePills(model, enumeration.sides)),
-    el("table", {}, el("tr", {}, el("th", {}, "Name"), el("th", {}, "Value"), el("th", {}, "Description")),
-      values.map(([value, info]) => el("tr", { id: `m-${value}`, class: "member" },
-        el("td", {}, el("code", {}, value)), el("td", {}, info.value ?? "—"), el("td", {}, info.desc)))),
+    pageHead({
+      eyebrow: "Enum", title: name, tags: sideTags(model, enumeration.sides),
+      facts: [["Values", values.length], ["Order", "by value"]],
+    }),
+    table("enum", [["Name"], ["Value", "num"], described ? ["Description"] : null].filter(Boolean),
+      values.map(([value, info]) => el("tr", { id: `m-${value}` },
+        el("td", {}, el("code", { class: "ident" },
+          prefix ? el("span", { class: "ident__prefix" }, breaks(prefix)) : null, breaks(value.slice(prefix.length)))),
+        el("td", { class: "num" }, code(info.value ?? "—")),
+        described ? el("td", { class: "desc" }, info.desc) : null))),
+    described ? null : el("p", { class: "table-caption" }, "The engine gives no descriptions for these values."),
   );
   focusMember(member);
 }
 
 function pageGlobal(model, name, member) {
   const global = model.lua.get(name);
-  if (!global) return pageMissing(name);
+  if (!global) return pageNotFound(model, "global", name);
   if (global.value.type === "function") {
-    show(el("h1", {}, name, " ", sidePills(model, global.sides)), memberBlock(model, name, plainSignature(name, global.value.fn, false), global.sides, global.value.fn));
+    show(
+      pageHead({ eyebrow: "Lua function", title: name, tags: sideTags(model, global.sides) }),
+      el("div", { class: "members" }, memberBlock(model, {
+        id: name, name, parts: signatureParts("plain", global.value.fn), sides: global.sides, context: global.sides, fn: global.value.fn,
+      })),
+    );
     return;
   }
   const members = Object.entries(global.value.members ?? {}).sort((a, b) => a[0].localeCompare(b[0]));
   show(
-    el("h1", {}, name, " ", sidePills(model, global.sides)),
-    el("p", { class: "muted" }, "Global table."),
-    members.map(([key, info]) => memberBlock(model, key,
-      info.type === "function" ? plainSignature(`${name}.${key}`, info.fn, false) : el("code", { class: "sig" }, `${name}.${key}: ${info.type}`),
-      global.sides, info.fn)),
+    pageHead({ eyebrow: "Lua table", title: name, tags: sideTags(model, global.sides), facts: [["Members", members.length]] }),
+    block("Members", members.length, el("div", { class: "members" }, members.map(([key, info]) => (info.type === "function"
+      ? memberBlock(model, {
+        id: key, name: key, href: `${model.id}/global/${name}/${key}`, parts: signatureParts("plain", info.fn),
+        sides: global.sides, context: global.sides, fn: info.fn,
+      })
+      : el("article", { class: "member", id: `m-${key}`, "data-name": key },
+        el("div", { class: "member__head" }, el("code", { class: "sig" },
+          el("span", { class: "sig__name" }, key), el("span", { class: "sig__p" }, ": "), el("span", { class: "sig__type" }, info.type)))))))),
   );
   focusMember(member);
 }
 
 function pageConstants(model, name) {
   const all = [...model.constants.values()].sort((a, b) => a.name.localeCompare(b.name));
-  const table = el("table", {});
-  const render = (query) => {
-    const needle = query.trim().toLowerCase();
-    const rows = all.filter((constant) => !needle || constant.name.toLowerCase().includes(needle)).slice(0, 500);
-    fill(table, el("tr", {}, el("th", {}, "Name"), el("th", {}, "Value")), rows.map((constant) =>
-      el("tr", { id: `m-${constant.name}`, class: "member" }, el("td", {}, el("code", {}, constant.name), " ", sidePills(model, constant.sides)),
-        el("td", {}, el("code", {}, JSON.stringify(constant.value.value))))));
+  // Every row is built once; the filter only hides rows, so typing stays instant.
+  const rows = all.map((constant) => {
+    const { value } = constant.value;
+    return el("tr", { id: `m-${constant.name}`, "data-name": constant.name.toLowerCase() },
+      el("td", {}, el("code", { class: "ident" }, breaks(constant.name))),
+      el("td", { class: typeof value === "string" ? "str" : typeof value === "number" ? "num" : null }, code(JSON.stringify(value))),
+      el("td", { class: "side-col" }, sideTags(model, constant.sides)));
+  });
+  const meta = el("p", { class: "filter__meta" });
+  const table = el("div", { class: "table-wrap" }, el("table", { class: "table table--const" },
+    el("thead", {}, el("tr", {}, el("th", { scope: "col" }, "Name"), el("th", { scope: "col" }, "Value"), el("th", { scope: "col", class: "side-col" }, "Side"))),
+    el("tbody", {}, rows)));
+  const empty = el("p", { class: "empty__hint", hidden: true }, "No constants match the filter.");
+  // Nothing matches: the message takes the place of the table, not a header row over nothing.
+  const filter = (words) => {
+    let shown = 0;
+    for (const row of rows) {
+      row.hidden = !matchesWords(row.dataset.name, words);
+      if (!row.hidden) shown++;
+    }
+    fill(meta, el("strong", {}, shown), ` of ${all.length}`);
+    table.hidden = shown === 0;
+    empty.hidden = shown > 0;
   };
-  const filter = el("input", { class: "filter", type: "search", placeholder: "Filter by name", value: name ?? "", oninput: (event) => render(event.target.value) });
-  show(el("h1", {}, "Constants"), el("p", { class: "muted" }, `Numbers and strings in _G outside enums: ${all.length}. Up to 500 shown.`), filter, table);
-  render(name ?? "");
+  const toolbar = filterToolbar("const-filter", "Filter constants by name", "Filter by name", filter, meta);
+  const input = toolbar.querySelector("input");
+  input.value = name ?? "";
+  show(
+    pageHead({ title: "Constants", sans: true, lead: ["Numbers and strings in ", code("_G"), " outside enums."] }),
+    toolbar,
+    table,
+    empty,
+  );
+  filter(queryWords(input.value));
   focusMember(name);
 }
 
-function pageMissing(name) {
-  show(el("h1", {}, "Not found"), el("p", { class: "muted" }, name ?? ""));
+/** Empty, error and not-found states; `failed` paints it as an error, `details` is the error text. */
+function emptyState({ iconName, title, text, hint, actions, failed = false, details }) {
+  document.title = `${title} — ${SITE_TITLE}`;
+  return el("div", { class: failed ? "empty empty--error" : "empty" },
+    el("span", { class: "empty__icon" }, icon(iconName, "lg")),
+    el("h1", { class: "empty__title" }, title),
+    text ? el("p", { class: "empty__text" }, text) : null,
+    hint ? el("p", { class: "empty__hint" }, hint) : null,
+    details ? el("pre", {}, details) : null,
+    actions ? el("div", { class: "empty__actions" }, actions) : null);
+}
+
+function pageNotFound(model, kind, name) {
+  show(emptyState({
+    iconName: "missing", title: "Not found",
+    text: name ? ["There is no ", kind, " ", code(name), " in ", model?.dataset.title ?? SITE_TITLE, "."] : `There is no such ${kind}.`,
+    actions: el("a", { class: "btn", href: model ? `#/${model.id}` : "#/" }, icon("overview", "sm"), model ? "Overview" : "Home"),
+  }));
+}
+
+function pageLoading(dataset) {
+  document.title = SITE_TITLE;
+  const skeleton = (width, style = "") => el("div", { class: "skel", style: `width: ${width}%${style}` });
+  show(el("div", { class: "loading", "aria-busy": "true" },
+    el("p", { class: "loading__label", role: "status" }, icon("spinner"), `Loading ${dataset.title}…`),
+    el("div", { class: "skel skel--title" }), skeleton(64), skeleton(48), skeleton(72, "; margin-top: 24px"), skeleton(56)));
+}
+
+function showError(error) {
+  show(emptyState({
+    iconName: "error", title: "Could not load the data", failed: true, details: String(error?.stack ?? error),
+    text: "The page needs the dump files next to the site. Reload, or open the repository if it keeps failing.",
+    actions: [
+      el("button", { class: "btn", type: "button", onclick: () => location.reload() }, "Reload"),
+      manifest ? el("a", { class: "btn btn--ghost", href: manifest.repository }, icon("external", "sm"), "Repository") : null,
+    ],
+  }));
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Navigation: grouped lists or search hits
+// Search: results take the main area; the page of the route comes back when the query is cleared.
+
+let searchKind = null;
+let activeHit = 0;
+let searchTimer = null;
+
+/** Model to search: the dataset in the route, else the first VScripts one. */
+async function searchModel() {
+  if (currentModel) return currentModel;
+  const dataset = manifest.datasets.find((d) => d.kind === "vscripts-api");
+  return dataset ? loadModel(dataset) : null;
+}
+
+/** Text with the parts matching the query words wrapped in <mark>, built as nodes. */
+function highlight(text, words) {
+  const lower = text.toLowerCase();
+  const spans = [];
+  for (const word of words) for (let i = lower.indexOf(word); i >= 0; i = lower.indexOf(word, i + word.length)) spans.push([i, i + word.length]);
+  spans.sort((a, b) => a[0] - b[0]);
+  const nodes = [];
+  let pos = 0;
+  for (const [start, end] of spans) {
+    if (end <= pos) continue;
+    const from = Math.max(start, pos);
+    nodes.push(text.slice(pos, from), el("mark", {}, text.slice(from, end)));
+    pos = end;
+  }
+  nodes.push(text.slice(pos));
+  return nodes.filter((node) => node !== "");
+}
+
+function hitNode(model, entry, words, active) {
+  const member = entry.owner && entry.label.slice(entry.owner.length + 1);
+  const desc = entry.sig === "bound" ? entry.fn.desc?.split(/\b(?:Args|Params):/)[0].trim() : null;
+  return el("li", { class: "hit" }, el("a", { class: active ? "hit__link is-active" : "hit__link", href: `#/${model.id}/${entry.route}` },
+    el("span", { class: "hit__kind" }, entry.kind),
+    el("span", { class: "hit__main" },
+      el("span", { class: "hit__name" }, member
+        ? [el("span", { class: "hit__owner" }, highlight(entry.owner, words), ":"), highlight(member, words)]
+        : highlight(entry.label, words)),
+      entry.sig ? signature(model, null, signatureParts(entry.sig, entry.fn, { method: Boolean(entry.owner), owner: entry.owner }), { extraClass: " hit__sig" }) : null,
+      desc ? el("span", { class: "hit__desc" }, desc) : null),
+    el("span", { class: "hit__enter" }, icon("enter", "sm"), "Enter")));
+}
+
+async function renderSearch() {
+  const query = search.value.trim();
+  const model = await searchModel();
+  if (!model || search.value.trim() !== query) return; // the query changed while the data loaded
+  const words = queryWords(query);
+  const all = model.search(query);
+  document.title = `${query} — ${SITE_TITLE}`;
+  if (!all.length) {
+    show(emptyState({
+      iconName: "search", title: "Nothing found",
+      text: ["No name contains ", words.map((word, i) => [i ? " and " : "", code(word)]), "."],
+      hint: ["Words can go in any order and match parts of names: ", code("spawn table"), " finds ", code("SpawnEntityFromTableAsynchronous"), "."],
+    }));
+    return;
+  }
+  const kinds = new Map();
+  for (const entry of all) kinds.set(entry.kind, (kinds.get(entry.kind) ?? 0) + 1);
+  if (searchKind && !kinds.has(searchKind)) searchKind = null;
+  const hits = searchKind ? all.filter((entry) => entry.kind === searchKind) : all;
+  activeHit = Math.min(activeHit, hits.length - 1);
+  const chip = (kind, total, label) => el("button", {
+    class: "chip", type: "button", "aria-pressed": String((searchKind ?? "") === kind),
+    onclick: () => {
+      searchKind = kind || null;
+      activeHit = 0;
+      renderSearch();
+    },
+  }, label, " ", count(total));
+  show(
+    el("div", { class: "results__head" },
+      el("h1", { class: "results__title" }, `${all.length === SEARCH_LIMIT ? `${SEARCH_LIMIT}+` : all.length} result${all.length === 1 ? "" : "s"} for `,
+        el("q", {}, query)),
+      el("div", { class: "chips", role: "group", "aria-label": "Filter results by kind" },
+        chip("", all.length, "All"), [...kinds].map(([kind, total]) => chip(kind, total, kind)))),
+    el("ol", { class: "hits" }, hits.map((entry, i) => hitNode(model, entry, words, i === activeHit))),
+    el("p", { class: "keys" },
+      el("span", {}, el("kbd", {}, "↑"), el("kbd", {}, "↓"), "move"),
+      el("span", {}, el("kbd", {}, "Enter"), "open"),
+      el("span", {}, el("kbd", {}, "Esc"), "clear and go back")),
+  );
+}
+
+function moveActiveHit(delta) {
+  const links = [...view.querySelectorAll(".hit__link")];
+  if (!links.length) return;
+  links[activeHit]?.classList.remove("is-active");
+  activeHit = (activeHit + delta + links.length) % links.length;
+  links[activeHit].classList.add("is-active");
+  links[activeHit].scrollIntoView({ block: "nearest" });
+}
+
+/** The "/" hint turns into a clear button while there is a query. */
+function syncSearchBox() {
+  const box = search.closest(".search");
+  box.querySelector(".search__key").hidden = Boolean(search.value);
+  box.querySelector(".search__clear").hidden = !search.value;
+}
+
+/** Empties the query; the page of the route comes back unless a navigation is about to render one. */
+function clearSearch({ restore = true } = {}) {
+  clearTimeout(searchTimer);
+  const had = Boolean(search.value);
+  search.value = "";
+  searchKind = null;
+  activeHit = 0;
+  syncSearchBox();
+  if (had && restore) route().catch(showError);
+}
+
+/** Opens a hit: a new route clears the search on hashchange; the same route has to be rendered here. */
+function openHit(link) {
+  const href = link.getAttribute("href");
+  if (href === location.hash) clearSearch();
+  else location.hash = href;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Navigation
+
+function renderDatasetTabs(datasetId) {
+  for (const tabs of document.querySelectorAll(".datasets")) {
+    fill(tabs, manifest.datasets.map((dataset) =>
+      el("a", { class: "datasets__tab", href: `#/${dataset.id}`, "aria-current": dataset.id === datasetId ? "page" : null }, dataset.title)));
+  }
+}
 
 function renderNav(model) {
+  app.classList.toggle("is-home", !model);
   if (!model) {
     nav.replaceChildren();
     return;
   }
-  const query = search.value.trim().toLowerCase();
-  if (query) {
-    // Words in any order: "spawn table" finds SpawnEntityFromTableAsynchronous; "baseentity origin" finds
-    // CBaseEntity:GetAbsOrigin, since the text includes the owner of a member.
-    const words = query.split(/\s+/);
-    const hits = model.index
-      .filter((entry) => words.every((word) => entry.text.includes(word)))
-      .sort((a, b) => rank(a, words) - rank(b, words) || a.label.length - b.label.length || a.label.localeCompare(b.label))
-      .slice(0, 300);
-    fill(nav, el("ul", {}, hits.map((hit) =>
-      el("li", { class: "hit" }, el("span", { class: "kind" }, hit.kind), link(`${model.id}/${hit.route}`, hit.label)))),
-    hits.length ? null : el("p", { class: "muted" }, "Nothing found"));
-    return;
-  }
-  const group = (title, names, route) =>
-    collapsible(`${model.id}:group:${title}`, { class: "group" }, el("summary", {}, `${title} (${names.length})`),
-      el("ul", {}, names.map((name) => el("li", {}, link(`${model.id}/${route(name)}`, name)))));
+  const navLink = (route, iconName, text, total) => el("li", {},
+    el("a", { class: "nav__link", href: `#/${route}` }, icon(iconName), text, total === undefined ? null : count(total)));
   const sorted = (map) => [...map.keys()].sort((a, b) => a.localeCompare(b));
+  const list = (title, names, route) => collapsible(`${model.id}:group:${title}`, { class: "group" },
+    el("summary", { class: "group__head" }, title, count(names.length)),
+    el("ul", { class: "list" }, names.map((name) =>
+      el("li", {}, el("a", { class: "list__link", href: `#/${model.id}/${route}/${name}`, title: name }, name)))));
   fill(nav,
-    el("ul", {}, el("li", {}, link(model.id, "Overview")), el("li", {}, link(`${model.id}/functions`, "Global functions")),
-      el("li", {}, link(`${model.id}/instances`, "Instances")), el("li", {}, link(`${model.id}/constants`, "Constants"))),
+    el("ul", { class: "nav__links" },
+      navLink(model.id, "overview", "Overview"),
+      navLink(`${model.id}/functions`, "function", "Global functions", model.functions.size),
+      navLink(`${model.id}/instances`, "instance", "Instances", model.instances.size),
+      navLink(`${model.id}/constants`, "constant", "Constants", model.constants.size)),
     model.sides.map((side) => classTree(model, side)),
-    group("Value types", sorted(model.valueTypes), (name) => `type/${name}`),
-    group("Enums", sorted(model.enums), (name) => `enum/${name}`),
-    group("Functions", sorted(model.functions), (name) => `function/${name}`),
-    group("Core Lua", sorted(model.lua), (name) => `global/${name}`),
+    list("Value types", sorted(model.valueTypes), "type"),
+    list("Enums", sorted(model.enums), "enum"),
+    list("Functions", sorted(model.functions), "function"),
+    list("Core Lua", sorted(model.lua), "global"),
   );
-  if (currentClass) revealInNav(currentClass);
+  nav.setAttribute("aria-label", model.dataset.title);
 }
 
 /**
- * Classes of one side as an inheritance tree. Each side has its own tree: a class on both sides may have a
- * different base on each (CBaseAnimatingActivity: CBaseModelEntity on the server, C_BaseModelEntity on the
- * client). Every class without a base is a root, with or without derived classes.
+ * Classes of one side as an inheritance tree. A class with subclasses is a link next to a toggle, not inside
+ * it (a link in <summary> is a nested interactive element); the stylesheet lays the link over the toggle row.
  */
 function classTree(model, side) {
-  const names = [...model.classes.values()].filter((cls) => cls.sides.has(side)).map((cls) => cls.name);
-  const children = new Map();
-  const roots = [];
-  for (const name of names) {
-    const base = model.classes.get(name).baseOn[side];
-    if (base && model.classes.get(base)?.sides.has(side)) {
-      if (!children.has(base)) children.set(base, []);
-      children.get(base).push(name);
-    } else {
-      roots.push(name);
-    }
-  }
-  const byName = (a, b) => a.localeCompare(b);
-  const classLink = (name) => el("a", { href: `#/${model.id}/class/${name}`, "data-class": name, title: name }, name);
+  const { roots, children, size } = model.classForest(side);
+  const classLink = (name) => el("a", { class: "tree__link", href: `#/${model.id}/class/${name}`, title: name }, name);
   const node = (name) => {
-    const derived = (children.get(name) ?? []).sort(byName);
-    if (!derived.length) return el("li", {}, classLink(name));
-    return el("li", {}, collapsible(`${model.id}:${side}:${name}`, {}, el("summary", {}, classLink(name)), el("ul", {}, derived.map(node))));
+    const derived = children.get(name);
+    if (!derived) return el("li", {}, classLink(name));
+    return el("li", { class: "tree__item" }, classLink(name),
+      collapsible(`${model.id}:${side}:${name}`, { class: "tree__node" },
+        el("summary", { class: "tree__row", "aria-label": `Subclasses of ${name}` }, count(derived.length)),
+        el("ul", { class: "tree" }, derived.map(node))));
   };
-  const title = model.sides.length > 1 ? `${side[0].toUpperCase()}${side.slice(1)} classes` : "Classes";
-  return collapsible(`${model.id}:classes:${side}`, { class: "group" }, el("summary", {}, `${title} (${names.length})`),
-    el("ul", { class: "tree" }, roots.sort(byName).map(node)));
+  const title = model.sides.length > 1 ? `${capitalize(side)} classes` : "Classes";
+  return collapsible(`${model.id}:classes:${side}`, { class: "group" },
+    el("summary", { class: "group__head" }, title, count(size)),
+    el("ul", { class: "tree" }, roots.map(node)));
 }
 
-/** Marks the class in the navigation trees and opens the branches that lead to it. */
-function revealInNav(name) {
-  for (const a of nav.querySelectorAll("a.current")) a.classList.remove("current");
-  const targets = [...nav.querySelectorAll("a[data-class]")].filter((a) => a.dataset.class === name);
-  for (const a of targets) {
-    a.classList.add("current");
-    for (let details = a.parentElement.closest("details"); details; details = details.parentElement.closest("details")) {
-      if (details.querySelector(":scope > summary") !== a.parentElement) details.open = true;
-    }
+/** Sidebar link the visitor clicked last: the one to keep in view when its page has links in several trees. */
+let clickedNavLink = null;
+
+/** Sections a sidebar link is in, innermost first. */
+function sectionsOf(link) {
+  const sections = [];
+  for (let details = link.parentElement.closest("details"); details; details = details.parentElement.closest("details")) sections.push(details);
+  return sections;
+}
+
+/**
+ * Marks the page of the route in the sidebar: its links get aria-current and the classes on the way to them
+ * are lifted. A class on both sides has a link in each tree; only one is revealed (its branches opened,
+ * scrolled to): the clicked one, else the one hidden the least — a group the visitor collapsed stays collapsed.
+ */
+function markNav(model, page, name) {
+  for (const a of nav.querySelectorAll("[aria-current]")) a.removeAttribute("aria-current");
+  for (const a of nav.querySelectorAll(".is-path")) a.classList.remove("is-path");
+  const whole = ["functions", "instances", "constants"].includes(page);
+  const target = `#/${[model.id, page, whole ? null : name].filter(Boolean).join("/")}`;
+  const links = [...nav.querySelectorAll("a")].filter((a) => a.getAttribute("href") === target);
+  for (const a of links) {
+    a.setAttribute("aria-current", "page");
+    for (const details of sectionsOf(a)) details.parentElement.querySelector(":scope > .tree__link")?.classList.add("is-path");
   }
-  targets[0]?.scrollIntoView({ block: "nearest" });
+  const hidden = (a) => sectionsOf(a).reduce((sum, details) => sum + (details.open ? 0 : details.classList.contains("group") ? 1000 : 1), 0);
+  const shown = links.includes(clickedNavLink) ? clickedNavLink
+    : links.reduce((best, a) => (best === null || hidden(a) < hidden(best) ? a : best), null);
+  clickedNavLink = null;
+  if (!shown) return;
+  for (const details of sectionsOf(shown)) details.open = true;
+  shown.scrollIntoView({ block: "nearest" });
 }
 
-/** Exact name first, then a name, then a text starting with the first word, then the rest. */
-function rank(entry, words) {
-  const query = words.join(" ");
-  return entry.name === query ? 0 : entry.name.startsWith(words[0]) ? 1 : entry.text.startsWith(words[0]) ? 2 : 3;
+function openNav() {
+  app.classList.add("is-nav-open");
+  menuButton.setAttribute("aria-expanded", "true");
+  menuButton.setAttribute("aria-label", "Close navigation");
+  // The current page, else the first link: focusing scrolls the drawer to it.
+  (nav.querySelector('[aria-current="page"]') ?? nav.querySelector("a"))?.focus();
+}
+
+function closeNav() {
+  if (!app.classList.contains("is-nav-open")) return;
+  app.classList.remove("is-nav-open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "Open navigation");
 }
 
 // ---------------------------------------------------------------------------------------------------------
 // Routing
 
-async function loadModel(dataset) {
-  if (!models.has(dataset.id)) {
-    const dumps = {};
-    for (const [side, path] of Object.entries(dataset.files)) dumps[side] = await fetchJson(path);
-    models.set(dataset.id, new VscriptsModel(dataset, dumps));
-  }
-  return models.get(dataset.id);
-}
-
-let currentModel = null;
+/** Number of the latest navigation: a page that finished loading after a newer one started is dropped. */
+let routeId = 0;
 
 async function route() {
+  const id = ++routeId;
+  closeNav();
   const [datasetId, page, name, member] = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
-  for (const a of document.querySelectorAll("#datasets a")) a.classList.toggle("active", a.dataset.id === datasetId);
+  renderDatasetTabs(datasetId);
   const dataset = manifest.datasets.find((d) => d.id === datasetId);
+  view.scrollTop = 0;
   if (!dataset) {
     currentModel = null;
     renderNav(null);
-    return pageHome();
+    return datasetId ? pageNotFound(null, "dataset", datasetId) : pageHome();
   }
-  if (dataset.kind !== "vscripts-api") return pageMissing(`No viewer for dataset kind ${dataset.kind}`);
-  view.replaceChildren(el("p", { class: "muted" }, "Loading…"));
+  if (dataset.kind !== "vscripts-api") return pageNotFound(null, "viewer for the dataset kind", dataset.kind);
+  if (!models.has(dataset.id)) pageLoading(dataset);
   const model = await loadModel(dataset);
+  if (id !== routeId) return;
   if (model !== currentModel) {
     currentModel = model;
     renderNav(model);
   }
-  currentClass = null;
-  for (const a of nav.querySelectorAll("a.current")) a.classList.remove("current");
+  markNav(model, page, name);
   const pages = {
     undefined: () => pageOverview(model),
     "": () => pageOverview(model),
     class: () => pageClass(model, name, member),
     type: () => pageValueType(model, name, member),
-    function: () => pageFunction(model, name),
+    function: () => pageFunctions(model, name),
     functions: () => pageFunctions(model),
     instances: () => pageInstances(model),
     enum: () => pageEnum(model, name, member),
     global: () => pageGlobal(model, name, member),
     constants: () => pageConstants(model, name),
   };
-  (pages[page] ?? (() => pageMissing(page)))();
-  if (!member) view.scrollTop = 0;
+  (pages[page] ?? (() => pageNotFound(model, "page", page)))();
 }
 
 async function start() {
+  renderThemeButton();
+  themeButton.addEventListener("click", toggleTheme);
+  systemLight.addEventListener("change", renderThemeButton);
+
   for (const root of DATA_ROOTS) {
     try {
       const response = await fetch(`${root}index.json`);
@@ -604,10 +1090,12 @@ async function start() {
       // try the next location
     }
   }
-  if (!manifest) return show(el("h1", {}, "No data"), el("p", { class: "muted" }, "data/index.json was not found."));
-  document.getElementById("repo").href = manifest.repository;
-  document.getElementById("datasets").replaceChildren(...manifest.datasets.map((dataset) =>
-    el("a", { href: `#/${dataset.id}`, "data-id": dataset.id }, dataset.title)));
+  if (!manifest) {
+    show(emptyState({ iconName: "error", title: "No data", text: ["The site could not find ", code("data/index.json"), "."], failed: true }));
+    return;
+  }
+  for (const repo of document.querySelectorAll(".repo")) repo.href = manifest.repository;
+
   // "toggle" does not bubble; a capturing listener on the sidebar still sees it.
   nav.addEventListener("toggle", (event) => {
     const id = event.target.dataset?.id;
@@ -616,17 +1104,63 @@ async function start() {
     else collapsed.add(id);
     saveCollapsed();
   }, true);
-  let timer = null;
-  search.addEventListener("input", () => {
-    clearTimeout(timer);
-    timer = setTimeout(() => renderNav(currentModel), 120);
+  nav.addEventListener("click", (event) => {
+    clickedNavLink = event.target.closest("a");
   });
-  window.addEventListener("hashchange", () => route().catch(showError));
-  await route();
-}
 
-function showError(error) {
-  show(el("h1", {}, "Error"), el("pre", {}, String(error?.stack ?? error)));
+  search.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    activeHit = 0;
+    syncSearchBox();
+    searchTimer = setTimeout(() => (search.value.trim() ? renderSearch().catch(showError) : clearSearch()), 100);
+  });
+  search.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault();
+      moveActiveHit(event.key === "ArrowDown" ? 1 : -1);
+    } else if (event.key === "Enter") {
+      const link = view.querySelector(".hit__link.is-active");
+      if (link) {
+        openHit(link);
+        search.blur();
+      }
+    } else if (event.key === "Escape") {
+      clearSearch();
+    }
+  });
+  search.closest(".search").querySelector(".search__clear").addEventListener("click", () => {
+    clearSearch();
+    search.focus();
+  });
+  view.addEventListener("click", (event) => {
+    const link = event.target.closest(".hit__link");
+    if (!link || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    event.preventDefault();
+    openHit(link);
+  });
+
+  menuButton.addEventListener("click", () => (app.classList.contains("is-nav-open") ? closeNav() : openNav()));
+  document.querySelector(".scrim").addEventListener("click", closeNav);
+  document.addEventListener("keydown", (event) => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName);
+    if (event.key === "/" && !typing && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault();
+      search.focus();
+      search.select();
+    } else if (event.key === "Escape" && app.classList.contains("is-nav-open")) {
+      closeNav();
+      menuButton.focus();
+    }
+  });
+
+  window.addEventListener("hashchange", () => {
+    clearSearch({ restore: false });
+    route().catch(showError);
+    // Keyboard and screen reader users land on the new page.
+    if (document.activeElement !== search) view.focus({ preventScroll: true });
+  });
+  syncSearchBox();
+  await route();
 }
 
 start().catch(showError);

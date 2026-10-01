@@ -4,21 +4,47 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dota 2 Modding</title>
+  <link rel="stylesheet" href="assets/fonts.css">
   <link rel="stylesheet" href="assets/style.css">
+  <script>
+    // Theme the visitor picked (app.js, theme button), set before the first paint so the page does not flash.
+    try { const theme = localStorage.getItem("dota2modding.theme"); if (theme) document.documentElement.dataset.theme = theme; } catch {}
+  </script>
   <script type="module" src="assets/app.js"></script>
 </head>
-<body>
+<body class="app">
   <header class="top">
-    <a class="brand" href="#/">Dota 2 Modding</a>
-    <nav id="datasets" class="datasets"></nav>
-    <input id="search" class="search" type="search" placeholder="Search: class, method, constant…" autocomplete="off" spellcheck="false">
-    <a id="repo" class="repo" target="_blank" rel="noopener">GitHub</a>
+    <button class="top__menu icon-btn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="side">
+      <svg class="i i--lg" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/></svg>
+    </button>
+    <a class="brand" href="#/"><span class="brand__mark" aria-hidden="true"></span><span class="brand__name">Dota 2 Modding</span></a>
+    <nav class="datasets" aria-label="Datasets"></nav>
+    <div class="search" role="search">
+      <svg class="i search__icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      <label class="vh" for="search">Search the API</label>
+      <input id="search" class="search__input" type="search" placeholder="Search classes, methods…" autocomplete="off" spellcheck="false">
+      <kbd class="search__key" aria-hidden="true">/</kbd>
+      <button class="search__clear" type="button" aria-label="Clear search" hidden>
+        <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+    <button class="theme-toggle icon-btn" type="button"></button>
+    <a class="repo" rel="noopener">
+      <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5M9.2 2.8l-2.4 10.4"/></svg><span>GitHub</span>
+    </a>
   </header>
   <div class="layout">
-    <aside class="side">
-      <div id="nav" class="nav"></div>
+    <aside class="side" id="side" aria-label="Contents">
+      <div class="side__head"><nav class="datasets" aria-label="Datasets"></nav></div>
+      <nav id="nav" class="nav" aria-label="Contents"></nav>
+      <div class="side__foot">
+        <a class="repo" rel="noopener">
+          <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5M9.2 2.8l-2.4 10.4"/></svg><span>GitHub</span>
+        </a>
+      </div>
     </aside>
-    <main id="view" class="view"><p class="muted">Loading…</p></main>
+    <div class="scrim"></div>
+    <main id="view" class="view" tabindex="-1"></main>
   </div>
 </body>
 </html>

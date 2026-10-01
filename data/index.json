@@ -11,7 +11,23 @@
         "server": "vscripts/server.json",
         "client": "vscripts/client.json"
       },
-      "annotations": "annotations/lua"
+      "annotations": "annotations/lua",
+      "summary": {
+        "classes": 106,
+        "functions": 240,
+        "enums": 51,
+        "constants": 1601,
+        "builds": {
+          "server": {
+            "steamBuildId": "25610408",
+            "versionDate": "Sep 29 2026"
+          },
+          "client": {
+            "steamBuildId": "25610408",
+            "versionDate": "Sep 29 2026"
+          }
+        }
+      }
     }
   ]
 }

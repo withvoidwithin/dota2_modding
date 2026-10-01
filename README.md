@@ -16,6 +16,7 @@ annotations/
     shared/           что есть на сервере и клиенте
     server/, client/  что есть только на одной стороне
 site/                 сайт GitHub Pages: статический, без сборки
+extension/            расширение VS Code «Dota 2 VScripts Annotations» для EmmyLua
 .github/workflows/    публикация сайта вместе с data/ и annotations/
 ```
 
@@ -24,7 +25,13 @@ site/                 сайт GitHub Pages: статический, без сб
 
 ## Аннотации Lua
 
-Подключаются как библиотека в `.emmyrc.json` проекта (проверено на EmmyLua):
+Проще всего — расширение VS Code «Dota 2 VScripts Annotations» (`extension/`):
+оно само подключает аннотации к EmmyLua через глобальный конфиг
+(`emmylua.ls.globalConfigPath`), проектный `.emmyrc.json` продолжает работать.
+Сборка: `node extension/build.mjs` → `extension/dist/*.vsix`; версия —
+`1.<сборка игры>.<патч>`.
+
+Без расширения — библиотекой в `.emmyrc.json` проекта (проверено на EmmyLua):
 
 ```json
 {
@@ -46,9 +53,11 @@ site/                 сайт GitHub Pages: статический, без сб
 
 ## Версии
 
-Номер сборки игры — в поле `build` каждого дампа. Ключи в JSON отсортированы,
-поэтому `git diff` между коммитами показывает, что изменилось в API после
-патча.
+Сборка игры, из которой снят дамп, — в поле `build` каждого дампа, в том числе
+Steam build id. Страница Overview на сайте сверяет его с текущей сборкой Dota 2
+в Steam (через api.steamcmd.net) и пишет, если вышла новая и дамп пора
+обновить. Ключи в JSON отсортированы, поэтому `git diff` между коммитами
+показывает, что изменилось в API после патча.
 
 ## Локальный просмотр сайта
 

@@ -1,0 +1,52 @@
+{
+  "name": "dota2-vscripts-annotations",
+  "displayName": "Dota 2 VScripts Annotations",
+  "description": "Dota 2 VScripts Lua API definitions for EmmyLua, taken from the game itself.",
+  "version": "1.6942.0",
+  "publisher": "withvoidwithin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/withvoidwithin/dota2_modding"
+  },
+  "homepage": "https://withvoidwithin.github.io/dota2_modding/",
+  "bugs": {
+    "url": "https://github.com/withvoidwithin/dota2_modding/issues"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "dota 2",
+    "dota2",
+    "vscripts",
+    "lua",
+    "emmylua",
+    "custom games"
+  ],
+  "extensionDependencies": [
+    "tangzx.emmylua"
+  ],
+  "activationEvents": [
+    "onLanguage:lua"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "dota2VscriptsAnnotations.connect",
+        "title": "Connect annotations",
+        "category": "Dota 2 VScripts"
+      },
+      {
+        "command": "dota2VscriptsAnnotations.disconnect",
+        "title": "Disconnect annotations",
+        "category": "Dota 2 VScripts"
+      }
+    ]
+  }
+}

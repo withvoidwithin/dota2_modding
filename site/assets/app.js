@@ -3,6 +3,10 @@
 
 // The deployed site has data/ next to it; a local server started at the repository root has it one level up.
 const DATA_ROOTS = ["data/", "../data/"];
+// Steam product info as JSON with CORS (community service steamcmd.net): the current public build of an app.
+// Steam's own ISteamApps/UpToDateCheck does not fit: it reports only the oldest still compatible version (any
+// recent version is "up to date"), and api.steampowered.com sends no CORS headers.
+const STEAM_INFO_URL = (appId) => `https://api.steamcmd.net/v1/info/${appId}`;
 
 const view = document.getElementById("view");
 const nav = document.getElementById("nav");
@@ -61,6 +65,42 @@ const collapsible = (id, attrs, summary, ...content) =>
 /** Replaces the children of a node; nested arrays are flattened and empty values skipped. */
 const fill = (parent, ...nodes) => parent.replaceChildren(...nodes.flat(Infinity).filter((node) => node !== null && node !== undefined && node !== false));
 const show = (...nodes) => fill(view, ...nodes);
+
+let steamBuild = null;
+
+/** Current public Steam build of the game: { id, time } or null when it cannot be checked. Asked once per visit. */
+function currentSteamBuild() {
+  const appId = manifest.steamAppId;
+  steamBuild ??= fetch(STEAM_INFO_URL(appId))
+    .then((response) => (response.ok ? response.json() : null))
+    .then((info) => {
+      const branch = info?.data?.[appId]?.depots?.branches?.public;
+      return branch ? { id: branch.buildid, time: Number(branch.timebuildupdated) } : null;
+    })
+    .catch(() => null);
+  return steamBuild;
+}
+
+const formatDate = (seconds) => new Date(seconds * 1000).toISOString().slice(0, 10);
+
+/** Line telling whether the data comes from the current Steam build of the game; filled when Steam answers. */
+function freshnessNote(model) {
+  const note = el("p", { class: "status" }, "Checking the current Dota 2 build…");
+  const dumped = [...new Set(model.sides.map((side) => model.builds[side].steamBuildId))];
+  currentSteamBuild().then((current) => {
+    if (!current) {
+      fill(note, "Could not check the current Dota 2 build.");
+    } else if (dumped.length === 1 && dumped[0] === current.id) {
+      note.classList.add("ok");
+      fill(note, `Up to date: the data comes from the current Dota 2 build ${current.id} (${formatDate(current.time)}).`);
+    } else {
+      note.classList.add("stale");
+      fill(note, `A new Dota 2 build is out: ${current.id} (${formatDate(current.time)}). The data comes from build `,
+        dumped.map((id) => id ?? "unknown").join(", "), " — waiting for a new dump.");
+    }
+  });
+  return note;
+}
 
 async function fetchJson(path) {
   const response = await fetch(dataRoot + path);
@@ -251,10 +291,11 @@ function pageOverview(model) {
     el("h1", {}, dataset.title),
     el("p", {}, dataset.description),
     el("h2", {}, "Game build"),
+    freshnessNote(model),
     el("table", {},
-      el("tr", {}, el("th", {}, "Side"), el("th", {}, "Version"), el("th", {}, "Revision"), el("th", {}, "Date")),
-      model.sides.map((side) => el("tr", {}, el("td", {}, side), el("td", {}, model.builds[side].clientVersion),
-        el("td", {}, model.builds[side].sourceRevision), el("td", {}, model.builds[side].versionDate)))),
+      el("tr", {}, el("th", {}, "Side"), el("th", {}, "Steam build"), el("th", {}, "Version"), el("th", {}, "Revision"), el("th", {}, "Date")),
+      model.sides.map((side) => el("tr", {}, el("td", {}, side), el("td", {}, model.builds[side].steamBuildId ?? "—"),
+        el("td", {}, model.builds[side].clientVersion), el("td", {}, model.builds[side].sourceRevision), el("td", {}, model.builds[side].versionDate)))),
     el("h2", {}, "Contents"),
     el("div", { class: "meta" },
       el("span", {}, `classes: ${model.classes.size}`),

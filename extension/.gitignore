@@ -1,0 +1,5 @@
+# Copied from the repository by build.mjs
+annotations/
+LICENSE
+# Packages
+dist/

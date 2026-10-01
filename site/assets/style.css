@@ -86,6 +86,9 @@ td code { white-space: nowrap; }
 .card:hover { border-color: var(--accent); text-decoration: none; }
 .card strong { display: block; margin-bottom: 4px; }
 pre { padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); overflow-x: auto; }
+.status { padding: 8px 12px; border-left: 3px solid var(--line); background: var(--panel); }
+.status.ok { border-left-color: var(--server); }
+.status.stale { border-left-color: var(--accent); }
 .section { margin-top: 24px; }
 .section > summary {
   cursor: pointer; padding: 6px 0; font-size: 15px; color: var(--muted);

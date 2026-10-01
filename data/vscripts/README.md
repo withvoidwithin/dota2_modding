@@ -6,7 +6,7 @@
 
 ```jsonc
 {
-  "build": { "clientVersion": "6942", "sourceRevision": "11055158", "versionDate": "Sep 29 2026" },
+  "build": { "clientVersion": "6942", "sourceRevision": "11055158", "versionDate": "Sep 29 2026", "steamBuildId": "25610408" },
   "api": {
     "functions":  { "<имя>": Function },           // глобальные функции движка
     "classes":    { "<имя>": Class },
@@ -18,6 +18,9 @@
 }
 ```
 
+- `build` — сборка игры, из которой снят дамп: `clientVersion`, `sourceRevision`,
+  `versionDate` — из `game/dota/steam.inf`; `steamBuildId` — Steam build id
+  установленной игры. По нему сайт сверяет дамп с текущей сборкой в Steam.
 - `Function` — `{ "desc", "returns", "params": [{ "name", "type" }] }`. Типы —
   как их называет движок: `int`, `float`, `bool`, `string`, `handle`,
   `Vector`, `<unknown>` и т. д. Пустое `name` — движок имя не сообщает.

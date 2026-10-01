@@ -1,5 +1,6 @@
 {
   "repository": "https://github.com/withvoidwithin/dota2_modding",
+  "steamAppId": 570,
   "datasets": [
     {
       "id": "vscripts",

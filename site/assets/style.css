@@ -344,6 +344,7 @@ body { background: var(--bg); }
   max-width: var(--content-max);
   padding: var(--sp-8) var(--sp-12) var(--sp-16);
 }
+.page:has(.members) { max-width: none; }   /* functions and methods take all the width beside the sidebar */
 
 .view:focus-visible { outline: none; }   /* focused after navigation, not by the user */
 
@@ -636,9 +637,17 @@ a.sig__type {
 a.sig__type:hover { text-decoration: underline solid; }
 .sig__type.is-unknown { color: var(--syn-anon); font-style: italic; }
 
-/* Long signatures: one parameter per line */
-.sig--long .sig__param { display: block; padding-left: 2ch; white-space: normal; }
-.sig--long .sig__end { display: block; }
+/* Signature of a member: on one line when it fits, else one parameter per line. --len is its length in
+   characters, so --over (one-line width minus the width it has, times 999) is negative when it fits and
+   huge when it does not; clamp() turns that into either nothing or the column layout. */
+.member__head .sig {
+  --over: calc((var(--len, 0) * 1ch - 100%) * 999);
+  display: flex;
+  flex-wrap: wrap;
+}
+.member__head .sig__p { white-space: pre; }   /* keep the space after a comma at the end of a flex item */
+.member__head :is(.sig__param, .sig__end) { min-width: clamp(0px, var(--over), 100%); }
+.member__head .sig__param { padding-left: clamp(0px, var(--over), 2ch); }
 
 /* ------------------------------------------------------------------ */
 /* 9. Members (methods, functions)                                     */
@@ -658,18 +667,31 @@ a.sig__type:hover { text-decoration: underline solid; }
 .block__title .count { font-size: var(--fs-sm); }
 .block__note { margin: calc(-1 * var(--sp-1)) 0 var(--sp-4); color: var(--text-muted); font-size: var(--fs-sm); }
 
-.members { margin-inline: calc(-1 * var(--sp-3)); border-top: 1px solid var(--line); }
+/* A member: the signature in its own box, the side tag at its right; the description below, quieter,
+   aligned with the signature text (--pad is the box padding). */
+.members { display: grid; gap: var(--sp-5); }
 .member {
+  --pad: var(--sp-4);
   display: grid;
-  gap: 6px;
-  padding: 14px var(--sp-3);
-  border-bottom: 1px solid var(--line);
-  border-radius: 0;
+  gap: var(--sp-2);
+  min-width: 0;
   scroll-margin-top: 80px;
 }
-.member__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--sp-3); min-width: 0; }
-.member__head .sig { min-width: 0; }
-.member__desc { max-width: 76ch; color: var(--text); font-size: var(--fs-md); line-height: 1.5; }
+.member__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px var(--sp-3);
+  min-width: 0;
+  padding: 10px var(--pad);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+.member__head .sig { flex: 1 1 0; min-width: 0; }   /* the width left by the side tag */
+.member__head .side-tag { margin-left: auto; }
+.member > :not(.member__head) { padding-inline: calc(var(--pad) + 1px); }
+.member__desc { max-width: 76ch; color: var(--text-muted); font-size: var(--fs-md); line-height: 1.5; }
 .member__args {
   max-width: 76ch;
   color: var(--text-muted);
@@ -678,15 +700,17 @@ a.sig__type:hover { text-decoration: underline solid; }
 .member__note { color: var(--text-muted); font-size: var(--fs-sm); }
 .member__note code { font-size: var(--fs-xs); color: var(--text); }
 
-.member:target, .member.is-focus {
-  background: var(--accent-weak);
-  box-shadow: inset 2px 0 0 var(--accent);
+.member:target > .member__head, .member.is-focus > .member__head {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
 }
 
-/* Compact rows inside "Inherited from" */
-.members--compact .member { padding-block: 10px; gap: 4px; }
+/* Compact members inside "Inherited from" */
+.members--compact { gap: var(--sp-4); }
+.members--compact .member { --pad: var(--sp-3); gap: 6px; }
+.members--compact .member__head { padding-block: 8px; }
 .members--compact .sig { font-size: var(--fs-code); }
-.members--compact .member__desc { font-size: var(--fs-sm); color: var(--text-muted); }
+.members--compact .member__desc { font-size: var(--fs-sm); }
 
 /* ------------------------------------------------------------------ */
 /* 10. Collapsible sections                                            */
@@ -726,10 +750,7 @@ a.sig__type:hover { text-decoration: underline solid; }
 .section__head .count { margin-left: auto; padding-left: var(--sp-3); }
 .section[open] > .section__head { border-bottom: 1px solid var(--line); background: var(--surface-2); }
 .section__body { background: var(--bg); }
-.section__body.members { margin: 0; }
-.section__body .member { padding-inline: var(--sp-4); }
-.section__body.members { border-top: 0; margin: 0; }
-.section__body .member:last-child { border-bottom: 0; }
+.section__body.members { padding: var(--sp-4); }
 .section__body.column { padding: var(--sp-3) var(--sp-4); }
 
 /* Plain section (Derived classes) outside a .sections box */
@@ -939,6 +960,36 @@ a.sig__type:hover { text-decoration: underline solid; }
 }
 .toolbar__spacer { flex: 1; }
 
+/* Side switch: radio buttons drawn as one segmented control; the markers are the ones of the side tags */
+.side-switch {
+  display: inline-flex;
+  flex: none;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+}
+.side-switch__item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-xs);
+  color: var(--text-muted);
+  font: 500 var(--fs-xs)/1 var(--font-mono);
+  cursor: pointer;
+  user-select: none;
+}
+.side-switch__item input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: inherit; }
+.side-switch__item:hover { color: var(--text-strong); }
+.side-switch__item:has(input:checked) { background: var(--surface-3); color: var(--text-strong); }
+.side-switch__item:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 1px; }
+.side-switch__item--server::before, .side-switch__item--client::before { content: ""; width: 6px; height: 6px; flex: none; }
+.side-switch__item--server::before { background: var(--server); border-radius: 1px; }
+.side-switch__item--client::before { border: 1.5px solid var(--client); border-radius: 50%; }
+
 .filter { position: relative; display: flex; align-items: center; flex: 1; max-width: 420px; }
 .filter .i { position: absolute; left: 11px; color: var(--text-muted); pointer-events: none; }
 .filter__input {
@@ -1097,8 +1148,6 @@ a.stat .stat__label { color: var(--link); }
 .hit__name { color: var(--text-strong); font: 600 var(--fs-sig)/1.5 var(--font-mono); overflow-wrap: anywhere; }
 .hit__owner { color: var(--text-muted); font-weight: 400; }
 .hit__sig.sig { font-size: var(--fs-code); }
-.hit__sig.sig .sig__param { display: inline; padding-left: 0; }   /* previews stay on one flowing line */
-.hit__sig.sig .sig__end { display: inline; }
 .hit__desc { color: var(--text-muted); font-size: var(--fs-sm); }
 .hit__enter { display: none; }
 .hit__link.is-active .hit__enter {
@@ -1245,15 +1294,14 @@ a.stat .stat__label { color: var(--link); }
   .filter { max-width: none; flex-basis: 100%; }
   .filter__input { height: 44px; font-size: 16px; }
   .toolbar .btn { height: 36px; }
+  .side-switch { height: 40px; }
 
   .sig { font-size: var(--fs-code); }
-  .sig--mid .sig__param { display: block; padding-left: 2ch; white-space: normal; }
-  .sig--mid .sig__end { display: block; }
-  .members { margin-inline: calc(-1 * var(--sp-4)); }
-  .member { padding: 12px var(--sp-4); }
+  .members { gap: var(--sp-4); }
+  .member { --pad: var(--sp-3); }
   .member__desc { font-size: var(--fs-sm); }
   .section__head { min-height: 52px; }
-  .section__body .member { padding-inline: var(--sp-3); }
+  .section__body.members { padding: var(--sp-3); }
 
   .status { grid-template-columns: auto minmax(0, 1fr); padding: var(--sp-4); gap: var(--sp-3); }
   .status__builds { grid-column: 1 / -1; padding: var(--sp-3) 0 0; border-left: 0; border-top: 1px solid color-mix(in srgb, var(--c) 30%, var(--line)); }

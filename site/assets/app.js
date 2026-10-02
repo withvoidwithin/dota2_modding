@@ -241,8 +241,9 @@ function typeNode(model, type, here) {
 }
 
 /**
- * What a signature shows: parameters ({ name, type?, anon }) and the return type or null.
- *   bound   — function described by the engine (FDesc): names and types, a name may be missing;
+ * What a signature shows: parameters ({ name?, type?, anon? }) and the return type or null. A parameter has a name
+ * only when it is known: none is made up. `anon` marks a placeholder that is not a name (`...` of a native).
+ *   bound   — function described by the engine (FDesc): types, and names when the engine reports them;
  *   plain   — Lua-defined or native function: names only, native ones take anything;
  *   probe   — value type method found by trying a sample: types only;
  *   unknown — value type method the probe could not call.
@@ -250,9 +251,7 @@ function typeNode(model, type, here) {
 function signatureParts(sig, fn, { method = false, owner } = {}) {
   if (sig === "bound") {
     return {
-      params: fn.params.map((param, index) => ({
-        name: param.name || `${param.type.replace(/\W/g, "") || "arg"}_${index + 1}`, type: param.type, anon: !param.name,
-      })),
+      params: fn.params.map((param) => ({ name: param.name || null, type: param.type })),
       returns: fn.returns && fn.returns !== "void" ? fn.returns : null,
     };
   }
@@ -263,29 +262,30 @@ function signatureParts(sig, fn, { method = false, owner } = {}) {
   }
   if (sig === "probe") {
     const operand = (kind) => (kind === "self" ? owner : "number");
-    return {
-      params: fn.params.map((kind, i) => ({ name: `arg${i + 1}`, type: operand(kind), anon: true })),
-      returns: fn.result === "nil" ? null : fn.result,
-    };
+    return { params: fn.params.map((kind) => ({ type: operand(kind) })), returns: fn.result === "nil" ? null : fn.result };
   }
   return { params: [{ name: "...", anon: true }], returns: null };
 }
 
-/** Code signature; `name` is a node, a string or null (search previews show the parameters only). */
+/**
+ * Code signature; `name` is a node, a string or null (search previews show the parameters only). A parameter shows
+ * `name: type`, or the one of them it has.
+ */
 function signature(model, name, { params, returns }, { here, extraClass = "" } = {}) {
   const punct = (text) => el("span", { class: "sig__p" }, text);
-  const text = `${name?.textContent ?? name ?? ""}(${params.map((p) => (p.type ? `${p.name}: ${p.type}` : p.name)).join(", ")})` +
-    (returns ? `: ${returns}` : "");
-  // One parameter per line: always past 72 characters, on phones past 38 (the stylesheet decides).
-  const size = text.length > 72 ? " sig--long" : text.length > 38 ? " sig--mid" : "";
-  return el("code", { class: `sig${size}${extraClass}` },
+  const paramText = (p) => [p.name, p.type].filter(Boolean).join(": ");
+  const text = `${name?.textContent ?? name ?? ""}(${params.map(paramText).join(", ")})` + (returns ? `: ${returns}` : "");
+  // Length in characters: the font is monospace, so the stylesheet knows the one-line width and puts one parameter
+  // per line only when the signature does not fit.
+  return el("code", { class: `sig${extraClass}`, style: `--len: ${text.length}` },
     typeof name === "string" ? el("span", { class: "sig__name" }, name) : name,
     punct("("),
     params.map((param, i) => el("span", { class: "sig__param" },
-      el("span", { class: param.anon ? "sig__pname is-anon" : "sig__pname" }, param.name),
-      param.type ? [punct(": "), typeNode(model, param.type, here)] : null,
+      param.name ? el("span", { class: param.anon ? "sig__pname is-anon" : "sig__pname" }, param.name) : null,
+      param.name && param.type ? punct(": ") : null,
+      param.type ? typeNode(model, param.type, here) : null,
       i < params.length - 1 ? punct(", ") : null)),
-    el("span", { class: "sig__end" }, punct(")"), returns ? [punct(": "), typeNode(model, returns, here)] : null));
+    el("span", { class: "sig__end" }, punct(")"), returns ? [punct(": "), typeNode(model, returns, here)] : null));
 }
 
 /** Description of the engine; the "Args: …" / "Params: …" tail it often carries goes to its own line. */
@@ -306,7 +306,7 @@ const sourceNote = (fn) => (fn?.source
  * have none. `href` is where its name leads.
  */
 function memberBlock(model, { id, name, href, parts, sides, context, fn, here }) {
-  return el("article", { class: "member", id: id == null ? null : `m-${id}`, "data-name": name },
+  return el("article", { class: "member", id: id == null ? null : `m-${id}`, "data-name": name, "data-sides": [...sides].join(" ") },
     el("div", { class: "member__head" },
       signature(model, href ? el("a", { class: "sig__name", href: `#/${href}` }, name) : name, parts, { here }),
       sideTags(model, sides, context)),
@@ -356,24 +356,53 @@ function filterToolbar(id, label, placeholder, onInput, ...more) {
     more);
 }
 
+/** Radio group "all" and the sides of the model; `onChange` gets the value picked. */
+function sideSwitch(model, name, onChange) {
+  return el("div", { class: "side-switch", role: "radiogroup", "aria-label": "Side" },
+    ["all", ...model.sides].map((side) => el("label", {
+      class: `side-switch__item side-switch__item--${side}`,
+      title: side === "all" ? "Members of both VMs" : `Members the ${side} VM has, shared ones included`,
+    },
+    el("input", { type: "radio", name, value: side, checked: side === "all", onchange: () => onChange(side) }),
+    el("span", {}, side))));
+}
+
 /**
- * Filters the members of a page by name: hides what does not match, the blocks and sections left empty,
- * opens the sections with matches; `empty` is shown when nothing matches.
+ * Toolbar of a list of members: the side switch, when not all members are on the same sides, then the name
+ * filter. Both apply together (filterMembers). `members` are model entries with `sides`.
  */
-function filterMembers(root, words, empty) {
-  const filtering = words.length > 0;
+function memberToolbar(model, { id, label, members, empty }, ...more) {
+  const state = { words: [], side: "all" };
+  const apply = () => filterMembers(view, state, empty);
+  const toolbar = filterToolbar(id, label, "Filter by name", (words) => { state.words = words; apply(); }, more);
+  if (new Set(members.map((member) => [...member.sides].sort().join())).size > 1) {
+    toolbar.prepend(sideSwitch(model, `${id}-side`, (side) => { state.side = side; apply(); }));
+  }
+  return toolbar;
+}
+
+/**
+ * Filters the members of a page by name words and side ("all" or a side the member has): hides what does not
+ * match and the blocks and sections left empty, the count of a block or section becomes what it shows; a name
+ * filter also opens the sections with matches. `empty` is shown when nothing matches.
+ */
+function filterMembers(root, { words, side }, empty) {
+  const byName = words.length > 0;
+  const filtering = byName || side !== "all";
   let shown = 0;
   for (const member of root.querySelectorAll(".member[data-name]")) {
-    const hit = matchesWords(member.dataset.name.toLowerCase(), words);
+    const hit = matchesWords(member.dataset.name.toLowerCase(), words) &&
+      (side === "all" || (member.dataset.sides ?? "").split(" ").includes(side));
     member.hidden = !hit;
     if (hit) shown++;
   }
-  for (const section of root.querySelectorAll(".section:not(.section--plain)")) {
-    const any = section.querySelector(".member:not([hidden])");
-    section.hidden = filtering && !any;
-    if (filtering) section.open = Boolean(any);
+  for (const part of root.querySelectorAll(".block, .section:not(.section--plain)")) {
+    const visible = part.querySelectorAll(".member:not([hidden])").length;
+    const counter = part.querySelector(":scope > :is(.block__title, .section__head) > .count");
+    if (counter) counter.textContent = visible;
+    part.hidden = filtering && !visible;
+    if (byName && part.matches(".section")) part.open = visible > 0;
   }
-  for (const part of root.querySelectorAll(".block")) part.hidden = filtering && !part.querySelector(".member:not([hidden])");
   empty.hidden = shown > 0;
 }
 
@@ -558,13 +587,14 @@ function pageClass(model, name, member) {
             el("li", {}, el("a", { href: `#/${model.id}/class/${derived}`, title: derived }, derived))))) : null,
       ],
     }),
-    own.length + inheritedCount ? filterToolbar("member-filter", "Filter methods", `Filter ${own.length + inheritedCount} methods by name`,
-      (words) => filterMembers(view, words, empty),
-      sections.length ? [
-        el("span", { class: "toolbar__spacer" }),
-        el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = true)) }, "Expand inherited"),
-        el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = false)) }, "Collapse"),
-      ] : null) : null,
+    own.length + inheritedCount ? memberToolbar(model, {
+      id: "member-filter", label: "Filter methods", members: [...own, ...inherited.flatMap((group) => group.members)], empty,
+    },
+    sections.length ? [
+      el("span", { class: "toolbar__spacer" }),
+      el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = true)) }, "Expand inherited"),
+      el("button", { class: "btn btn--ghost btn--sm", type: "button", onclick: () => sections.forEach((s) => (s.open = false)) }, "Collapse"),
+    ] : null) : null,
     block("Methods", own.length, own.length
       ? el("div", { class: "members" }, own.map((m) => method(m, cls.name, m.name)))
       : el("p", { class: "block__note" }, "No own methods.")),
@@ -644,7 +674,9 @@ function pageFunctions(model, name) {
   const empty = el("p", { class: "empty__hint", hidden: true }, "No functions match the filter.");
   show(
     pageHead({ title: "Global functions", sans: true, lead: "Functions the engine puts in the global scope of the Lua VM." }),
-    filterToolbar("function-filter", "Filter functions", `Filter ${all.length} functions by name`, (words) => filterMembers(view, words, empty)),
+    memberToolbar(model, {
+      id: "function-filter", label: "Filter functions", members: all, empty,
+    }),
     block("Functions", all.length, el("div", { class: "members" }, all.map((fn) => memberBlock(model, {
       id: fn.name, name: fn.name, href: `${model.id}/function/${fn.name}`, parts: signatureParts("bound", fn.value),
       sides: fn.sides, fn: fn.value,
@@ -955,7 +987,6 @@ function renderNav(model) {
     model.sides.map((side) => classTree(model, side)),
     list("Value types", sorted(model.valueTypes), "type"),
     list("Enums", sorted(model.enums), "enum"),
-    list("Functions", sorted(model.functions), "function"),
     list("Core Lua", sorted(model.lua), "global"),
   );
   nav.setAttribute("aria-label", model.dataset.title);
@@ -1000,8 +1031,10 @@ function sectionsOf(link) {
 function markNav(model, page, name) {
   for (const a of nav.querySelectorAll("[aria-current]")) a.removeAttribute("aria-current");
   for (const a of nav.querySelectorAll(".is-path")) a.classList.remove("is-path");
-  const whole = ["functions", "instances", "constants"].includes(page);
-  const target = `#/${[model.id, page, whole ? null : name].filter(Boolean).join("/")}`;
+  // A function's route shows the Global functions page at that function.
+  const listed = page === "function" ? "functions" : page;
+  const whole = ["functions", "instances", "constants"].includes(listed);
+  const target = `#/${[model.id, listed, whole ? null : name].filter(Boolean).join("/")}`;
   const links = [...nav.querySelectorAll("a")].filter((a) => a.getAttribute("href") === target);
   for (const a of links) {
     a.setAttribute("aria-current", "page");

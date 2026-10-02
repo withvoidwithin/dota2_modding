@@ -173,20 +173,33 @@ export class VscriptsModel {
   }
 
   /**
-   * Members a class inherits, grouped by ancestor, nearest first; a member overridden closer is not repeated.
+   * Members a class inherits, grouped by ancestor, nearest first. Each side walks its own chain: there a member
+   * comes from the nearest class that has it on that side, so one overridden closer is not repeated. The `sides`
+   * of a member are the sides it is inherited on: a method of CEntityInstance, which both VMs have, is server-only
+   * in a server-only class; on the client CBaseAnimatingActivity inherits from C_BaseModelEntity, not CBaseModelEntity.
    * @returns {{ ancestor: string, members: object[] }[]} groups with at least one member
    */
   inherited(cls) {
-    const seen = new Set(cls.members.keys());
-    const groups = [];
-    for (const ancestor of this.ancestors(cls)) {
-      const members = [...this.classes.get(ancestor).members.values()]
-        .filter((member) => !seen.has(member.name))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      for (const member of members) seen.add(member.name);
-      if (members.length) groups.push({ ancestor, members });
+    /** @type {Map<string, Map<string, object>>} ancestor → member name → member with the sides it is inherited on */
+    const given = new Map();
+    for (const side of cls.sides) {
+      const seen = new Set();
+      for (const name of this.chain(cls.name, side).reverse()) {
+        for (const member of this.classes.get(name)?.members.values() ?? []) {   // a base may be undeclared
+          if (!member.sides.has(side) || seen.has(member.name)) continue;
+          seen.add(member.name);
+          if (name === cls.name) continue;
+          if (!given.has(name)) given.set(name, new Map());
+          const members = given.get(name);
+          if (!members.has(member.name)) members.set(member.name, { ...member, sides: new Set() });
+          members.get(member.name).sides.add(side);
+        }
+      }
     }
-    return groups;
+    return this.ancestors(cls).filter((ancestor) => given.has(ancestor)).map((ancestor) => ({
+      ancestor,
+      members: [...given.get(ancestor).values()].sort((a, b) => a.name.localeCompare(b.name)),
+    }));
   }
 
   /**

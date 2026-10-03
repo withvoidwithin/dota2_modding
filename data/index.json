@@ -6,25 +6,27 @@
       "id": "vscripts",
       "kind": "vscripts-api",
       "title": "VScripts API",
-      "description": "Lua API of the server and client VMs: functions, classes, enums, constants.",
+      "description": "Lua API of the server and client VMs: functions, classes, enums, constants, and the entity classes of the server.",
       "files": {
         "server": "vscripts/server.json",
         "client": "vscripts/client.json"
       },
+      "entities": "vscripts/entities.json",
       "annotations": "annotations/lua",
       "summary": {
         "classes": 106,
         "functions": 240,
         "enums": 51,
-        "constants": 1601,
+        "constants": 1600,
+        "entities": 3520,
         "builds": {
           "server": {
-            "steamBuildId": "25610408",
-            "versionDate": "Sep 29 2026"
+            "steamBuildId": "25664722",
+            "versionDate": "Oct 01 2026"
           },
           "client": {
-            "steamBuildId": "25610408",
-            "versionDate": "Sep 29 2026"
+            "steamBuildId": "25664722",
+            "versionDate": "Oct 01 2026"
           }
         }
       }

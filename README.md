@@ -10,7 +10,7 @@
 ```
 data/                 исходные дампы (JSON), по разделам
   index.json          список наборов данных — по нему строится сайт
-  vscripts/           Lua API серверной и клиентской VM; формат — README в папке
+  vscripts/           Lua API серверной и клиентской VM и классы энтити сервера; формат — README в папке
 annotations/
   lua/                определения LuaCATS для EmmyLua
     shared/           что есть на сервере и клиенте

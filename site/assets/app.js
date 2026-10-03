@@ -1,6 +1,6 @@
 // Browser for the Dota 2 modding data: reads data/index.json and the dumps it lists, renders everything
 // client-side. Routes live in the hash: #/<dataset>/<page>/<name>[/<member>].
-import { SEARCH_LIMIT, VscriptsModel, matchesWords, queryWords } from "./model.js";
+import { ENTITY_KINDS, SEARCH_LIMIT, VscriptsModel, matchesWords, queryWords } from "./model.js";
 
 // The deployed site has data/ next to it; a local server started at the repository root has it one level up.
 const DATA_ROOTS = ["data/", "../data/"];
@@ -114,6 +114,7 @@ const ICONS = {
   function: ["M11 2.5c-1.8 0-2.4.8-2.7 2.6l-1.3 6.8c-.3 1.6-.9 2.1-2.5 2.1M5.5 6.5h5"],
   instance: ["M8 2l5.5 3v6L8 14l-5.5-3V5zM2.5 5L8 8l5.5-3M8 8v6"],
   constant: ["M6.2 2.5l-1.2 11M11 2.5l-1.2 11M3 6h10.5M2.5 10h10.5"],
+  entity: ["M2.5 2.5h11v11h-11zM8 5.5v5M5.5 8h5"],
   arrow: ["M3 8h10M9 4l4 4-4 4"],
   external: ["M9 2.5h4.5V7M13.5 2.5L7.5 8.5M12 9.5v4H2.5V4h4"],
   spinner: ["M8 2.5a5.5 5.5 0 1 1-5.5 5.5"],
@@ -165,7 +166,8 @@ async function loadModel(dataset) {
   if (!models.has(dataset.id)) {
     const dumps = {};
     for (const [side, path] of Object.entries(dataset.files)) dumps[side] = await fetchJson(path);
-    models.set(dataset.id, new VscriptsModel(dataset, dumps));
+    const entities = dataset.entities ? await fetchJson(dataset.entities) : null;
+    models.set(dataset.id, new VscriptsModel(dataset, dumps, entities));
   }
   return models.get(dataset.id);
 }
@@ -356,16 +358,22 @@ function filterToolbar(id, label, placeholder, onInput, ...more) {
     more);
 }
 
-/** Radio group "all" and the sides of the model; `onChange` gets the value picked. */
-function sideSwitch(model, name, onChange) {
-  return el("div", { class: "side-switch", role: "radiogroup", "aria-label": "Side" },
-    ["all", ...model.sides].map((side) => el("label", {
-      class: `side-switch__item side-switch__item--${side}`,
-      title: side === "all" ? "Members of both VMs" : `Members the ${side} VM has, shared ones included`,
-    },
-    el("input", { type: "radio", name, value: side, checked: side === "all", onchange: () => onChange(side) }),
-    el("span", {}, side))));
+/**
+ * Radio group drawn as one segmented control. `options`: [value, label, title?], the first one checked;
+ * `onChange` gets the value picked.
+ */
+function segmented(name, groupLabel, options, onChange) {
+  return el("div", { class: "segmented", role: "radiogroup", "aria-label": groupLabel },
+    options.map(([value, label, title], i) => el("label", { class: `segmented__item segmented__item--${value}`, title },
+      el("input", { type: "radio", name, value, checked: i === 0, onchange: () => onChange(value) }),
+      el("span", {}, label))));
 }
+
+/** "all" and the sides of the model. */
+const sideSwitch = (model, name, onChange) => segmented(name, "Side", [
+  ["all", "all", "Members of both VMs"],
+  ...model.sides.map((side) => [side, side, `Members the ${side} VM has, shared ones included`]),
+], onChange);
 
 /**
  * Toolbar of a list of members: the side switch, when not all members are on the same sides, then the name
@@ -423,7 +431,8 @@ function pageHome() {
     block("Datasets", null, el("div", { class: "cards" }, manifest.datasets.map((dataset) => {
       const { summary } = dataset;
       const stats = summary && el("span", { class: "dcard__stats" },
-        [["classes", summary.classes], ["functions", summary.functions], ["enums", summary.enums], ["constants", summary.constants]]
+        [["classes", summary.classes], ["functions", summary.functions], ["enums", summary.enums], ["constants", summary.constants],
+          ["entity classes", summary.entities]]
           .filter(([, value]) => value !== undefined).map(([label, value]) => el("span", {}, el("b", {}, value), ` ${label}`)));
       return card({ class: "dcard", href: `#/${dataset.id}` }, capitalize(Object.keys(dataset.files).join(" + ")), dataset.title,
         dataset.description, stats, summary ? buildLine(summary.builds) : "Open", "arrow");
@@ -522,7 +531,8 @@ function pageOverview(model) {
       stat(model.instances.size, "instances", "instances"),
       stat(model.enums.size, "enums"),
       stat(model.constants.size, "constants", "constants"),
-      stat(model.lua.size, "core Lua"))),
+      stat(model.lua.size, "core Lua"),
+      model.entities.size ? stat(model.entities.size, "entity classes", "entities") : null)),
     block("Sides", null, el("ul", { class: "legend" },
       model.sides.map((side) => el("li", {}, sideTag(side), el("span", {}, `Exists on the ${side} VM only.`))),
       el("li", {}, el("span", { class: "legend__none" }, "no mark"), el("span", {}, "Exists on both sides.")))),
@@ -530,7 +540,8 @@ function pageOverview(model) {
       el("div", { class: "downloads" },
         download("download", "Raw dumps",
           ["JSON, keys sorted. Format — ", el("a", { href: `${repo}/tree/main/data/${model.id}` }, "described in the repository"), "."],
-          Object.entries(dataset.files).map(([side, path]) => button(dataRoot + path, "file", `${side}.json`))),
+          [...Object.entries(dataset.files).map(([side, path]) => button(dataRoot + path, "file", `${side}.json`)),
+            dataset.entities ? button(dataRoot + dataset.entities, "file", dataset.entities.split("/").pop()) : null]),
         download("braces", "EmmyLua annotations", ["LuaCATS definitions: ", code("shared/"), ", ", code("server/"), ", ", code("client/"), "."],
           button(`${repo}/tree/main/${dataset.annotations}`, "external", dataset.annotations)),
         download("extension", "VS Code extension", "Dota 2 VScripts Annotations connects the same annotations to EmmyLua for you.",
@@ -782,7 +793,7 @@ function pageConstants(model, name) {
     empty.hidden = shown > 0;
   };
   const toolbar = filterToolbar("const-filter", "Filter constants by name", "Filter by name", filter, meta);
-  const input = toolbar.querySelector("input");
+  const input = toolbar.querySelector(".filter__input");
   input.value = name ?? "";
   show(
     pageHead({ title: "Constants", sans: true, lead: ["Numbers and strings in ", code("_G"), " outside enums."] }),
@@ -791,6 +802,71 @@ function pageConstants(model, name) {
     empty,
   );
   filter(queryWords(input.value));
+  focusMember(name);
+}
+
+// Kind switch of the entity classes page: the kinds of ENTITY_KINDS and the rest, in reading order.
+const baseOf = (kind) => ENTITY_KINDS.find(([entry]) => entry === kind)[1];
+const ENTITY_KIND_OPTIONS = [
+  ["all", "all"],
+  ["hero", "heroes", `Derive from ${baseOf("hero")}`],
+  ["unit", "units", `Derive from ${baseOf("unit")}, heroes aside`],
+  ["item", "items", `Derive from ${baseOf("item")}`],
+  ["ability", "abilities", `Derive from ${baseOf("ability")}, items aside`],
+  ["other", "other", "Neither units, items nor abilities: info_target, logic_*, triggers, props…"],
+];
+
+function pageEntities(model, name) {
+  const all = [...model.entities.values()];
+  const route = (entity) => `#/${model.id}/entities/${entity}`;
+  const rows = all.map((entity) => el("tr", {
+    id: `m-${entity.name}`, "data-name": `${entity.name} ${entity.cls}`.toLowerCase(), "data-kind": entity.kind,
+  },
+  el("td", { class: "row-num" }),
+  el("td", {}, el("code", { class: "ident" }, breaks(entity.name)),
+    entity.aliasOf ? el("span", { class: "entity-alias" }, "alias of ", el("a", { href: route(entity.aliasOf) }, code(entity.aliasOf))) : null),
+  el("td", { "data-label": "Lua class" }, entity.luaClass
+    ? el("code", { class: "ident" }, typeNode(model, entity.luaClass))
+    : el("span", { class: "empty-cell" }, "—")),
+  el("td", { "data-label": "C++ class" }, el("code", { class: "ident" }, breaks(entity.cls)))));
+  const meta = el("p", { class: "filter__meta" });
+  const table = el("div", { class: "table-wrap" }, el("table", { class: "table table--entities" },
+    el("thead", {}, el("tr", {}, el("th", { scope: "col", class: "row-num" }, "#"), el("th", { scope: "col" }, "Name"),
+      el("th", { scope: "col" }, "Lua class"), el("th", { scope: "col" }, "C++ class"))),
+    el("tbody", {}, rows)));
+  const empty = el("p", { class: "empty__hint", hidden: true }, "No entity classes match the filter.");
+  const state = { words: [], kind: "all" };
+  // Every row is built once; the filters only hide rows and number the ones shown, so typing stays instant.
+  const filter = () => {
+    let shown = 0;
+    for (const row of rows) {
+      row.hidden = !matchesWords(row.dataset.name, state.words) || (state.kind !== "all" && row.dataset.kind !== state.kind);
+      if (!row.hidden) row.cells[0].textContent = ++shown;
+    }
+    fill(meta, el("strong", {}, shown), ` of ${all.length}`);
+    table.hidden = shown === 0;
+    empty.hidden = shown > 0;
+  };
+  const toolbar = filterToolbar("entity-filter", "Filter entity classes", "Filter by name or class",
+    (words) => { state.words = words; filter(); }, meta);
+  toolbar.prepend(segmented("entity-kind", "Kind", ENTITY_KIND_OPTIONS, (kind) => { state.kind = kind; filter(); }));
+  const input = toolbar.querySelector(".filter__input");
+  input.value = name ?? "";
+  state.words = queryWords(input.value);
+  show(
+    pageHead({
+      title: "Entity classes", sans: true,
+      lead: ["Names that ", code("SpawnEntityFromTableSynchronous"), ", ", code("CEntities:CreateByClassname"), " and ",
+        code("FindAllByClassname"), " take, the Lua class of the handle each gives — the nearest of its C++ classes the Lua API describes — and the C++ class it creates."],
+    }),
+    el("div", { class: "callout", role: "note" }, icon("info"),
+      el("p", {}, "Read from ", code("server.dll"), ", not from the Lua VM. Items, abilities and heroes are entities too, but are made with ",
+        code("CreateItem"), ", ", code("AddAbility"), " and ", code("CreateUnitByName"), ".")),
+    toolbar,
+    table,
+    empty,
+  );
+  filter();
   focusMember(name);
 }
 
@@ -983,7 +1059,8 @@ function renderNav(model) {
       navLink(model.id, "overview", "Overview"),
       navLink(`${model.id}/functions`, "function", "Global functions", model.functions.size),
       navLink(`${model.id}/instances`, "instance", "Instances", model.instances.size),
-      navLink(`${model.id}/constants`, "constant", "Constants", model.constants.size)),
+      navLink(`${model.id}/constants`, "constant", "Constants", model.constants.size),
+      model.entities.size ? navLink(`${model.id}/entities`, "entity", "Entity classes", model.entities.size) : null),
     model.sides.map((side) => classTree(model, side)),
     list("Value types", sorted(model.valueTypes), "type"),
     list("Enums", sorted(model.enums), "enum"),
@@ -1033,7 +1110,7 @@ function markNav(model, page, name) {
   for (const a of nav.querySelectorAll(".is-path")) a.classList.remove("is-path");
   // A function's route shows the Global functions page at that function.
   const listed = page === "function" ? "functions" : page;
-  const whole = ["functions", "instances", "constants"].includes(listed);
+  const whole = ["functions", "instances", "constants", "entities"].includes(listed);
   const target = `#/${[model.id, listed, whole ? null : name].filter(Boolean).join("/")}`;
   const links = [...nav.querySelectorAll("a")].filter((a) => a.getAttribute("href") === target);
   for (const a of links) {
@@ -1102,6 +1179,7 @@ async function route() {
     enum: () => pageEnum(model, name, member),
     global: () => pageGlobal(model, name, member),
     constants: () => pageConstants(model, name),
+    entities: () => pageEntities(model, name),
   };
   (pages[page] ?? (() => pageNotFound(model, "page", page)))();
 }

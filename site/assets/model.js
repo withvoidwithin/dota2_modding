@@ -14,7 +14,8 @@ export const queryWords = (query) => query.trim().toLowerCase().split(/\s+/).fil
 export const matchesWords = (text, words) => words.every((word) => text.includes(word));
 
 export class VscriptsModel {
-  constructor(dataset, dumps) {
+  /** `dumps`: side → VM dump; `entities`: the entity classes of the server (entities.json), or null. */
+  constructor(dataset, dumps, entities = null) {
     this.id = dataset.id;
     this.dataset = dataset;
     this.sides = Object.keys(dumps);
@@ -75,6 +76,8 @@ export class VscriptsModel {
       else if (global.value.value !== undefined) this.constants.set(global.name, global);
     }
 
+    this.entities = entityClasses(entities, this.classes);
+    this.entitiesBuild = entities?.build ?? null;
     this.index = this.buildIndex();
   }
 
@@ -118,6 +121,7 @@ export class VscriptsModel {
       }
     }
     for (const constant of this.constants.keys()) add(constant, "constant", `constants/${constant}`);
+    for (const entity of this.entities.values()) add(entity.name, "entity", `entities/${entity.name}`, `${entity.name} → ${entity.cls}`);
     return entries;
   }
 
@@ -226,6 +230,33 @@ export class VscriptsModel {
 }
 
 const byName = (a, b) => a.localeCompare(b);
+
+/** Kinds of entity classes by the C++ base they derive from, checked in this order; the rest are "other". */
+export const ENTITY_KINDS = [["item", "CDOTA_Item"], ["ability", "CDOTABaseAbility"], ["hero", "CDOTA_BaseNPC_Hero"], ["unit", "CDOTA_BaseNPC"]];
+
+/**
+ * Entity classes of entities.json: name → { name, cls, kind, luaClass, aliasOf }. `luaClass` is the class whose
+ * methods a script handle of the entity has: the nearest C++ class, itself or a base, that the server Lua API
+ * describes. `aliasOf` is the name an alias stands for: an alias class is named <Class>Alias_<name>.
+ */
+function entityClasses(dump, classes) {
+  const entities = new Map();
+  if (!dump) return entities;
+  const byClass = new Map();
+  for (const [name, cls] of Object.entries(dump.entities)) if (!byClass.has(cls)) byClass.set(cls, name);
+  for (const [name, cls] of Object.entries(dump.entities).sort(([a], [b]) => byName(a, b))) {
+    const chain = [cls];
+    for (let base = dump.classes[cls]; base && !chain.includes(base); base = dump.classes[base]) chain.push(base);
+    const alias = /^(.+)Alias_(.+)$/.exec(cls);
+    entities.set(name, {
+      name, cls,
+      kind: ENTITY_KINDS.find(([, base]) => chain.includes(base))?.[0] ?? "other",
+      luaClass: chain.find((c) => classes.get(c)?.sides.has("server")) ?? null,
+      aliasOf: alias && alias[2] === name ? byClass.get(alias[1]) ?? null : null,
+    });
+  }
+  return entities;
+}
 
 /** Exact name first, then a name, then a label starting with the first word, then the rest. */
 function rank(entry, words) {

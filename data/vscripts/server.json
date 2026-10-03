@@ -28651,39 +28651,35 @@
    },
    "ACT_DOTA_ATTACK_STATUE": {
     "type": "number",
-    "value": 1787
+    "value": 1780
    },
    "ACT_DOTA_CAST1_STATUE": {
     "type": "number",
-    "value": 1782
+    "value": 1789
    },
    "ACT_DOTA_CAST2_STATUE": {
     "type": "number",
-    "value": 1783
+    "value": 1790
    },
    "ACT_DOTA_CAST3_STATUE": {
     "type": "number",
-    "value": 1779
+    "value": 1791
    },
    "ACT_DOTA_CAST4_STATUE": {
     "type": "number",
-    "value": 1784
+    "value": 1792
    },
    "ACT_DOTA_CAST5_STATUE": {
     "type": "number",
-    "value": 1795
-   },
-   "ACT_DOTA_CAST6_STATUE": {
-    "type": "number",
-    "value": 1801
+    "value": 1793
    },
    "ACT_DOTA_CAST_STATUE": {
     "type": "number",
-    "value": 1792
+    "value": 1781
    },
    "ACT_DOTA_CHANNEL_STATUE": {
     "type": "number",
-    "value": 1804
+    "value": 1802
    },
    "ACT_DOTA_CRATER_CLOSED": {
     "type": "number",
@@ -28695,63 +28691,63 @@
    },
    "ACT_DOTA_DEFEAT_STATUE": {
     "type": "number",
-    "value": 1799
+    "value": 1800
    },
    "ACT_DOTA_FLAIL_STATUE": {
     "type": "number",
-    "value": 1788
+    "value": 1786
    },
    "ACT_DOTA_FORCESTAFF_STATUE": {
     "type": "number",
-    "value": 1802
+    "value": 1801
    },
    "ACT_DOTA_IDLE_RARE_STATUE": {
     "type": "number",
-    "value": 1800
+    "value": 1805
    },
    "ACT_DOTA_IDLE_STATUE": {
     "type": "number",
-    "value": 1786
+    "value": 1784
    },
    "ACT_DOTA_LOADOUT_FRONTPAGE": {
     "type": "number",
-    "value": 1798
+    "value": 1803
    },
    "ACT_DOTA_LOADOUT_STATUE": {
     "type": "number",
-    "value": 1793
+    "value": 1782
    },
    "ACT_DOTA_RUN_STATUE": {
     "type": "number",
-    "value": 1785
+    "value": 1783
    },
    "ACT_DOTA_SPAWN_STATUE": {
     "type": "number",
-    "value": 1794
+    "value": 1787
    },
    "ACT_DOTA_STATUE_SEQUENCE": {
     "type": "number",
-    "value": 1803
+    "value": 1798
    },
    "ACT_DOTA_STUN_STATUE": {
     "type": "number",
-    "value": 1789
+    "value": 1785
    },
    "ACT_DOTA_TAUNT_STATUE": {
     "type": "number",
-    "value": 1790
+    "value": 1788
    },
    "ACT_DOTA_TELEPORT_END_STATUE": {
     "type": "number",
-    "value": 1805
+    "value": 1799
    },
    "ACT_DOTA_TELEPORT_STATUE": {
     "type": "number",
-    "value": 1780
+    "value": 1794
    },
    "ACT_DOTA_VICTORY_STATUE": {
     "type": "number",
-    "value": 1781
+    "value": 1795
    },
    "ACT_DO_NOT_DISTURB": {
     "type": "number",
@@ -32605,20 +32601,6 @@
     },
     "type": "function"
    },
-   "BuildFunctionSignatureString": {
-    "fn": {
-     "lines": [
-      37,
-      49
-     ],
-     "params": [
-      "fnName",
-      "fdesc"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
    "CDesc": {
     "members": {
      "CBaseAnimGraph": {
@@ -35279,33 +35261,6 @@
     },
     "type": "function"
    },
-   "PrintBindings": {
-    "fn": {
-     "lines": [
-      101,
-      108
-     ],
-     "params": [
-      "tbl"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
-   "PrintEnum": {
-    "fn": {
-     "lines": [
-      95,
-      100
-     ],
-     "params": [
-      "enumName",
-      "enumTable"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
    "QAngle": {
     "fn": {
      "native": true
@@ -35725,8 +35680,7 @@
     "type": "function"
    },
    "ScriptDebugTraceAllOn": {
-    "type": "boolean",
-    "value": true
+    "type": "boolean"
    },
    "ScriptDebugTraces": {
     "members": [],
@@ -35737,11 +35691,7 @@
     "value": 26
    },
    "ScriptDebugWatches": {
-    "members": {
-     "1": {
-      "type": "nil"
-     }
-    },
+    "members": [],
     "type": "table"
    },
    "ScriptFunctionHelp": {
@@ -35752,19 +35702,6 @@
      ],
      "params": [
       "scope"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
-   "SortedKeys": {
-    "fn": {
-     "lines": [
-      87,
-      94
-     ],
-     "params": [
-      "tbl"
      ],
      "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
     },
@@ -35966,11 +35903,7 @@
     "type": "function"
    },
    "_deepprint_alreadyseen": {
-    "members": {
-     "1": {
-      "type": "nil"
-     }
-    },
+    "members": [],
     "type": "table"
    },
    "_sourceline": {
@@ -35996,6 +35929,10 @@
      "source": "scripts\\vscripts\\utils/utilsinit.lua"
     },
     "type": "function"
+   },
+   "background_idle": {
+    "type": "number",
+    "value": 1804
    },
    "bit": {
     "members": {
@@ -36363,7 +36300,7 @@
    },
    "ti6": {
     "type": "number",
-    "value": 1791
+    "value": 1779
    },
    "vlua": {
     "members": {
@@ -36834,9 +36771,9 @@
   }
  },
  "build": {
-  "clientVersion": "6942",
-  "sourceRevision": "11055158",
-  "steamBuildId": "25610408",
-  "versionDate": "Sep 29 2026"
+  "clientVersion": "6943",
+  "sourceRevision": "11069754",
+  "steamBuildId": "25664722",
+  "versionDate": "Oct 01 2026"
  }
 }

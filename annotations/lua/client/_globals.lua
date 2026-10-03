@@ -92,6 +92,9 @@ ACT_DOTA_CAPTURE_PET = 1698
 ACT_DOTA_CAPTURE_RARE = 1706
 
 ---Client only.
+ACT_DOTA_CAST6_STATUE = 1806
+
+---Client only.
 ACT_DOTA_CAST_ABILITY_1 = 1510
 
 ---Client only.
@@ -176,7 +179,7 @@ ACT_DOTA_CAST_EMP = 1584
 ACT_DOTA_CAST_EMP_ORB = 1740
 
 ---Client only.
-ACT_DOTA_CAST_FENCE = 1817
+ACT_DOTA_CAST_FENCE = 1819
 
 ---Client only.
 ACT_DOTA_CAST_FORGE_SPIRIT = 1588
@@ -293,7 +296,7 @@ ACT_DOTA_CUSTOM_TOWER_IDLE_RARE = 1755
 ACT_DOTA_CUSTOM_TOWER_TAUNT = 1756
 
 ---Client only.
-ACT_DOTA_CYCLONE = 1819
+ACT_DOTA_CYCLONE = 1808
 
 ---Client only.
 ACT_DOTA_DAGON = 1651
@@ -413,7 +416,7 @@ ACT_DOTA_IDLE_SLEEPING = 1622
 ACT_DOTA_IDLE_SLEEPING_END = 1639
 
 ---Client only.
-ACT_DOTA_IMPALE = 1820
+ACT_DOTA_IMPALE = 1809
 
 ---Client only.
 ACT_DOTA_INTRO = 1623
@@ -611,7 +614,7 @@ ACT_DOTA_POOF_END = 1603
 ACT_DOTA_PRESENT_ITEM = 1635
 
 ---Client only.
-ACT_DOTA_RADIANT_CREEP_HAMMER = 1814
+ACT_DOTA_RADIANT_CREEP_HAMMER = 1813
 
 ---Client only.
 ACT_DOTA_RATTLETRAP_BATTERYASSAULT = 1549
@@ -641,7 +644,7 @@ ACT_DOTA_RAZE_3 = 1665
 ACT_DOTA_RELAX_END = 1610
 
 ---Client only.
-ACT_DOTA_RELAX_IN = 1815
+ACT_DOTA_RELAX_IN = 1817
 
 ---Client only.
 ACT_DOTA_RELAX_LOOP = 1609
@@ -650,7 +653,7 @@ ACT_DOTA_RELAX_LOOP = 1609
 ACT_DOTA_RELAX_LOOP_END = 1634
 
 ---Client only.
-ACT_DOTA_RELAX_OUT = 1816
+ACT_DOTA_RELAX_OUT = 1818
 
 ---Client only.
 ACT_DOTA_RELAX_START = 1608
@@ -663,9 +666,6 @@ ACT_DOTA_ROQUELAIRE_LAND_IDLE = 1616
 
 ---Client only.
 ACT_DOTA_RUN = 1502
-
----Client only.
-ACT_DOTA_RUN_ALT = 1809
 
 ---Client only.
 ACT_DOTA_RUN_RARE = 1761
@@ -725,7 +725,7 @@ ACT_DOTA_SPIRIT_BREAKER_CHARGE_END = 1594
 ACT_DOTA_SPIRIT_BREAKER_CHARGE_POSE = 1593
 
 ---Client only.
-ACT_DOTA_SPWN = 1818
+ACT_DOTA_SPWN = 1820
 
 ---Client only.
 ACT_DOTA_STARTLE = 1629
@@ -791,6 +791,9 @@ ACT_DOTA_TINKER_REARM2 = 1556
 ACT_DOTA_TINKER_REARM3 = 1557
 
 ---Client only.
+ACT_DOTA_TORRENT = 1810
+
+---Client only.
 ACT_DOTA_TRANSITION = 1731
 
 ---Client only.
@@ -833,7 +836,7 @@ ACT_DOTA_VIPER_DIVE = 1762
 ACT_DOTA_VIPER_DIVE_END = 1763
 
 ---Client only.
-ACT_DOTA_VOODOO_REST = 1808
+ACT_DOTA_VOODOO_REST = 1811
 
 ---Client only.
 ACT_DOTA_WAIT_IDLE = 1689
@@ -899,16 +902,13 @@ DOTA_PROJECTILE_ATTACHMENT_LAST = 6
 DOTA_PROJECTILE_ATTACHMENT_NONE = 0
 
 ---Client only.
-background_idle = 1806
+muerta_debut_satyr_a = 1814
 
 ---Client only.
-muerta_debut_satyr_a = 1810
+muerta_debut_satyr_b = 1815
 
 ---Client only.
-muerta_debut_satyr_b = 1811
+muerta_debut_satyr_c = 1816
 
 ---Client only.
-muerta_debut_satyr_c = 1812
-
----Client only.
-radiant_melee_mars_shieldbash = 1813
+radiant_melee_mars_shieldbash = 1812

@@ -10883,7 +10883,7 @@
    },
    "ACT_DOTA_ATTACK_STATUE": {
     "type": "number",
-    "value": 1787
+    "value": 1780
    },
    "ACT_DOTA_AW_MAGNETIC_FIELD": {
     "type": "number",
@@ -10955,27 +10955,27 @@
    },
    "ACT_DOTA_CAST1_STATUE": {
     "type": "number",
-    "value": 1782
+    "value": 1789
    },
    "ACT_DOTA_CAST2_STATUE": {
     "type": "number",
-    "value": 1783
+    "value": 1790
    },
    "ACT_DOTA_CAST3_STATUE": {
     "type": "number",
-    "value": 1779
+    "value": 1791
    },
    "ACT_DOTA_CAST4_STATUE": {
     "type": "number",
-    "value": 1784
+    "value": 1792
    },
    "ACT_DOTA_CAST5_STATUE": {
     "type": "number",
-    "value": 1795
+    "value": 1793
    },
    "ACT_DOTA_CAST6_STATUE": {
     "type": "number",
-    "value": 1801
+    "value": 1806
    },
    "ACT_DOTA_CAST_ABILITY_1": {
     "type": "number",
@@ -11091,7 +11091,7 @@
    },
    "ACT_DOTA_CAST_FENCE": {
     "type": "number",
-    "value": 1817
+    "value": 1819
    },
    "ACT_DOTA_CAST_FORGE_SPIRIT": {
     "type": "number",
@@ -11135,7 +11135,7 @@
    },
    "ACT_DOTA_CAST_STATUE": {
     "type": "number",
-    "value": 1792
+    "value": 1781
    },
    "ACT_DOTA_CAST_SUN_STRIKE": {
     "type": "number",
@@ -11215,7 +11215,7 @@
    },
    "ACT_DOTA_CHANNEL_STATUE": {
     "type": "number",
-    "value": 1804
+    "value": 1802
    },
    "ACT_DOTA_CHILLING_TOUCH": {
     "type": "number",
@@ -11263,7 +11263,7 @@
    },
    "ACT_DOTA_CYCLONE": {
     "type": "number",
-    "value": 1819
+    "value": 1808
    },
    "ACT_DOTA_DAGON": {
     "type": "number",
@@ -11283,7 +11283,7 @@
    },
    "ACT_DOTA_DEFEAT_STATUE": {
     "type": "number",
-    "value": 1799
+    "value": 1800
    },
    "ACT_DOTA_DIE": {
     "type": "number",
@@ -11331,7 +11331,7 @@
    },
    "ACT_DOTA_FLAIL_STATUE": {
     "type": "number",
-    "value": 1788
+    "value": 1786
    },
    "ACT_DOTA_FLEE": {
     "type": "number",
@@ -11347,7 +11347,7 @@
    },
    "ACT_DOTA_FORCESTAFF_STATUE": {
     "type": "number",
-    "value": 1802
+    "value": 1801
    },
    "ACT_DOTA_FRUSTRATION": {
     "type": "number",
@@ -11427,7 +11427,7 @@
    },
    "ACT_DOTA_IDLE_RARE_STATUE": {
     "type": "number",
-    "value": 1800
+    "value": 1805
    },
    "ACT_DOTA_IDLE_SLEEPING": {
     "type": "number",
@@ -11439,11 +11439,11 @@
    },
    "ACT_DOTA_IDLE_STATUE": {
     "type": "number",
-    "value": 1786
+    "value": 1784
    },
    "ACT_DOTA_IMPALE": {
     "type": "number",
-    "value": 1820
+    "value": 1809
    },
    "ACT_DOTA_INTRO": {
     "type": "number",
@@ -11563,7 +11563,7 @@
    },
    "ACT_DOTA_LOADOUT_FRONTPAGE": {
     "type": "number",
-    "value": 1798
+    "value": 1803
    },
    "ACT_DOTA_LOADOUT_RARE": {
     "type": "number",
@@ -11571,7 +11571,7 @@
    },
    "ACT_DOTA_LOADOUT_STATUE": {
     "type": "number",
-    "value": 1793
+    "value": 1782
    },
    "ACT_DOTA_LOOK_AROUND": {
     "type": "number",
@@ -11715,7 +11715,7 @@
    },
    "ACT_DOTA_RADIANT_CREEP_HAMMER": {
     "type": "number",
-    "value": 1814
+    "value": 1813
    },
    "ACT_DOTA_RATTLETRAP_BATTERYASSAULT": {
     "type": "number",
@@ -11755,7 +11755,7 @@
    },
    "ACT_DOTA_RELAX_IN": {
     "type": "number",
-    "value": 1815
+    "value": 1817
    },
    "ACT_DOTA_RELAX_LOOP": {
     "type": "number",
@@ -11767,7 +11767,7 @@
    },
    "ACT_DOTA_RELAX_OUT": {
     "type": "number",
-    "value": 1816
+    "value": 1818
    },
    "ACT_DOTA_RELAX_START": {
     "type": "number",
@@ -11785,17 +11785,13 @@
     "type": "number",
     "value": 1502
    },
-   "ACT_DOTA_RUN_ALT": {
-    "type": "number",
-    "value": 1809
-   },
    "ACT_DOTA_RUN_RARE": {
     "type": "number",
     "value": 1761
    },
    "ACT_DOTA_RUN_STATUE": {
     "type": "number",
-    "value": 1785
+    "value": 1783
    },
    "ACT_DOTA_SAND_KING_BURROW_IN": {
     "type": "number",
@@ -11863,7 +11859,7 @@
    },
    "ACT_DOTA_SPAWN_STATUE": {
     "type": "number",
-    "value": 1794
+    "value": 1787
    },
    "ACT_DOTA_SPIRIT_BREAKER_CHARGE_END": {
     "type": "number",
@@ -11875,7 +11871,7 @@
    },
    "ACT_DOTA_SPWN": {
     "type": "number",
-    "value": 1818
+    "value": 1820
    },
    "ACT_DOTA_STARTLE": {
     "type": "number",
@@ -11887,11 +11883,11 @@
    },
    "ACT_DOTA_STATUE_SEQUENCE": {
     "type": "number",
-    "value": 1803
+    "value": 1798
    },
    "ACT_DOTA_STUN_STATUE": {
     "type": "number",
-    "value": 1789
+    "value": 1785
    },
    "ACT_DOTA_SWIM": {
     "type": "number",
@@ -11915,7 +11911,7 @@
    },
    "ACT_DOTA_TAUNT_STATUE": {
     "type": "number",
-    "value": 1790
+    "value": 1788
    },
    "ACT_DOTA_TELEPORT": {
     "type": "number",
@@ -11947,7 +11943,7 @@
    },
    "ACT_DOTA_TELEPORT_END_STATUE": {
     "type": "number",
-    "value": 1805
+    "value": 1799
    },
    "ACT_DOTA_TELEPORT_REACT": {
     "type": "number",
@@ -11959,7 +11955,7 @@
    },
    "ACT_DOTA_TELEPORT_STATUE": {
     "type": "number",
-    "value": 1780
+    "value": 1794
    },
    "ACT_DOTA_THIRST": {
     "type": "number",
@@ -11980,6 +11976,10 @@
    "ACT_DOTA_TINKER_REARM3": {
     "type": "number",
     "value": 1557
+   },
+   "ACT_DOTA_TORRENT": {
+    "type": "number",
+    "value": 1810
    },
    "ACT_DOTA_TRANSITION": {
     "type": "number",
@@ -12031,7 +12031,7 @@
    },
    "ACT_DOTA_VICTORY_STATUE": {
     "type": "number",
-    "value": 1781
+    "value": 1795
    },
    "ACT_DOTA_VIPER_DIVE": {
     "type": "number",
@@ -12043,7 +12043,7 @@
    },
    "ACT_DOTA_VOODOO_REST": {
     "type": "number",
-    "value": 1808
+    "value": 1811
    },
    "ACT_DOTA_WAIT_IDLE": {
     "type": "number",
@@ -17630,33 +17630,6 @@
     },
     "type": "table"
    },
-   "PrintBindings": {
-    "fn": {
-     "lines": [
-      101,
-      108
-     ],
-     "params": [
-      "tbl"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
-   "PrintEnum": {
-    "fn": {
-     "lines": [
-      95,
-      100
-     ],
-     "params": [
-      "enumName",
-      "enumTable"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
    "QAngle": {
     "fn": {
      "native": true
@@ -18099,19 +18072,6 @@
     },
     "type": "function"
    },
-   "SortedKeys": {
-    "fn": {
-     "lines": [
-      87,
-      94
-     ],
-     "params": [
-      "tbl"
-     ],
-     "source": "...s\\common\\dota 2 beta\\game\\core\\scripts\\vscripts\\init.lua"
-    },
-    "type": "function"
-   },
    "UniqueString": {
     "fn": {
      "lines": [
@@ -18337,7 +18297,7 @@
    },
    "background_idle": {
     "type": "number",
-    "value": 1806
+    "value": 1804
    },
    "bit": {
     "members": {
@@ -18687,15 +18647,15 @@
    },
    "muerta_debut_satyr_a": {
     "type": "number",
-    "value": 1810
+    "value": 1814
    },
    "muerta_debut_satyr_b": {
     "type": "number",
-    "value": 1811
+    "value": 1815
    },
    "muerta_debut_satyr_c": {
     "type": "number",
-    "value": 1812
+    "value": 1816
    },
    "printstack": {
     "fn": {
@@ -18705,7 +18665,7 @@
    },
    "radiant_melee_mars_shieldbash": {
     "type": "number",
-    "value": 1813
+    "value": 1812
    },
    "scripthelp_DeepPrint": {
     "type": "string",
@@ -18721,7 +18681,7 @@
    },
    "ti6": {
     "type": "number",
-    "value": 1791
+    "value": 1779
    },
    "vlua": {
     "members": {
@@ -19186,9 +19146,9 @@
   }
  },
  "build": {
-  "clientVersion": "6942",
-  "sourceRevision": "11055158",
-  "steamBuildId": "25610408",
-  "versionDate": "Sep 29 2026"
+  "clientVersion": "6943",
+  "sourceRevision": "11069754",
+  "steamBuildId": "25664722",
+  "versionDate": "Oct 01 2026"
  }
 }

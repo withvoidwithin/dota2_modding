@@ -1,0 +1,7 @@
+{
+ "first": {"clientVersion":"6942","sourceRevision":"11055158","steamBuildId":"25610408","versionDate":"Sep 29 2026"},
+ "entries": [
+  {"build":{"clientVersion":"6951","sourceRevision":"11096670","steamBuildId":"25768240","versionDate":"Oct 06 2026"},"from":{"clientVersion":"6943","sourceRevision":"11069754","steamBuildId":"25664722","versionDate":"Oct 01 2026"},"notes":["The dumps were made in different conditions (map — server: unknown → dota; client: unknown → maps/dota.vpk): some of the changes may come from the dump, not from the game.","The entity classes were read by different versions of the parser (1 → 2): some of their changes may come from the parser, not from the game."],"counts":{"added":41,"removed":6,"changed":439},"pages":["class/CDOTA_Ability_Aghanim_Spear","class/CScriptHTTPRequest","class/CScriptUniformRandomStream","class/CTakeDamageInfo","enum/DOTASlotType_t","enum/DOTA_ABILITY_BEHAVIOR","enum/modifierfunction"]},
+  {"build":{"clientVersion":"6943","sourceRevision":"11069754","steamBuildId":"25664722","versionDate":"Oct 01 2026"},"from":{"clientVersion":"6942","sourceRevision":"11055158","steamBuildId":"25610408","versionDate":"Sep 29 2026"},"counts":{"added":1,"removed":1,"changed":38},"pages":[]}
+ ]
+}

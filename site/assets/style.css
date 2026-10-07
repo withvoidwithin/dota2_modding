@@ -105,7 +105,7 @@
   /* Layout */
   --header-h: 56px;
   --side-w: 380px;
-  --content-max: 960px;
+  --content-max: 1120px;
   --tree-indent: 12px;
 
   /* Motion */
@@ -735,7 +735,8 @@ a.sig__type:hover { text-decoration: underline solid; }
   user-select: none;
 }
 .section__head::-webkit-details-marker { display: none; }
-.section__head::before {
+.section__head::before,
+.entry__head::before {
   content: "";
   flex: none;
   width: 16px; height: 16px;
@@ -744,8 +745,9 @@ a.sig__type:hover { text-decoration: underline solid; }
           mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 4l4 4-4 4' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 16px no-repeat;
   transition: transform var(--dur) var(--ease);
 }
-.section[open] > .section__head::before { transform: rotate(90deg); }
-.section__head:hover { background: var(--surface-2); }
+.section[open] > .section__head::before,
+.entry[open] > .entry__head::before { transform: rotate(90deg); }
+.section__head:hover, .entry__head:hover { background: var(--surface-2); }
 .section__title { min-width: 0; color: var(--text-muted); font-size: var(--fs-sm); overflow-wrap: anywhere; }
 .section__title a, .section__title code { color: var(--text-strong); font: 500 var(--fs-code)/1.4 var(--font-mono); }
 .section__head .count { margin-left: auto; padding-left: var(--sp-3); }
@@ -858,6 +860,7 @@ a.sig__type:hover { text-decoration: underline solid; }
 
 .status--checking { --c: var(--text-muted); }
 .status--ok       { --c: var(--ok); }
+.status--ahead    { --c: var(--ok); }
 .status--stale    { --c: var(--accent-text); }
 .status--error    { --c: var(--warn); }
 .status--checking .status__icon .i { animation: spin 1s linear infinite; }
@@ -1225,6 +1228,139 @@ a.stat .stat__label { color: var(--link); }
 @keyframes shimmer { to { background-position: -150% 0; } }
 
 /* ------------------------------------------------------------------ */
+/* 18b. Changelog: marks, entries, changes                             */
+/* ------------------------------------------------------------------ */
+
+/* "new" / "updated": what the newest entry of the changelog added or changed. Built like a side tag, told
+   apart by hue (green, purple) and by word. */
+.mark {
+  --c: var(--ok);
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in srgb, var(--c) 38%, transparent);
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  color: var(--c);
+  font: 600 var(--fs-2xs)/1 var(--font-mono);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: 2px;
+}
+a.mark:hover { background: color-mix(in srgb, var(--c) 24%, transparent); text-decoration: none; }
+.mark--updated { --c: var(--syn-number); }
+.page-title .mark { height: 22px; font-size: var(--fs-xs); vertical-align: 0; }
+.hit__name .mark, .table .mark { margin-left: var(--sp-2); }
+
+/* Sidebar: a dot after the name instead of a tag, so a name keeps its room. */
+[data-mark] { --c: var(--ok); }
+[data-mark="updated"] { --c: var(--syn-number); }
+.tree__link[data-mark]::after, .list__link[data-mark]::after {
+  content: "";
+  display: inline-block;
+  width: 6px; height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--c);
+  vertical-align: 1px;
+}
+
+/* "+3 −1 ~38" */
+.deltas { display: inline-flex; flex-wrap: wrap; gap: 2px var(--sp-3); font: 600 var(--fs-xs)/1.4 var(--font-mono); font-variant-numeric: tabular-nums; }
+.delta--added { color: var(--ok); }
+.delta--removed { color: var(--accent-text); }
+.delta--changed { color: var(--syn-number); }
+
+.callout--warn { border-color: color-mix(in srgb, var(--warn) 40%, var(--line)); background: color-mix(in srgb, var(--warn) 7%, var(--surface)); }
+.callout--warn .i { color: var(--warn); }
+
+/* Entries of the Changelog page: a build, then its changes by kind */
+.entries { display: grid; gap: var(--sp-4); }
+.entry { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); overflow: clip; scroll-margin-top: 80px; }
+.entry__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-4);
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-3);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.entry__head::-webkit-details-marker { display: none; }
+.entry__head::before { align-self: center; margin-right: calc(-1 * var(--sp-2)); }
+.entry__build { color: var(--text-strong); font-weight: 600; }
+.entry__build code { font-size: var(--fs-code); }
+.entry__date, .entry__from { color: var(--text-muted); font-size: var(--fs-sm); }
+.entry__date { font-family: var(--font-mono); }
+.entry__from code { font-size: var(--fs-xs); color: var(--text); }
+.entry__head .deltas { margin-left: auto; }
+.entry[open] > .entry__head { border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.entry__body { display: grid; gap: var(--sp-3); padding: var(--sp-4); }
+.entry__body > .block__note { margin: 0; }
+
+/* A change: the sign of what happened, the name, and from what to what */
+.changes { display: grid; }
+.section__body.changes { background: var(--surface); }
+.change {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: 9px var(--sp-4);
+  border-top: 1px solid var(--line);
+}
+.changes > .change:first-child { border-top: 0; }
+.change__op { font: 700 var(--fs-md)/1.5 var(--font-mono); text-align: center; }
+.change--added .change__op { color: var(--ok); }
+.change--removed .change__op { color: var(--accent-text); }
+.change--changed .change__op { color: var(--syn-number); }
+.change__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--sp-3); min-width: 0; }
+.change__head code { font-size: var(--fs-code); color: var(--text-strong); }
+.change--removed .change__head code { color: var(--text-muted); text-decoration: line-through; text-decoration-color: var(--text-faint); }
+.change__members { color: var(--text-muted); font-size: var(--fs-xs); }
+.change__facets { display: grid; gap: var(--sp-2); margin-top: 6px; }
+.facet { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px var(--sp-3); font-size: var(--fs-sm); }
+.facet__name { flex: none; width: 96px; color: var(--text-muted); font-size: var(--fs-2xs); font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+.facet dd { min-width: 0; overflow-wrap: anywhere; }
+.facet__was, .facet__was code { color: var(--text-muted); }
+.facet__arrow { color: var(--text-faint); }
+.facet__now code { color: var(--text-strong); }
+.change__sig.sig { font-size: var(--fs-code); }
+.change__text { color: var(--text-muted); }
+
+/* History block at the foot of a page */
+.history { display: grid; gap: var(--sp-5); }
+.history__build { margin-bottom: var(--sp-2); font: 600 var(--fs-sm)/1.4 var(--font-mono); }
+.history .changes { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); overflow: clip; }
+
+/* Overview: the newest entry in a line */
+.digest {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color var(--dur) var(--ease);
+}
+.digest:hover { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); text-decoration: none; }
+.digest__main { display: grid; gap: 2px; min-width: 0; margin-right: auto; }
+.digest__title { color: var(--text-strong); font-weight: 600; }
+.digest__text { color: var(--text-muted); font-size: var(--fs-sm); }
+.digest__text code { font-size: var(--fs-xs); color: var(--text); }
+.digest .i { color: var(--text-muted); }
+.digest:hover .i { color: var(--accent-text); }
+
+/* Home: the changes of the newest build on a dataset card */
+.dcard__change { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px var(--sp-2); color: var(--text-muted); font-size: var(--fs-xs); }
+.dcard__change code { font-size: var(--fs-xs); color: var(--text); }
+
+/* ------------------------------------------------------------------ */
 /* 19. Medium widths                                                   */
 /* ------------------------------------------------------------------ */
 
@@ -1360,6 +1496,12 @@ a.stat .stat__label { color: var(--link); }
   .keys { display: none; }
   .chip { height: 36px; }
   .column { columns: 1; }
+
+  .entry__head .deltas { margin-left: 0; flex-basis: 100%; }
+  .entry__body { padding: var(--sp-3); }
+  .change { padding-inline: var(--sp-3); gap: var(--sp-2); }
+  .facet__name { width: 100%; }
+  .digest { padding: var(--sp-4); flex-wrap: wrap; }
 }
 
 @media (prefers-reduced-motion: reduce) {

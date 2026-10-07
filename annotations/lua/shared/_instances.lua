@@ -19,7 +19,7 @@ NativeFunctions = nil
 ---@type CScriptParticleManager
 ParticleManager = nil
 
----@type CEntityInstance
+---@type CBaseEntity
 c = nil
 
 ---@type CDebugOverlayScriptHelper

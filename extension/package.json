@@ -2,7 +2,7 @@
   "name": "dota2-vscripts-annotations",
   "displayName": "Dota 2 VScripts Annotations",
   "description": "Dota 2 VScripts Lua API definitions for EmmyLua, taken from the game itself.",
-  "version": "1.6943.0",
+  "version": "1.6951.0",
   "publisher": "withvoidwithin",
   "license": "MIT",
   "repository": {

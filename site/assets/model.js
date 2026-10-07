@@ -13,6 +13,13 @@ export const queryWords = (query) => query.trim().toLowerCase().split(/\s+/).fil
 /** Whether a lower-case text contains every word; any text matches no words. */
 export const matchesWords = (text, words) => words.every((word) => text.includes(word));
 
+/**
+ * Whether a Steam build id is newer than another: the ids are numbers that grow with every update (an assumption: Steam
+ * documents nothing like it). The Steam info service the tools and the site ask lags behind the game, so an
+ * installed build or a dump can be newer than the build it calls current.
+ */
+export const isNewerBuild = (build, other) => /^\d+$/.test(build) && /^\d+$/.test(other) && BigInt(build) > BigInt(other);
+
 export class VscriptsModel {
   /** `dumps`: side → VM dump; `entities`: the entity classes of the server (entities.json), or null. */
   constructor(dataset, dumps, entities = null) {
@@ -68,6 +75,8 @@ export class VscriptsModel {
     const nested = new Set(luaFunctions.filter((inner) => luaFunctions.some((outer) =>
       outer !== inner && outer.value.fn.source === inner.value.fn.source &&
       outer.value.fn.lines[0] < inner.value.fn.lines[0] && inner.value.fn.lines[1] <= outer.value.fn.lines[1])).map((global) => global.name));
+    /** Names of the nested helpers: tools/dota-api leaves them out of the annotations too. */
+    this.nested = nested;
     this.lua = new Map();
     this.constants = new Map();
     for (const global of globals.values()) {

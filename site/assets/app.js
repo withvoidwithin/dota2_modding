@@ -1,6 +1,7 @@
 // Browser for the Dota 2 modding data: reads data/index.json and the dumps it lists, renders everything
 // client-side. Routes live in the hash: #/<dataset>/<page>/<name>[/<member>].
-import { ENTITY_KINDS, SEARCH_LIMIT, VscriptsModel, matchesWords, queryWords } from "./model.js";
+import { CHANGE_KINDS, buildId, entryPath, latestMarks } from "./changelog.js";
+import { ENTITY_KINDS, SEARCH_LIMIT, VscriptsModel, isNewerBuild, matchesWords, queryWords } from "./model.js";
 
 // The deployed site has data/ next to it; a local server started at the repository root has it one level up.
 const DATA_ROOTS = ["data/", "../data/"];
@@ -20,6 +21,8 @@ let dataRoot = null;
 let manifest = null;
 /** @type {Map<string, VscriptsModel>} dataset id → loaded model */
 const models = new Map();
+/** @type {Map<string, object | null>} dataset id → its changelog (see loadChangelog); null when it has none */
+const changelogs = new Map();
 /** Model of the dataset in the route; null on Home. */
 let currentModel = null;
 
@@ -134,6 +137,7 @@ const ICONS = {
   enter: ["M13 3.5V8a1.5 1.5 0 0 1-1.5 1.5H3M6 6.5l-3 3 3 3"],
   sun: [[8, 8, 3], "M8 1.5V3M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1.1 1.1M11.5 11.5l1.1 1.1M3.4 12.6l1.1-1.1M11.5 4.5l1.1-1.1"],
   moon: ["M13.5 9.6A5.5 5.5 0 1 1 6.4 2.5a4.5 4.5 0 0 0 7.1 7.1z"],
+  history: [[8, 8, 5.5], "M8 5.2V8l2.2 1.4"],
 };
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -167,10 +171,46 @@ async function loadModel(dataset) {
     const dumps = {};
     for (const [side, path] of Object.entries(dataset.files)) dumps[side] = await fetchJson(path);
     const entities = dataset.entities ? await fetchJson(dataset.entities) : null;
-    models.set(dataset.id, new VscriptsModel(dataset, dumps, entities));
+    const model = new VscriptsModel(dataset, dumps, entities);
+    changelogs.set(dataset.id, await loadChangelog(dataset, model));
+    models.set(dataset.id, model);
   }
   return models.get(dataset.id);
 }
+
+/**
+ * The changelog of a dataset: { path, first, entries, marks, routes, loaded }. `entries` are what its index lists,
+ * newest first: each build, the counts of its changes and the pages it touches, but not the changes, which are a file
+ * of an entry each (loadEntry). `marks` come from the newest entry (latestMarks), the only one fetched here.
+ * `routes` are the pages that exist now: what the changelog names and no longer exists gets no link. A changelog that
+ * is missing or does not load is not an error: the site just has no history.
+ */
+async function loadChangelog(dataset, model) {
+  if (!dataset.changelog) return null;
+  try {
+    const { first, entries } = await fetchJson(dataset.changelog);
+    const routes = new Set([...model.index.map((entry) => entry.route), ...[...model.instances.keys()].map((name) => `instances/${name}`)]);
+    const log = { path: dataset.changelog, first, entries, routes, marks: new Map(), loaded: new Map() };
+    if (entries.length) log.marks = latestMarks([await loadEntry(log, entries[0])]);
+    return log;
+  } catch {
+    return null;
+  }
+}
+
+/** An entry of the index with its changes: a promise of the entry file, fetched once. */
+function loadEntry(log, summary) {
+  const id = buildId(summary.build);
+  if (!log.loaded.has(id)) {
+    log.loaded.set(id, fetchJson(entryPath(log.path, summary.build)).catch((error) => {
+      log.loaded.delete(id);   // a failed fetch may be tried again
+      throw error;
+    }));
+  }
+  return log.loaded.get(id);
+}
+
+const changelogOf = (model) => changelogs.get(model.id) ?? null;
 
 let steamBuild = null;
 
@@ -305,12 +345,13 @@ const sourceNote = (fn) => (fn?.source
 
 /**
  * A documented member. `id` makes it a target of #/…/<member> links; members listed on another class's page
- * have none. `href` is where its name leads.
+ * have none. `href` is where its name leads, `route` is what the changelog knows it by (changeMark).
  */
-function memberBlock(model, { id, name, href, parts, sides, context, fn, here }) {
+function memberBlock(model, { id, name, href, route, parts, sides, context, fn, here }) {
   return el("article", { class: "member", id: id == null ? null : `m-${id}`, "data-name": name, "data-sides": [...sides].join(" ") },
     el("div", { class: "member__head" },
       signature(model, href ? el("a", { class: "sig__name", href: `#/${href}` }, name) : name, parts, { here }),
+      changeMark(model, route),
       sideTags(model, sides, context)),
     description(fn?.desc),
     sourceNote(fn));
@@ -415,6 +456,157 @@ function filterMembers(root, { words, side }, empty) {
 }
 
 // ---------------------------------------------------------------------------------------------------------
+// Changelog pieces: the changes of the API between two dumped builds (changelog.js), as tags on what changed
+// in the newest build and as a page of all of them.
+
+const FACET_NAMES = { sides: "sides", signature: "signature", desc: "description", value: "value", base: "base class", class: "class", cls: "C++ class" };
+const KIND_TITLES = {
+  class: "Classes", method: "Methods", type: "Value types", function: "Global functions", instance: "Instances", enum: "Enums",
+  "enum value": "Enum values", Lua: "Core Lua", table: "Lua tables", constant: "Constants", entity: "Entity classes",
+};
+// What a new or a removed item takes along, by kind: singular and plural.
+const MEMBER_NOUNS = { class: ["method", "methods"], type: ["method", "methods"], enum: ["value", "values"], table: ["function", "functions"] };
+const OP_SIGNS = { added: "+", removed: "−", changed: "~" };
+
+/** Where a mark of the newest entry comes from, for a tooltip. */
+function markTitle({ mark, entry, change, derived }) {
+  const when = `build ${buildId(entry.build)} · ${versionDate(entry.build.versionDate)}`;
+  if (mark === "new") return `Added in ${when}`;
+  return derived ? `Members changed in ${when}` : `Changed in ${when}: ${Object.keys(change.now).map((facet) => FACET_NAMES[facet] ?? facet).join(", ")}`;
+}
+
+/**
+ * "new" or "updated" for a route the newest entry of the changelog added or changed, else null; a link to the entry
+ * (`link: false` where it would sit inside another link).
+ */
+function changeMark(model, route, { link = true } = {}) {
+  const found = changelogOf(model)?.marks.get(route);
+  if (!found) return null;
+  const attrs = { class: `mark mark--${found.mark}`, title: markTitle(found) };
+  return link ? el("a", { ...attrs, href: `#/${model.id}/changelog/${buildId(found.entry.build)}` }, found.mark) : el("span", attrs, found.mark);
+}
+
+/** Attributes of a sidebar link: its title and, for what the newest entry changed, the dot the stylesheet draws. */
+function navAttrs(model, route, name) {
+  const found = changelogOf(model)?.marks.get(route);
+  return found ? { title: `${name} — ${markTitle(found).toLowerCase()}`, "data-mark": found.mark } : { title: name };
+}
+
+/** "+3 −1 ~38": the counts of added, removed and changed; none are left out. */
+function deltas(counts) {
+  const shown = Object.keys(OP_SIGNS).filter((op) => counts[op]);
+  return el("span", { class: "deltas" }, shown.length
+    ? shown.map((op) => el("span", { class: `delta delta--${op}`, title: `${counts[op]} ${op}` }, `${OP_SIGNS[op]}${counts[op]}`))
+    : el("span", { class: "muted" }, "no changes"));
+}
+
+/** One side of a change: a facet of the item as it was or is now. */
+function facetValue(model, change, facet, value) {
+  if (value === null || value === undefined) return el("span", { class: "muted" }, "none");
+  if (facet === "sides") return model.sides.filter((side) => value.includes(side)).map((side) => sideTag(side));
+  if (facet === "signature") {
+    const sig = value.returns !== undefined ? "bound" : value.result !== undefined ? "probe" : "plain";
+    return signature(model, null, signatureParts(sig, value, { method: change.route.startsWith("class/"), owner: change.route.split("/")[1] }),
+      { extraClass: " change__sig" });
+  }
+  if (facet === "desc") return el("span", { class: "change__text" }, value || "none");
+  if (facet === "base") return code(Object.entries(value).map(([side, base]) => `${side}: ${base}`).join(", ") || "none");
+  return code(typeof value === "string" ? value : JSON.stringify(value));
+}
+
+/** A change as a list item: what happened, to what (a link while the page exists), and from what to what. */
+function changeRow(model, change) {
+  const name = el("code", { class: "ident" }, breaks(change.label));
+  const exists = change.op !== "removed" && changelogOf(model).routes.has(change.route);
+  return el("li", { class: `change change--${change.op}` },
+    el("span", { class: "change__op", title: capitalize(change.op) }, OP_SIGNS[change.op]),
+    el("div", { class: "change__body" },
+      el("div", { class: "change__head" },
+        exists ? el("a", { href: `#/${model.id}/${change.route}` }, name) : name,
+        sideTags(model, new Set(change.sides), change.kind === "entity" ? new Set(change.sides) : undefined),
+        change.members ? el("span", { class: "change__members" },
+          `${OP_SIGNS[change.op]}${change.members} ${(MEMBER_NOUNS[change.kind] ?? ["member", "members"])[change.members === 1 ? 0 : 1]}`) : null),
+      change.op === "changed" ? el("dl", { class: "change__facets" }, Object.keys(change.now).map((facet) => el("div", { class: "facet" },
+        el("dt", { class: "facet__name" }, FACET_NAMES[facet] ?? facet),
+        el("dd", { class: "facet__was" }, facetValue(model, change, facet, change.was[facet])),
+        el("dd", { class: "facet__arrow", "aria-label": "became" }, "→"),
+        el("dd", { class: "facet__now" }, facetValue(model, change, facet, change.now[facet]))))) : null));
+}
+
+/** The changes of an entry by kind. */
+function changesNode(model, entry) {
+  const groups = CHANGE_KINDS.map((kind) => [kind, entry.changes.filter((change) => change.kind === kind)]).filter(([, changes]) => changes.length);
+  return groups.length
+    ? el("div", { class: "sections" }, groups.map(([kind, changes]) => el("details", { class: "section", open: changes.length <= 25 },
+      el("summary", { class: "section__head" }, el("span", { class: "section__title" }, KIND_TITLES[kind]), count(changes.length)),
+      el("ul", { class: "section__body changes" }, changes.map((change) => changeRow(model, change))))))
+    : el("p", { class: "block__note" }, "No API changes between these builds.");
+}
+
+/**
+ * An entry of the changelog as the index lists it: the builds it compares, the counts and the notes at once, the
+ * changes when it is opened (its file is fetched then, not with the page).
+ */
+function entryNode(model, summary, open) {
+  const id = buildId(summary.build);
+  const log = changelogOf(model);
+  const status = el("p", { class: "block__note" }, "Loading…");
+  const details = el("details", { class: "entry", id: `b-${id}`, open },
+    el("summary", { class: "entry__head" },
+      el("span", { class: "entry__build" }, "Build ", code(id)),
+      el("span", { class: "entry__date" }, versionDate(summary.build.versionDate)),
+      el("span", { class: "entry__from" }, "from ", code(buildId(summary.from))),
+      deltas(summary.counts)),
+    el("div", { class: "entry__body" },
+      (summary.notes ?? []).map((note) => el("div", { class: "callout callout--warn", role: "note" }, icon("warning"), el("p", {}, note))),
+      status));
+  let requested = false;
+  const fillBody = () => {
+    if (requested) return;
+    requested = true;
+    loadEntry(log, summary).then((entry) => status.replaceWith(changesNode(model, entry))).catch(() => {
+      requested = false;   // closing and opening the entry tries again
+      status.textContent = "Could not load the changes of this build.";
+    });
+  };
+  if (open) fillBody();
+  details.addEventListener("toggle", () => details.open && fillBody());
+  return details;
+}
+
+/**
+ * Everything the changelog says about a page and what is under it (a class and its methods): by build, newest first.
+ * Only the entries that touch the page are fetched; the block is there at once and fills when they arrive.
+ */
+function historyBlock(model, route) {
+  const log = changelogOf(model);
+  const summaries = (log?.entries ?? []).filter((summary) => summary.pages.includes(route));
+  if (!summaries.length) return null;
+  const list = el("div", { class: "history" }, el("p", { class: "block__note" }, "Loading…"));
+  Promise.all(summaries.map((summary) => loadEntry(log, summary))).then((entries) => fill(list, entries.map((entry) => el("section", { class: "history__entry" },
+    el("h3", { class: "history__build" }, el("a", { href: `#/${model.id}/changelog/${buildId(entry.build)}` }, "Build ", code(buildId(entry.build))),
+      el("span", { class: "muted" }, ` · ${versionDate(entry.build.versionDate)}`)),
+    el("ul", { class: "changes" }, entry.changes
+      .filter((change) => change.route === route || change.route.startsWith(`${route}/`))
+      .map((change) => changeRow(model, change))))))).catch(() => fill(list, el("p", { class: "block__note" }, "Could not load the history.")));
+  return block("History", summaries.length, list);
+}
+
+/** Overview block: the newest entry in a line, a link to it. */
+function latestChanges(model) {
+  const log = changelogOf(model);
+  if (!log) return null;
+  const [entry] = log.entries;
+  return block("What changed", null, entry
+    ? el("a", { class: "digest", href: `#/${model.id}/changelog/${buildId(entry.build)}` },
+      el("span", { class: "digest__main" },
+        el("span", { class: "digest__title" }, "Build ", code(buildId(entry.build)), ` · ${versionDate(entry.build.versionDate)}`),
+        el("span", { class: "digest__text" }, "against build ", code(buildId(entry.from)))),
+      deltas(entry.counts), icon("arrow"))
+    : el("p", { class: "block__note" }, "Nothing to compare with yet: ", log.first ? ["the changelog starts at build ", code(buildId(log.first)), "."] : "there is one dump."));
+}
+
+// ---------------------------------------------------------------------------------------------------------
 // Pages
 
 function pageHome() {
@@ -434,8 +626,9 @@ function pageHome() {
         [["classes", summary.classes], ["functions", summary.functions], ["enums", summary.enums], ["constants", summary.constants],
           ["entity classes", summary.entities]]
           .filter(([, value]) => value !== undefined).map(([label, value]) => el("span", {}, el("b", {}, value), ` ${label}`)));
+      const change = summary?.lastChange && el("span", { class: "dcard__change" }, deltas(summary.lastChange), " since build ", code(summary.lastChange.from));
       return card({ class: "dcard", href: `#/${dataset.id}` }, capitalize(Object.keys(dataset.files).join(" + ")), dataset.title,
-        dataset.description, stats, summary ? buildLine(summary.builds) : "Open", "arrow");
+        dataset.description, [stats, change], summary ? buildLine(summary.builds) : "Open", "arrow");
     }))),
     block("Use it in your editor", null, el("div", { class: "cards" },
       card({ class: "dcard dcard--quiet", href: `${repo}/tree/main/extension` }, "VS Code extension", "Dota 2 VScripts Annotations",
@@ -468,6 +661,10 @@ function freshnessStatus(model) {
     } else if (dumped.length === 1 && dumped[0] === current.id) {
       render("ok", "check", "Matches the current build",
         ["Dumped from build ", code(current.id), `, the public Dota 2 build on Steam since ${steamDate(current.time)}.`], current.id);
+    } else if (dumped.every((id) => isNewerBuild(id, current.id))) {
+      render("ahead", "check", "Newer than Steam's info",
+        ["The data is from ", dumpedBuild, "; the Steam info service reports build ", code(current.id), ` since ${steamDate(current.time)}. `,
+          "Its data lags behind the game."], current.id);
     } else {
       render("stale", "warning", "A newer build is out",
         ["Steam serves build ", code(current.id), ` since ${steamDate(current.time)}; the data is from `, dumpedBuild,
@@ -514,6 +711,7 @@ function pageOverview(model) {
   show(
     pageHead({ eyebrow: "Dataset", title: dataset.title, sans: true, lead: dataset.description }),
     freshnessStatus(model),
+    latestChanges(model),
     block("Game build", null, table("build",
       [["Side"], ["Steam build", "num"], ["Version", "num"], ["Revision", "num"], ["Date"]],
       model.sides.map((side) => {
@@ -575,8 +773,8 @@ function pageClass(model, name, member) {
   const inherited = model.inherited(cls);
   const inheritedCount = inherited.reduce((sum, group) => sum + group.members.length, 0);
   const method = (m, owner, id) => memberBlock(model, {
-    id, name: m.name, href: `${model.id}/class/${owner}/${m.name}`, parts: signatureParts(m.kind, m.fn, { method: true }),
-    sides: m.sides, context: cls.sides, fn: m.fn, here: cls.name,
+    id, name: m.name, href: `${model.id}/class/${owner}/${m.name}`, route: `class/${owner}/${m.name}`,
+    parts: signatureParts(m.kind, m.fn, { method: true }), sides: m.sides, context: cls.sides, fn: m.fn, here: cls.name,
   });
   const sections = inherited.map(({ ancestor, members }) => el("details", { class: "section" },
     el("summary", { class: "section__head" },
@@ -585,7 +783,7 @@ function pageClass(model, name, member) {
   const empty = el("p", { class: "empty__hint", hidden: true }, "No methods match the filter.");
   const page = [
     pageHead({
-      eyebrow: "Class", title: cls.name, tags: sideTags(model, cls.sides),
+      eyebrow: "Class", title: cls.name, tags: [sideTags(model, cls.sides), changeMark(model, `class/${cls.name}`)],
       facts: [
         ["Methods", inheritedCount ? `${own.length} own · ${inheritedCount} inherited` : `${own.length} own`],
         cls.instances.length ? [cls.instances.length > 1 ? "Instances" : "Instance", cls.instances.map((instance, i) => [i ? ", " : "", code(instance)])] : null,
@@ -610,6 +808,7 @@ function pageClass(model, name, member) {
       ? el("div", { class: "members" }, own.map((m) => method(m, cls.name, m.name)))
       : el("p", { class: "block__note" }, "No own methods.")),
     sections.length ? block("Inherited", inheritedCount, el("div", { class: "sections" }, sections)) : null,
+    historyBlock(model, `class/${cls.name}`),
     empty,
   ];
   show(page);
@@ -649,7 +848,7 @@ function pageValueType(model, name, member) {
   const typed = (kind) => typeNode(model, operand(kind), name);
   show(
     pageHead({
-      eyebrow: "Value type", title: name, tags: sideTags(model, type.sides),
+      eyebrow: "Value type", title: name, tags: [sideTags(model, type.sides), changeMark(model, `type/${name}`)],
       more: probe ? el("div", { class: "callout", role: "note" }, icon("info"),
         el("p", {}, "Fields, operators and signatures were found by trying a sample made by ", code(`${name}()`),
           "; parameter names are unknown.")) : null,
@@ -670,11 +869,12 @@ function pageValueType(model, name, member) {
     block("Methods", methods.length, el("div", { class: "members" }, methods.map((method) => {
       const probed = probe?.methods?.[method];
       return memberBlock(model, {
-        id: method, name: method, href: `${model.id}/type/${name}/${method}`,
+        id: method, name: method, href: `${model.id}/type/${name}/${method}`, route: `type/${name}/${method}`,
         parts: signatureParts(probed ? "probe" : "unknown", probed, { owner: name }),
         sides: type.sides, context: type.sides, here: name,
       });
     }))),
+    historyBlock(model, `type/${name}`),
   );
   focusMember(member);
 }
@@ -689,23 +889,24 @@ function pageFunctions(model, name) {
       id: "function-filter", label: "Filter functions", members: all, empty,
     }),
     block("Functions", all.length, el("div", { class: "members" }, all.map((fn) => memberBlock(model, {
-      id: fn.name, name: fn.name, href: `${model.id}/function/${fn.name}`, parts: signatureParts("bound", fn.value),
-      sides: fn.sides, fn: fn.value,
+      id: fn.name, name: fn.name, href: `${model.id}/function/${fn.name}`, route: `function/${fn.name}`,
+      parts: signatureParts("bound", fn.value), sides: fn.sides, fn: fn.value,
     })))),
     empty,
   );
   focusMember(name);
 }
 
-function pageInstances(model) {
+function pageInstances(model, name) {
   const all = [...model.instances.values()].sort((a, b) => a.name.localeCompare(b.name));
   show(
     pageHead({ title: "Instances", sans: true, lead: "Objects the engine puts in the global scope, with their classes." }),
     table("instances", [["Name"], ["Class"], ["Side", "side-col"]], all.map((instance) => el("tr", { id: `m-${instance.name}` },
-      el("td", {}, code(instance.name)),
+      el("td", {}, code(instance.name), changeMark(model, `instances/${instance.name}`)),
       el("td", {}, el("code", {}, typeNode(model, instance.value))),
       el("td", { class: "side-col" }, sideTags(model, instance.sides))))),
   );
+  focusMember(name);
 }
 
 /** Common prefix of enum value names up to its last "_": DOTA_GAMERULES_STATE_ of DOTA_GAMERULES_STATE_INIT… */
@@ -725,16 +926,18 @@ function pageEnum(model, name, member) {
   const described = values.some(([, info]) => info.desc);
   show(
     pageHead({
-      eyebrow: "Enum", title: name, tags: sideTags(model, enumeration.sides),
+      eyebrow: "Enum", title: name, tags: [sideTags(model, enumeration.sides), changeMark(model, `enum/${name}`)],
       facts: [["Values", values.length], ["Order", "by value"]],
     }),
     table("enum", [["Name"], ["Value", "num"], described ? ["Description"] : null].filter(Boolean),
       values.map(([value, info]) => el("tr", { id: `m-${value}` },
         el("td", {}, el("code", { class: "ident" },
-          prefix ? el("span", { class: "ident__prefix" }, breaks(prefix)) : null, breaks(value.slice(prefix.length)))),
+          prefix ? el("span", { class: "ident__prefix" }, breaks(prefix)) : null, breaks(value.slice(prefix.length))),
+        changeMark(model, `enum/${name}/${value}`)),
         el("td", { class: "num" }, code(info.value ?? "—")),
         described ? el("td", { class: "desc" }, info.desc) : null))),
     described ? null : el("p", { class: "table-caption" }, "The engine gives no descriptions for these values."),
+    historyBlock(model, `enum/${name}`),
   );
   focusMember(member);
 }
@@ -744,20 +947,23 @@ function pageGlobal(model, name, member) {
   if (!global) return pageNotFound(model, "global", name);
   if (global.value.type === "function") {
     show(
-      pageHead({ eyebrow: "Lua function", title: name, tags: sideTags(model, global.sides) }),
+      pageHead({ eyebrow: "Lua function", title: name, tags: [sideTags(model, global.sides), changeMark(model, `global/${name}`)] }),
       el("div", { class: "members" }, memberBlock(model, {
         id: name, name, parts: signatureParts("plain", global.value.fn), sides: global.sides, context: global.sides, fn: global.value.fn,
       })),
+      historyBlock(model, `global/${name}`),
     );
     return;
   }
   const members = Object.entries(global.value.members ?? {}).sort((a, b) => a[0].localeCompare(b[0]));
   show(
-    pageHead({ eyebrow: "Lua table", title: name, tags: sideTags(model, global.sides), facts: [["Members", members.length]] }),
+    pageHead({
+      eyebrow: "Lua table", title: name, tags: [sideTags(model, global.sides), changeMark(model, `global/${name}`)], facts: [["Members", members.length]],
+    }),
     block("Members", members.length, el("div", { class: "members" }, members.map(([key, info]) => (info.type === "function"
       ? memberBlock(model, {
-        id: key, name: key, href: `${model.id}/global/${name}/${key}`, parts: signatureParts("plain", info.fn),
-        sides: global.sides, context: global.sides, fn: info.fn,
+        id: key, name: key, href: `${model.id}/global/${name}/${key}`, route: `global/${name}/${key}`,
+        parts: signatureParts("plain", info.fn), sides: global.sides, context: global.sides, fn: info.fn,
       })
       : el("article", { class: "member", id: `m-${key}`, "data-name": key },
         el("div", { class: "member__head" }, el("code", { class: "sig" },
@@ -772,7 +978,7 @@ function pageConstants(model, name) {
   const rows = all.map((constant) => {
     const { value } = constant.value;
     return el("tr", { id: `m-${constant.name}`, "data-name": constant.name.toLowerCase() },
-      el("td", {}, el("code", { class: "ident" }, breaks(constant.name))),
+      el("td", {}, el("code", { class: "ident" }, breaks(constant.name)), changeMark(model, `constants/${constant.name}`)),
       el("td", { class: typeof value === "string" ? "str" : typeof value === "number" ? "num" : null }, code(JSON.stringify(value))),
       el("td", { class: "side-col" }, sideTags(model, constant.sides)));
   });
@@ -823,7 +1029,7 @@ function pageEntities(model, name) {
     id: `m-${entity.name}`, "data-name": `${entity.name} ${entity.cls}`.toLowerCase(), "data-kind": entity.kind,
   },
   el("td", { class: "row-num" }),
-  el("td", {}, el("code", { class: "ident" }, breaks(entity.name)),
+  el("td", {}, el("code", { class: "ident" }, breaks(entity.name)), changeMark(model, `entities/${entity.name}`),
     entity.aliasOf ? el("span", { class: "entity-alias" }, "alias of ", el("a", { href: route(entity.aliasOf) }, code(entity.aliasOf))) : null),
   el("td", { "data-label": "Lua class" }, entity.luaClass
     ? el("code", { class: "ident" }, typeNode(model, entity.luaClass))
@@ -868,6 +1074,29 @@ function pageEntities(model, name) {
   );
   filter();
   focusMember(name);
+}
+
+function pageChangelog(model, build) {
+  const log = changelogOf(model);
+  if (!log) return pageNotFound(model, "page", "changelog");
+  if (build && !log.entries.some((entry) => buildId(entry.build) === build)) return pageNotFound(model, "build", build);
+  const opened = build ?? (log.entries[0] && buildId(log.entries[0].build));
+  show(
+    pageHead({
+      title: "Changelog", sans: true, lead: "What changed in the API between the dumped game builds.",
+      facts: [
+        log.first ? ["Tracked since", ["Build ", code(buildId(log.first)), ` · ${versionDate(log.first.versionDate)}`]] : null,
+        ["Entries", log.entries.length],
+      ],
+    }),
+    el("div", { class: "callout", role: "note" }, icon("info"),
+      el("p", {}, "Each entry compares the dumps of two builds. A build nobody dumped has no entry of its own: what it changed is in the entry of the next dumped one. ",
+        "Only what the engine reports to the script VM is compared.")),
+    log.entries.length
+      ? el("div", { class: "entries" }, log.entries.map((entry) => entryNode(model, entry, buildId(entry.build) === opened)))
+      : el("p", { class: "block__note" }, "Nothing to compare with yet: the changelog compares two dumps, and there is one."),
+  );
+  if (build) document.getElementById(`b-${build}`)?.scrollIntoView({ block: "start" });
 }
 
 /** Empty, error and not-found states; `failed` paints it as an error, `details` is the error text. */
@@ -944,12 +1173,14 @@ function highlight(text, words) {
 function hitNode(model, entry, words, active) {
   const member = entry.owner && entry.label.slice(entry.owner.length + 1);
   const desc = entry.sig === "bound" ? entry.fn.desc?.split(/\b(?:Args|Params):/)[0].trim() : null;
+  // An instance leads to its class, so the changes of the class are not its own.
+  const mark = entry.kind === "instance" ? null : changeMark(model, entry.route, { link: false });
   return el("li", { class: "hit" }, el("a", { class: active ? "hit__link is-active" : "hit__link", href: `#/${model.id}/${entry.route}` },
     el("span", { class: "hit__kind" }, entry.kind),
     el("span", { class: "hit__main" },
       el("span", { class: "hit__name" }, member
         ? [el("span", { class: "hit__owner" }, highlight(entry.owner, words), ":"), highlight(member, words)]
-        : highlight(entry.label, words)),
+        : highlight(entry.label, words), mark),
       entry.sig ? signature(model, null, signatureParts(entry.sig, entry.fn, { method: Boolean(entry.owner), owner: entry.owner }), { extraClass: " hit__sig" }) : null,
       desc ? el("span", { class: "hit__desc" }, desc) : null),
     el("span", { class: "hit__enter" }, icon("enter", "sm"), "Enter")));
@@ -1053,10 +1284,12 @@ function renderNav(model) {
   const list = (title, names, route) => collapsible(`${model.id}:group:${title}`, { class: "group" },
     el("summary", { class: "group__head" }, title, count(names.length)),
     el("ul", { class: "list" }, names.map((name) =>
-      el("li", {}, el("a", { class: "list__link", href: `#/${model.id}/${route}/${name}`, title: name }, name)))));
+      el("li", {}, el("a", { class: "list__link", href: `#/${model.id}/${route}/${name}`, ...navAttrs(model, `${route}/${name}`, name) }, name)))));
+  const log = changelogOf(model);
   fill(nav,
     el("ul", { class: "nav__links" },
       navLink(model.id, "overview", "Overview"),
+      log ? navLink(`${model.id}/changelog`, "history", "Changelog", log.entries.length) : null,
       navLink(`${model.id}/functions`, "function", "Global functions", model.functions.size),
       navLink(`${model.id}/instances`, "instance", "Instances", model.instances.size),
       navLink(`${model.id}/constants`, "constant", "Constants", model.constants.size),
@@ -1075,7 +1308,7 @@ function renderNav(model) {
  */
 function classTree(model, side) {
   const { roots, children, size } = model.classForest(side);
-  const classLink = (name) => el("a", { class: "tree__link", href: `#/${model.id}/class/${name}`, title: name }, name);
+  const classLink = (name) => el("a", { class: "tree__link", href: `#/${model.id}/class/${name}`, ...navAttrs(model, `class/${name}`, name) }, name);
   const node = (name) => {
     const derived = children.get(name);
     if (!derived) return el("li", {}, classLink(name));
@@ -1110,7 +1343,7 @@ function markNav(model, page, name) {
   for (const a of nav.querySelectorAll(".is-path")) a.classList.remove("is-path");
   // A function's route shows the Global functions page at that function.
   const listed = page === "function" ? "functions" : page;
-  const whole = ["functions", "instances", "constants", "entities"].includes(listed);
+  const whole = ["functions", "instances", "constants", "entities", "changelog"].includes(listed);
   const target = `#/${[model.id, listed, whole ? null : name].filter(Boolean).join("/")}`;
   const links = [...nav.querySelectorAll("a")].filter((a) => a.getAttribute("href") === target);
   for (const a of links) {
@@ -1175,11 +1408,12 @@ async function route() {
     type: () => pageValueType(model, name, member),
     function: () => pageFunctions(model, name),
     functions: () => pageFunctions(model),
-    instances: () => pageInstances(model),
+    instances: () => pageInstances(model, name),
     enum: () => pageEnum(model, name, member),
     global: () => pageGlobal(model, name, member),
     constants: () => pageConstants(model, name),
     entities: () => pageEntities(model, name),
+    changelog: () => pageChangelog(model, name),
   };
   (pages[page] ?? (() => pageNotFound(model, "page", page)))();
 }

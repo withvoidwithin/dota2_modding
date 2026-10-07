@@ -21,7 +21,6 @@
 ---@field CDOTAPlayerController table
 ---@field CDOTATutorial table
 ---@field CDOTAVoteSystem table
----@field CDOTA_Ability_Aghanim_Spear table
 ---@field CDOTA_Ability_Animation_Attack table
 ---@field CDOTA_Ability_Animation_TailSpin table
 ---@field CDOTA_Ability_DataDriven table
@@ -84,11 +83,13 @@
 ---@field CPointTemplate table
 ---@field CPointWorldText table
 ---@field CSceneEntity table
+---@field CScriptHTTPRequest table
 ---@field CScriptHeroList table
 ---@field CScriptKeyValues table
 ---@field CScriptParticleManager table
 ---@field CScriptPrecacheContext table
 ---@field CScriptUniformRandomStream table
+---@field CTakeDamageInfo table
 ---@field Convars table
 ---@field GlobalSys table
 ---@field GridNav table

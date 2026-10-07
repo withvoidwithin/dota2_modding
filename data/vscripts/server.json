@@ -5937,30 +5937,6 @@
      }
     }
    },
-   "CDOTA_Ability_Aghanim_Spear": {
-    "base": "CDOTABaseAbility",
-    "extra": {
-     "IsNull": {
-      "native": true
-     }
-    },
-    "methods": {
-     "LaunchSpear": {
-      "desc": "Launch Spear to a target position from a source position",
-      "params": [
-       {
-        "name": "vTarget",
-        "type": "<unknown>"
-       },
-       {
-        "name": "vStart",
-        "type": "<unknown>"
-       }
-      ],
-      "returns": "void"
-     }
-    }
-   },
    "CDOTA_Ability_Animation_Attack": {
     "base": "CDOTABaseAbility",
     "extra": {
@@ -16685,6 +16661,87 @@
      }
     }
    },
+   "CScriptHTTPRequest": {
+    "extra": {
+     "IsNull": {
+      "native": true
+     }
+    },
+    "methods": {
+     "Send": {
+      "desc": "Send a HTTP request.",
+      "params": [
+       {
+        "name": "",
+        "type": "handle"
+       }
+      ],
+      "returns": "bool"
+     },
+     "SetHTTPRequestAbsoluteTimeoutMS": {
+      "desc": "Set the total timeout on the request.",
+      "params": [
+       {
+        "name": "",
+        "type": "unsigned"
+       }
+      ],
+      "returns": "bool"
+     },
+     "SetHTTPRequestGetOrPostParameter": {
+      "desc": "Set a POST or GET parameter on the request.",
+      "params": [
+       {
+        "name": "",
+        "type": "string"
+       },
+       {
+        "name": "",
+        "type": "string"
+       }
+      ],
+      "returns": "bool"
+     },
+     "SetHTTPRequestHeaderValue": {
+      "desc": "Set a header value on the request.",
+      "params": [
+       {
+        "name": "",
+        "type": "string"
+       },
+       {
+        "name": "",
+        "type": "string"
+       }
+      ],
+      "returns": "bool"
+     },
+     "SetHTTPRequestNetworkActivityTimeout": {
+      "desc": "Set the network timeout on the request - this timer is reset when any data is received.",
+      "params": [
+       {
+        "name": "",
+        "type": "unsigned"
+       }
+      ],
+      "returns": "bool"
+     },
+     "SetHTTPRequestRawPostBody": {
+      "desc": "Set the literal body of a post - invalid after setting a post parameter.",
+      "params": [
+       {
+        "name": "",
+        "type": "string"
+       },
+       {
+        "name": "",
+        "type": "string"
+       }
+      ],
+      "returns": "bool"
+     }
+    }
+   },
    "CScriptHeroList": {
     "extra": {
      "IsNull": {
@@ -17163,6 +17220,200 @@
        }
       ],
       "returns": "bool"
+     }
+    }
+   },
+   "CTakeDamageInfo": {
+    "extra": {
+     "IsNull": {
+      "native": true
+     }
+    },
+    "methods": {
+     "AddDamage": {
+      "desc": "",
+      "params": [
+       {
+        "name": "flAddAmount",
+        "type": "float"
+       }
+      ],
+      "returns": "void"
+     },
+     "AddDamageType": {
+      "desc": "",
+      "params": [
+       {
+        "name": "iDamageType",
+        "type": "int"
+       }
+      ],
+      "returns": "void"
+     },
+     "GetAmmoType": {
+      "desc": "",
+      "params": [],
+      "returns": "int"
+     },
+     "GetAttacker": {
+      "desc": "",
+      "params": [],
+      "returns": "handle"
+     },
+     "GetDamage": {
+      "desc": "",
+      "params": [],
+      "returns": "float"
+     },
+     "GetDamageCustom": {
+      "desc": "",
+      "params": [],
+      "returns": "int"
+     },
+     "GetDamageForce": {
+      "desc": "",
+      "params": [],
+      "returns": "Vector"
+     },
+     "GetDamagePosition": {
+      "desc": "",
+      "params": [],
+      "returns": "<unknown>"
+     },
+     "GetDamageType": {
+      "desc": "",
+      "params": [],
+      "returns": "<unknown>"
+     },
+     "GetInflictor": {
+      "desc": "",
+      "params": [],
+      "returns": "handle"
+     },
+     "GetOriginalDamage": {
+      "desc": "",
+      "params": [],
+      "returns": "float"
+     },
+     "GetReportedPosition": {
+      "desc": "",
+      "params": [],
+      "returns": "<unknown>"
+     },
+     "GetTotalledDamage": {
+      "desc": "",
+      "params": [],
+      "returns": "float"
+     },
+     "HasDamageType": {
+      "desc": "",
+      "params": [
+       {
+        "name": "iDamageType",
+        "type": "int"
+       }
+      ],
+      "returns": "bool"
+     },
+     "ScaleDamage": {
+      "desc": "",
+      "params": [
+       {
+        "name": "flScaleAmount",
+        "type": "float"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetAmmoType": {
+      "desc": "",
+      "params": [
+       {
+        "name": "iAmmoType",
+        "type": "int"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetAttacker": {
+      "desc": "",
+      "params": [
+       {
+        "name": "hAttacker",
+        "type": "handle"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetDamage": {
+      "desc": "",
+      "params": [
+       {
+        "name": "flDamage",
+        "type": "float"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetDamageCustom": {
+      "desc": "",
+      "params": [
+       {
+        "name": "iDamageCustom",
+        "type": "int"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetDamageForce": {
+      "desc": "",
+      "params": [
+       {
+        "name": "damageForce",
+        "type": "Vector"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetDamagePosition": {
+      "desc": "",
+      "params": [
+       {
+        "name": "damagePosition",
+        "type": "<unknown>"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetDamageType": {
+      "desc": "",
+      "params": [
+       {
+        "name": "iDamageType",
+        "type": "int"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetOriginalDamage": {
+      "desc": "",
+      "params": [
+       {
+        "name": "flOriginalDamage",
+        "type": "float"
+       }
+      ],
+      "returns": "void"
+     },
+     "SetReportedPosition": {
+      "desc": "",
+      "params": [
+       {
+        "name": "reportedPosition",
+        "type": "<unknown>"
+       }
+      ],
+      "returns": "void"
      }
     }
    },
@@ -18516,7 +18767,7 @@
    "DOTASlotType_t": {
     "DOTA_LOADOUT_PERSONA_1_END": {
      "desc": "",
-     "value": 68
+     "value": 77
     },
     "DOTA_LOADOUT_PERSONA_1_START": {
      "desc": "",
@@ -18566,37 +18817,73 @@
      "desc": "",
      "value": 30
     },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_1_PERSONA_1": {
+     "desc": "",
+     "value": 68
+    },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_2": {
      "desc": "",
      "value": 31
+    },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_2_PERSONA_1": {
+     "desc": "",
+     "value": 69
     },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_3": {
      "desc": "",
      "value": 32
     },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_3_PERSONA_1": {
+     "desc": "",
+     "value": 70
+    },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_4": {
      "desc": "",
      "value": 33
+    },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_4_PERSONA_1": {
+     "desc": "",
+     "value": 71
     },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_5": {
      "desc": "",
      "value": 34
     },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_5_PERSONA_1": {
+     "desc": "",
+     "value": 72
+    },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_6": {
      "desc": "",
      "value": 35
+    },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_6_PERSONA_1": {
+     "desc": "",
+     "value": 73
     },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_7": {
      "desc": "",
      "value": 36
     },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_7_PERSONA_1": {
+     "desc": "",
+     "value": 74
+    },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_8": {
      "desc": "",
      "value": 37
     },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_8_PERSONA_1": {
+     "desc": "",
+     "value": 75
+    },
     "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_9": {
      "desc": "",
      "value": 38
+    },
+    "DOTA_LOADOUT_TYPE_ABILITY_EFFECTS_9_PERSONA_1": {
+     "desc": "",
+     "value": 76
     },
     "DOTA_LOADOUT_TYPE_ABILITY_ULTIMATE": {
      "desc": "",
@@ -18616,11 +18903,11 @@
     },
     "DOTA_LOADOUT_TYPE_ANCIENT": {
      "desc": "",
-     "value": 100
+     "value": 109
     },
     "DOTA_LOADOUT_TYPE_ANNOUNCER": {
      "desc": "",
-     "value": 71
+     "value": 80
     },
     "DOTA_LOADOUT_TYPE_ARMOR": {
      "desc": "",
@@ -18656,7 +18943,7 @@
     },
     "DOTA_LOADOUT_TYPE_BLINK_EFFECT": {
      "desc": "",
-     "value": 82
+     "value": 91
     },
     "DOTA_LOADOUT_TYPE_BODY_HEAD": {
      "desc": "",
@@ -18672,39 +18959,39 @@
     },
     "DOTA_LOADOUT_TYPE_COUNT": {
      "desc": "",
-     "value": 103
+     "value": 112
     },
     "DOTA_LOADOUT_TYPE_COURIER": {
      "desc": "",
-     "value": 70
+     "value": 79
     },
     "DOTA_LOADOUT_TYPE_COURIER_EFFECT": {
      "desc": "",
-     "value": 95
+     "value": 104
     },
     "DOTA_LOADOUT_TYPE_CURSOR_PACK": {
      "desc": "",
-     "value": 80
+     "value": 89
     },
     "DOTA_LOADOUT_TYPE_DEATH_EFFECT": {
      "desc": "",
-     "value": 92
+     "value": 101
     },
     "DOTA_LOADOUT_TYPE_DIRE_CREEPS": {
      "desc": "",
-     "value": 86
+     "value": 95
     },
     "DOTA_LOADOUT_TYPE_DIRE_SIEGE_CREEPS": {
      "desc": "",
-     "value": 97
+     "value": 106
     },
     "DOTA_LOADOUT_TYPE_DIRE_TOWER": {
      "desc": "",
-     "value": 88
+     "value": 97
     },
     "DOTA_LOADOUT_TYPE_EMBLEM": {
      "desc": "",
-     "value": 83
+     "value": 92
     },
     "DOTA_LOADOUT_TYPE_GLOVES": {
      "desc": "",
@@ -18720,7 +19007,7 @@
     },
     "DOTA_LOADOUT_TYPE_HEAD_EFFECT": {
      "desc": "",
-     "value": 93
+     "value": 102
     },
     "DOTA_LOADOUT_TYPE_HEAD_PERSONA_1": {
      "desc": "",
@@ -18728,7 +19015,7 @@
     },
     "DOTA_LOADOUT_TYPE_HEROIC_STATUE": {
      "desc": "",
-     "value": 78
+     "value": 87
     },
     "DOTA_LOADOUT_TYPE_HERO_BASE": {
      "desc": "",
@@ -18744,7 +19031,7 @@
     },
     "DOTA_LOADOUT_TYPE_HUD_SKIN": {
      "desc": "",
-     "value": 75
+     "value": 84
     },
     "DOTA_LOADOUT_TYPE_INVALID": {
      "desc": "",
@@ -18752,7 +19039,7 @@
     },
     "DOTA_LOADOUT_TYPE_KILL_EFFECT": {
      "desc": "",
-     "value": 91
+     "value": 100
     },
     "DOTA_LOADOUT_TYPE_LEGS": {
      "desc": "",
@@ -18764,15 +19051,15 @@
     },
     "DOTA_LOADOUT_TYPE_LOADING_SCREEN": {
      "desc": "",
-     "value": 76
+     "value": 85
     },
     "DOTA_LOADOUT_TYPE_MAP_EFFECT": {
      "desc": "",
-     "value": 94
+     "value": 103
     },
     "DOTA_LOADOUT_TYPE_MEGA_KILLS": {
      "desc": "",
-     "value": 72
+     "value": 81
     },
     "DOTA_LOADOUT_TYPE_MISC": {
      "desc": "",
@@ -18792,11 +19079,11 @@
     },
     "DOTA_LOADOUT_TYPE_MULTIKILL_BANNER": {
      "desc": "",
-     "value": 79
+     "value": 88
     },
     "DOTA_LOADOUT_TYPE_MUSIC": {
      "desc": "",
-     "value": 73
+     "value": 82
     },
     "DOTA_LOADOUT_TYPE_NECK": {
      "desc": "",
@@ -18808,7 +19095,7 @@
     },
     "DOTA_LOADOUT_TYPE_NONE": {
      "desc": "",
-     "value": 102
+     "value": 111
     },
     "DOTA_LOADOUT_TYPE_OFFHAND_WEAPON": {
      "desc": "",
@@ -18828,27 +19115,27 @@
     },
     "DOTA_LOADOUT_TYPE_PERSONA_SELECTOR": {
      "desc": "",
-     "value": 69
+     "value": 78
     },
     "DOTA_LOADOUT_TYPE_PET_EFFIGY": {
      "desc": "",
-     "value": 101
+     "value": 110
     },
     "DOTA_LOADOUT_TYPE_RADIANT_CREEPS": {
      "desc": "",
-     "value": 85
+     "value": 94
     },
     "DOTA_LOADOUT_TYPE_RADIANT_SIEGE_CREEPS": {
      "desc": "",
-     "value": 96
+     "value": 105
     },
     "DOTA_LOADOUT_TYPE_RADIANT_TOWER": {
      "desc": "",
-     "value": 87
+     "value": 96
     },
     "DOTA_LOADOUT_TYPE_ROSHAN": {
      "desc": "",
-     "value": 98
+     "value": 107
     },
     "DOTA_LOADOUT_TYPE_SHAPESHIFT": {
      "desc": "",
@@ -18868,7 +19155,7 @@
     },
     "DOTA_LOADOUT_TYPE_STREAK_EFFECT": {
      "desc": "",
-     "value": 90
+     "value": 99
     },
     "DOTA_LOADOUT_TYPE_SUMMON": {
      "desc": "",
@@ -18896,19 +19183,19 @@
     },
     "DOTA_LOADOUT_TYPE_TELEPORT_EFFECT": {
      "desc": "",
-     "value": 81
+     "value": 90
     },
     "DOTA_LOADOUT_TYPE_TERRAIN": {
      "desc": "",
-     "value": 84
+     "value": 93
     },
     "DOTA_LOADOUT_TYPE_TORMENTOR": {
      "desc": "",
-     "value": 99
+     "value": 108
     },
     "DOTA_LOADOUT_TYPE_VERSUS_SCREEN": {
      "desc": "",
-     "value": 89
+     "value": 98
     },
     "DOTA_LOADOUT_TYPE_VOICE": {
      "desc": "",
@@ -18916,11 +19203,11 @@
     },
     "DOTA_LOADOUT_TYPE_VOICE_PERSONA_1": {
      "desc": "",
-     "value": 68
+     "value": 77
     },
     "DOTA_LOADOUT_TYPE_WARD": {
      "desc": "",
-     "value": 74
+     "value": 83
     },
     "DOTA_LOADOUT_TYPE_WEAPON": {
      "desc": "",
@@ -18940,15 +19227,15 @@
     },
     "DOTA_LOADOUT_TYPE_WEATHER": {
      "desc": "",
-     "value": 77
+     "value": 86
     },
     "DOTA_PLAYER_LOADOUT_END": {
      "desc": "",
-     "value": 101
+     "value": 110
     },
     "DOTA_PLAYER_LOADOUT_START": {
      "desc": "",
-     "value": 70
+     "value": 79
     }
    },
    "DOTASpeechType_t": {
@@ -19143,6 +19430,10 @@
     "DOTA_ABILITY_BEHAVIOR_DIRECTIONAL": {
      "desc": "",
      "value": 1024
+    },
+    "DOTA_ABILITY_BEHAVIOR_DIRECT_KEYBIND": {
+     "desc": "",
+     "value": 0
     },
     "DOTA_ABILITY_BEHAVIOR_DONT_ALERT_TARGET": {
      "desc": "",
@@ -22456,319 +22747,327 @@
    "modifierfunction": {
     "MODIFIER_EVENT_NEUTRAL_ENHANCEMENT_OPTIONS": {
      "desc": "GetModifierNeutralEnhancementOptions",
-     "value": 377
+     "value": 378
     },
     "MODIFIER_EVENT_NEUTRAL_TRINKET_OPTIONS": {
      "desc": "GetModifierNeutralTrinketOptions",
-     "value": 376
+     "value": 377
     },
     "MODIFIER_EVENT_ON_ABILITY_END_CHANNEL": {
      "desc": "OnAbilityEndChannel",
-     "value": 211
+     "value": 212
     },
     "MODIFIER_EVENT_ON_ABILITY_EXECUTED": {
      "desc": "OnAbilityExecuted",
-     "value": 208
+     "value": 209
     },
     "MODIFIER_EVENT_ON_ABILITY_FULLY_CAST": {
      "desc": "OnAbilityFullyCast",
-     "value": 209
+     "value": 210
     },
     "MODIFIER_EVENT_ON_ABILITY_START": {
      "desc": "OnAbilityStart",
-     "value": 207
+     "value": 208
     },
     "MODIFIER_EVENT_ON_ABILITY_SWAPPED": {
      "desc": "OnAbilitySwapped",
-     "value": 392
+     "value": 393
     },
     "MODIFIER_EVENT_ON_ABILITY_TOGGLED": {
      "desc": "OnAbilityToggled",
-     "value": 370
+     "value": 371
     },
     "MODIFIER_EVENT_ON_ASSIST": {
      "desc": "OnAssist",
-     "value": 267
+     "value": 268
     },
     "MODIFIER_EVENT_ON_ATTACK": {
      "desc": "OnAttack",
-     "value": 199
+     "value": 200
     },
     "MODIFIER_EVENT_ON_ATTACKED": {
      "desc": "OnAttacked",
-     "value": 221
+     "value": 222
     },
     "MODIFIER_EVENT_ON_ATTACK_ALLIED": {
      "desc": "OnAttackAllied",
-     "value": 202
+     "value": 203
     },
     "MODIFIER_EVENT_ON_ATTACK_CANCELLED": {
      "desc": "OnAttackCancelled",
-     "value": 281
+     "value": 282
     },
     "MODIFIER_EVENT_ON_ATTACK_FAIL": {
      "desc": "OnAttackFail",
-     "value": 201
+     "value": 202
     },
     "MODIFIER_EVENT_ON_ATTACK_FINISHED": {
      "desc": "OnAttackFinished",
-     "value": 270
+     "value": 271
     },
     "MODIFIER_EVENT_ON_ATTACK_LANDED": {
      "desc": "OnAttackLanded",
-     "value": 200
+     "value": 201
     },
     "MODIFIER_EVENT_ON_ATTACK_RECORD": {
      "desc": "OnAttackRecord",
-     "value": 197
+     "value": 198
     },
     "MODIFIER_EVENT_ON_ATTACK_RECORD_DESTROY": {
      "desc": "OnAttackRecordDestroy",
-     "value": 278
+     "value": 279
     },
     "MODIFIER_EVENT_ON_ATTACK_START": {
      "desc": "OnAttackStart",
-     "value": 198
+     "value": 199
     },
     "MODIFIER_EVENT_ON_ATTEMPT_PROJECTILE_DODGE": {
      "desc": "OnAttemptProjectileDodge",
-     "value": 288
+     "value": 289
     },
     "MODIFIER_EVENT_ON_BREAK_INVISIBILITY": {
      "desc": "OnBreakInvisibility",
-     "value": 210
+     "value": 211
     },
     "MODIFIER_EVENT_ON_BUILDING_KILLED": {
      "desc": "OnBuildingKilled",
-     "value": 237
+     "value": 238
     },
     "MODIFIER_EVENT_ON_CLEAVE_ATTACK_LANDED": {
      "desc": "OnCleaveAttackLanded",
-     "value": 359
+     "value": 360
     },
     "MODIFIER_EVENT_ON_CUSTOM1": {
      "desc": "OnCustom1",
-     "value": 405
+     "value": 406
     },
     "MODIFIER_EVENT_ON_CUSTOM2": {
      "desc": "OnCustom2",
-     "value": 406
+     "value": 407
     },
     "MODIFIER_EVENT_ON_CUSTOM3": {
      "desc": "OnCustom3",
-     "value": 407
+     "value": 408
     },
     "MODIFIER_EVENT_ON_DAMAGE_CALCULATED": {
      "desc": "OnDamageCalculated",
-     "value": 219
+     "value": 220
     },
     "MODIFIER_EVENT_ON_DAMAGE_HPLOSS": {
      "desc": "OnDamageHPLoss",
-     "value": 316
+     "value": 317
+    },
+    "MODIFIER_EVENT_ON_DAMAGE_HP_LOSS_SELF": {
+     "desc": "OnDamageHPLossSelf",
+     "value": 411
     },
     "MODIFIER_EVENT_ON_DAY_STARTED": {
      "desc": "OnDayStarted",
-     "value": 346
+     "value": 347
     },
     "MODIFIER_EVENT_ON_DEATH": {
      "desc": "OnDeath",
-     "value": 222
+     "value": 223
     },
     "MODIFIER_EVENT_ON_DEATH_COMPLETED": {
      "desc": "OnDeathCompleted",
-     "value": 223
+     "value": 224
     },
     "MODIFIER_EVENT_ON_DEATH_PREVENTED": {
      "desc": "OnDamagePrevented",
-     "value": 215
+     "value": 216
     },
     "MODIFIER_EVENT_ON_DOMINATED": {
      "desc": "OnDominated",
-     "value": 265
+     "value": 266
     },
     "MODIFIER_EVENT_ON_FORCE_PROC_MAGIC_STICK": {
      "desc": "OnForceProcMagicStick",
-     "value": 315
+     "value": 316
     },
     "MODIFIER_EVENT_ON_FOW_TEAM_CHANGED": {
      "desc": "OnFoWTeamChanged",
-     "value": 368
+     "value": 369
     },
     "MODIFIER_EVENT_ON_HEALTH_GAINED": {
      "desc": "OnHealthGained",
-     "value": 231
+     "value": 232
     },
     "MODIFIER_EVENT_ON_HEAL_RECEIVED": {
      "desc": "OnHealReceived",
-     "value": 235
+     "value": 236
     },
     "MODIFIER_EVENT_ON_HERO_BEGIN_DYING": {
      "desc": "OnHeroBeginDying",
-     "value": 339
+     "value": 340
     },
     "MODIFIER_EVENT_ON_HERO_KILLED": {
      "desc": "OnHeroKilled",
-     "value": 234
+     "value": 235
     },
     "MODIFIER_EVENT_ON_ILLUSION_CREATED": {
      "desc": "OnIllusionCreated",
-     "value": 399
+     "value": 400
     },
     "MODIFIER_EVENT_ON_KILL": {
      "desc": "OnKill",
-     "value": 266
+     "value": 267
     },
     "MODIFIER_EVENT_ON_MAGIC_DAMAGE_CALCULATED": {
      "desc": "OnMagicDamageCalculated",
-     "value": 220
+     "value": 221
     },
     "MODIFIER_EVENT_ON_MANA_GAINED": {
      "desc": "OnManaGained",
-     "value": 232
+     "value": 233
     },
     "MODIFIER_EVENT_ON_MODEL_CHANGED": {
      "desc": "OnModelChanged",
-     "value": 238
+     "value": 239
     },
     "MODIFIER_EVENT_ON_MODIFIER_ADDED": {
      "desc": "OnModifierAdded",
-     "value": 239
+     "value": 240
     },
     "MODIFIER_EVENT_ON_MODIFIER_REFRESHED": {
      "desc": "OnModifierRefreshed",
-     "value": 391
+     "value": 392
     },
     "MODIFIER_EVENT_ON_MODIFIER_REMOVED": {
      "desc": "OnModifierRemoved",
-     "value": 240
+     "value": 241
     },
     "MODIFIER_EVENT_ON_MUTE_DAMAGE_ABILITIES": {
      "desc": "OnMuteDamageAbilities",
-     "value": 328
+     "value": 329
     },
     "MODIFIER_EVENT_ON_NIGHT_STARTED": {
      "desc": "OnNightStarted",
-     "value": 347
+     "value": 348
     },
     "MODIFIER_EVENT_ON_ORB_EFFECT": {
      "desc": "Unused",
-     "value": 217
+     "value": 218
     },
     "MODIFIER_EVENT_ON_ORDER": {
      "desc": "OnOrder",
-     "value": 204
+     "value": 205
     },
     "MODIFIER_EVENT_ON_ORDER_RECEIVED": {
      "desc": "OnOrderReceived",
-     "value": 205
+     "value": 206
     },
     "MODIFIER_EVENT_ON_PROCESS_CLEAVE": {
      "desc": "OnProcessCleave",
-     "value": 218
+     "value": 219
     },
     "MODIFIER_EVENT_ON_PROCESS_UPGRADE": {
      "desc": "Unused",
-     "value": 212
+     "value": 213
     },
     "MODIFIER_EVENT_ON_PROJECTILE_DODGE": {
      "desc": "OnProjectileDodge",
-     "value": 203
+     "value": 204
     },
     "MODIFIER_EVENT_ON_PROJECTILE_OBSTRUCTION_HIT": {
      "desc": "OnProjectileObstructionHit",
-     "value": 279
+     "value": 280
     },
     "MODIFIER_EVENT_ON_PURE_DAMAGE_CALCULATED": {
      "desc": "OnPureDamageCalculated",
-     "value": 375
+     "value": 376
     },
     "MODIFIER_EVENT_ON_PURGE": {
      "desc": "OnPurged",
-     "value": 398
+     "value": 399
     },
     "MODIFIER_EVENT_ON_REDIRECT_HEALTH_GAIN": {
      "desc": "OnRedirectHealthGain",
-     "value": 236
+     "value": 237
     },
     "MODIFIER_EVENT_ON_REFRESH": {
      "desc": "Unused",
-     "value": 213
+     "value": 214
     },
     "MODIFIER_EVENT_ON_RESPAWN": {
      "desc": "OnRespawn",
-     "value": 224
+     "value": 225
     },
     "MODIFIER_EVENT_ON_RUNE_SPAWN": {
      "desc": "OnRuneSpawn",
-     "value": 372
+     "value": 373
     },
     "MODIFIER_EVENT_ON_SCEPTER_UPGRADE_SELECTED": {
      "desc": "OnScepterUpgradeSelected",
-     "value": 241
+     "value": 242
     },
     "MODIFIER_EVENT_ON_SET_LOCATION": {
      "desc": "OnSetLocation",
-     "value": 230
+     "value": 231
     },
     "MODIFIER_EVENT_ON_SHARD_UPGRADE_SELECTED": {
      "desc": "OnShardUpgradeSelected",
-     "value": 242
+     "value": 243
     },
     "MODIFIER_EVENT_ON_SPELL_TARGET_READY": {
      "desc": "OnSpellTargetReady",
-     "value": 196
+     "value": 197
     },
     "MODIFIER_EVENT_ON_SPENT_HEALTH": {
      "desc": "OnSpentHealth",
-     "value": 226
+     "value": 227
     },
     "MODIFIER_EVENT_ON_SPENT_ITEM_CHARGE": {
      "desc": "OnSpentItemCharge",
-     "value": 227
+     "value": 228
     },
     "MODIFIER_EVENT_ON_SPENT_MANA": {
      "desc": "OnSpentMana",
-     "value": 225
+     "value": 226
     },
     "MODIFIER_EVENT_ON_STATE_CHANGED": {
      "desc": "OnStateChanged",
-     "value": 216
+     "value": 217
     },
     "MODIFIER_EVENT_ON_TAKEDAMAGE": {
      "desc": "OnTakeDamage",
-     "value": 214
+     "value": 215
     },
     "MODIFIER_EVENT_ON_TAKEDAMAGE_KILLCREDIT": {
      "desc": "OnTakeDamageKillCredit",
-     "value": 233
+     "value": 234
     },
     "MODIFIER_EVENT_ON_TAKEDAMAGE_POST_UNAVOIDABLE_BLOCK": {
      "desc": "OnTakeDamagePostUnavoidableBlock",
-     "value": 327
+     "value": 328
     },
     "MODIFIER_EVENT_ON_TELEPORTED": {
      "desc": "OnTeleported",
-     "value": 229
+     "value": 230
     },
     "MODIFIER_EVENT_ON_TELEPORTING": {
      "desc": "OnTeleporting",
-     "value": 228
+     "value": 229
     },
     "MODIFIER_EVENT_ON_TIER_TOKEN_REROLLED": {
      "desc": "OnTierTokenRerolled",
-     "value": 365
+     "value": 366
     },
     "MODIFIER_EVENT_ON_TREE_CUT_DOWN": {
      "desc": "OnTreeCutDown",
-     "value": 358
+     "value": 359
+    },
+    "MODIFIER_EVENT_ON_TREE_PLANTED": {
+     "desc": "OnTreePlanted",
+     "value": 410
     },
     "MODIFIER_EVENT_ON_UNIT_MOVED": {
      "desc": "OnUnitMoved",
-     "value": 206
+     "value": 207
     },
     "MODIFIER_EVENT_SPELL_APPLIED_SUCCESSFULLY": {
      "desc": "OnSpellAppliedSuccessfully",
-     "value": 297
+     "value": 298
     },
     "MODIFIER_FUNCTION_INVALID": {
      "desc": "",
@@ -22776,63 +23075,63 @@
     },
     "MODIFIER_FUNCTION_LAST": {
      "desc": "",
-     "value": 409
+     "value": 412
     },
     "MODIFIER_PROPERTY_ABILITY_LAYOUT": {
      "desc": "GetModifierAbilityLayout",
-     "value": 264
+     "value": 265
     },
     "MODIFIER_PROPERTY_ABILITY_POINTS": {
      "desc": "GetModifierAbilityPoints",
-     "value": 330
+     "value": 331
     },
     "MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_MAGICAL": {
      "desc": "GetAbsoluteNoDamageMagical",
-     "value": 167
+     "value": 168
     },
     "MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_PHYSICAL": {
      "desc": "GetAbsoluteNoDamagePhysical",
-     "value": 166
+     "value": 167
     },
     "MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_PURE": {
      "desc": "GetAbsoluteNoDamagePure",
-     "value": 168
+     "value": 169
     },
     "MODIFIER_PROPERTY_ABSORB_SPELL": {
      "desc": "GetAbsorbSpell",
-     "value": 154
+     "value": 155
     },
     "MODIFIER_PROPERTY_ADDITIONAL_NEUTRAL_ITEM_DROPS": {
      "desc": "GetModifierAdditionalNutralItemDrops",
-     "value": 354
+     "value": 355
     },
     "MODIFIER_PROPERTY_ALWAYS_ALLOW_ATTACK": {
      "desc": "GetAlwaysAllowAttack",
-     "value": 179
+     "value": 180
     },
     "MODIFIER_PROPERTY_ALWAYS_AUTOATTACK_WHILE_HOLD_POSITION": {
      "desc": "GetAlwaysAutoAttackWhileHoldPosition",
-     "value": 190
+     "value": 191
     },
     "MODIFIER_PROPERTY_ALWAYS_ETHEREAL_ATTACK": {
      "desc": "GetAllowEtherealAttack",
-     "value": 180
+     "value": 181
     },
     "MODIFIER_PROPERTY_AOE_BONUS_CONSTANT": {
      "desc": "GetModifierAoEBonusConstant",
-     "value": 325
+     "value": 326
     },
     "MODIFIER_PROPERTY_AOE_BONUS_CONSTANT_STACKING": {
      "desc": "GetModifierAoEBonusConstantStacking",
-     "value": 326
+     "value": 327
     },
     "MODIFIER_PROPERTY_AOE_BONUS_PERCENTAGE": {
      "desc": "GetModifierAoEBonusPercentage",
-     "value": 308
+     "value": 309
     },
     "MODIFIER_PROPERTY_ATTACKSPEED_ABSOLUTE_MAX": {
      "desc": "GetModifierAttackSpeedAbsoluteMax",
-     "value": 337
+     "value": 338
     },
     "MODIFIER_PROPERTY_ATTACKSPEED_BASE_OVERRIDE": {
      "desc": "GetModifierAttackSpeedBaseOverride",
@@ -22844,19 +23143,19 @@
     },
     "MODIFIER_PROPERTY_ATTACKSPEED_PERCENTAGE": {
      "desc": "GetModifierAttackSpeedPercentage",
-     "value": 287
+     "value": 288
     },
     "MODIFIER_PROPERTY_ATTACKSPEED_REDUCTION_PERCENTAGE": {
      "desc": "GetModifierAttackSpeedReductionPercentage",
-     "value": 284
+     "value": 285
     },
     "MODIFIER_PROPERTY_ATTACK_ANIM_TIME_PERCENTAGE": {
      "desc": "GetModifierPercentageAttackAnimTime",
-     "value": 132
+     "value": 133
     },
     "MODIFIER_PROPERTY_ATTACK_HEIGHT_BONUS": {
      "desc": "GetModifierAttackHeightBonus",
-     "value": 351
+     "value": 352
     },
     "MODIFIER_PROPERTY_ATTACK_POINT_CONSTANT": {
      "desc": "GetModifierAttackPointConstant",
@@ -22880,11 +23179,11 @@
     },
     "MODIFIER_PROPERTY_ATTACK_WHILE_MOVING_TARGET": {
      "desc": "",
-     "value": 286
+     "value": 287
     },
     "MODIFIER_PROPERTY_AVOID_ATTACK_PROCS": {
      "desc": "GetModifierAvoidAttackProcs",
-     "value": 371
+     "value": 372
     },
     "MODIFIER_PROPERTY_AVOID_DAMAGE": {
      "desc": "GetModifierAvoidDamage",
@@ -22892,7 +23191,7 @@
     },
     "MODIFIER_PROPERTY_AVOID_DAMAGE_AFTER_REDUCTIONS": {
      "desc": "GetModifierAvoidDamageAfterReductions",
-     "value": 298
+     "value": 299
     },
     "MODIFIER_PROPERTY_AVOID_SPELL": {
      "desc": "GetModifierAvoidSpell",
@@ -22904,7 +23203,7 @@
     },
     "MODIFIER_PROPERTY_BASEATTACK_POSTBONUS": {
      "desc": "GetBaseAttackPostBonus",
-     "value": 367
+     "value": 368
     },
     "MODIFIER_PROPERTY_BASEDAMAGEOUTGOING_PERCENTAGE": {
      "desc": "GetModifierBaseDamageOutgoing_Percentage",
@@ -22916,11 +23215,11 @@
     },
     "MODIFIER_PROPERTY_BASE_ARMOR_PER_AGI_BONUS_PERCENTAGE": {
      "desc": "GetModifierBaseArmorPerAgiBonusPercentage",
-     "value": 342
+     "value": 343
     },
     "MODIFIER_PROPERTY_BASE_ATTACKSPEED_PER_AGI_BONUS_PERCENTAGE": {
      "desc": "GetModifierBaseAttackSpeedPerAgiBonusPercentage",
-     "value": 343
+     "value": 344
     },
     "MODIFIER_PROPERTY_BASE_ATTACK_TIME_CONSTANT": {
      "desc": "GetModifierBaseAttackTimeConstant",
@@ -22936,7 +23235,7 @@
     },
     "MODIFIER_PROPERTY_BASE_HP_REGEN_PER_STR_BONUS_PERCENTAGE": {
      "desc": "GetModifierBaseHpRegenPerStrBonusPercentage",
-     "value": 341
+     "value": 342
     },
     "MODIFIER_PROPERTY_BASE_MANA_REGEN": {
      "desc": "GetModifierBaseRegen",
@@ -22944,27 +23243,27 @@
     },
     "MODIFIER_PROPERTY_BASE_MP_REGEN_PER_INT_BONUS_PERCENTAGE": {
      "desc": "GetModifierBaseManaRegenPerIntBonusPercentage",
-     "value": 344
+     "value": 345
     },
     "MODIFIER_PROPERTY_BASE_MRES_PER_INT_BONUS_PERCENTAGE": {
      "desc": "GetModifierBaseMagicResistPerIntBonusPercentage",
-     "value": 345
+     "value": 346
     },
     "MODIFIER_PROPERTY_BECOME_AGILITY": {
      "desc": "GetModifierBecomeAgility",
-     "value": 312
+     "value": 313
     },
     "MODIFIER_PROPERTY_BECOME_INTELLIGENCE": {
      "desc": "GetModifierBecomeIntelligence",
-     "value": 313
+     "value": 314
     },
     "MODIFIER_PROPERTY_BECOME_STRENGTH": {
      "desc": "GetModifierBecomeStrength",
-     "value": 311
+     "value": 312
     },
     "MODIFIER_PROPERTY_BECOME_UNIVERSAL": {
      "desc": "GetModifierBecomeUniversal",
-     "value": 314
+     "value": 315
     },
     "MODIFIER_PROPERTY_BONUSDAMAGEOUTGOING_PERCENTAGE": {
      "desc": "GetModifierBonusDamageOutgoing_Percentage",
@@ -22972,63 +23271,63 @@
     },
     "MODIFIER_PROPERTY_BONUS_DAY_VISION": {
      "desc": "GetBonusDayVision",
-     "value": 157
+     "value": 158
     },
     "MODIFIER_PROPERTY_BONUS_DAY_VISION_PERCENTAGE": {
      "desc": "GetBonusDayVisionPercentage",
-     "value": 158
+     "value": 159
     },
     "MODIFIER_PROPERTY_BONUS_LOTUS_HEAL": {
      "desc": "GetModifierBonusLotusHeal",
-     "value": 340
+     "value": 341
     },
     "MODIFIER_PROPERTY_BONUS_NIGHT_VISION": {
      "desc": "GetBonusNightVision",
-     "value": 159
+     "value": 160
     },
     "MODIFIER_PROPERTY_BONUS_NIGHT_VISION_UNIQUE": {
      "desc": "GetBonusNightVisionUnique",
-     "value": 160
+     "value": 161
     },
     "MODIFIER_PROPERTY_BONUS_UPHILL_MISS_CHANCE": {
      "desc": "GetModifierBonusUphillMissChance",
-     "value": 335
+     "value": 336
     },
     "MODIFIER_PROPERTY_BONUS_VISION_PERCENTAGE": {
      "desc": "GetBonusVisionPercentage",
-     "value": 161
+     "value": 162
     },
     "MODIFIER_PROPERTY_BOT_ATTACK_SCORE_BONUS": {
      "desc": "BotAttackScoreBonus",
-     "value": 283
+     "value": 284
     },
     "MODIFIER_PROPERTY_BOUNTY_CREEP_MULTIPLIER": {
      "desc": "Unused",
-     "value": 183
+     "value": 184
     },
     "MODIFIER_PROPERTY_BOUNTY_OTHER_MULTIPLIER": {
      "desc": "Unused",
-     "value": 184
+     "value": 185
     },
     "MODIFIER_PROPERTY_BUFF_AMPLIFICATION": {
      "desc": "GetBuffAmplification",
-     "value": 195
+     "value": 196
     },
     "MODIFIER_PROPERTY_BUYBACK_PENALTY_PERCENT": {
      "desc": "GetModifierBuybackPenaltyPercent",
-     "value": 331
+     "value": 332
     },
     "MODIFIER_PROPERTY_CAN_ATTACK_TREES": {
      "desc": "GetModifierCanAttackTrees",
-     "value": 272
+     "value": 273
     },
     "MODIFIER_PROPERTY_CASTTIME_CONSTANT": {
      "desc": "GetModifierConstantCasttime",
-     "value": 131
+     "value": 132
     },
     "MODIFIER_PROPERTY_CASTTIME_PERCENTAGE": {
      "desc": "GetModifierPercentageCasttime",
-     "value": 130
+     "value": 131
     },
     "MODIFIER_PROPERTY_CAST_RANGE_BONUS": {
      "desc": "GetModifierCastRangeBonus",
@@ -23048,35 +23347,35 @@
     },
     "MODIFIER_PROPERTY_CHANGE_ABILITY_VALUE": {
      "desc": "GetModifierChangeAbilityValue",
-     "value": 261
+     "value": 262
     },
     "MODIFIER_PROPERTY_CONSUMABLE_USE_SPEED": {
      "desc": "GetModifierPropertyConsumableUseSpeed",
-     "value": 389
+     "value": 390
     },
     "MODIFIER_PROPERTY_CONVERT_ATTACK_PHYSICAL_TO_PURE": {
      "desc": "GetConvertAttackPhysicalToPure",
-     "value": 194
+     "value": 195
     },
     "MODIFIER_PROPERTY_CONVERT_EXP_TO_GOLD_PCT": {
      "desc": "GetModifierPercentageConvertExpToGold",
-     "value": 142
+     "value": 143
     },
     "MODIFIER_PROPERTY_CONVERT_MANA_COST_TO_HEALTH_COST": {
      "desc": "GetModifierConvertManaCostToHealthCost",
-     "value": 257
+     "value": 258
     },
     "MODIFIER_PROPERTY_COOLDOWN_PERCENTAGE": {
      "desc": "GetModifierPercentageCooldown",
-     "value": 128
+     "value": 129
     },
     "MODIFIER_PROPERTY_COOLDOWN_PERCENTAGE_ONGOING": {
      "desc": "GetModifierPercentageCooldownOngoing",
-     "value": 129
+     "value": 130
     },
     "MODIFIER_PROPERTY_COOLDOWN_PERCENTAGE_STACKING": {
      "desc": "GetModifierPercentageCooldownStacking",
-     "value": 289
+     "value": 290
     },
     "MODIFIER_PROPERTY_COOLDOWN_REDUCTION_CONSTANT": {
      "desc": "GetModifierCooldownReduction_Constant",
@@ -23084,31 +23383,31 @@
     },
     "MODIFIER_PROPERTY_CREATE_BONUS_ILLUSION_CHANCE": {
      "desc": "GetModifierCreateBonusIllusionChance",
-     "value": 348
+     "value": 349
     },
     "MODIFIER_PROPERTY_CREATE_BONUS_ILLUSION_COUNT": {
      "desc": "GetModifierCreateBonusIllusionCount",
-     "value": 349
+     "value": 350
     },
     "MODIFIER_PROPERTY_CREEP_DENY_PERCENT": {
      "desc": "GetModifierCreepDenyPercent",
-     "value": 336
+     "value": 337
     },
     "MODIFIER_PROPERTY_CRITICAL_STRIKE_BONUS": {
      "desc": "GetCriticalStrikeBonus",
-     "value": 193
+     "value": 194
     },
     "MODIFIER_PROPERTY_CUSTOM1": {
      "desc": "GetModifierPropertyCustom1",
-     "value": 402
+     "value": 403
     },
     "MODIFIER_PROPERTY_CUSTOM2": {
      "desc": "GetModifierPropertyCustom2",
-     "value": 403
+     "value": 404
     },
     "MODIFIER_PROPERTY_CUSTOM3": {
      "desc": "GetModifierPropertyCustom3",
-     "value": 404
+     "value": 405
     },
     "MODIFIER_PROPERTY_DAMAGEOUTGOING_PERCENTAGE": {
      "desc": "GetModifierDamageOutgoing_Percentage",
@@ -23124,39 +23423,39 @@
     },
     "MODIFIER_PROPERTY_DAMAGEOUTGOING_PERCENTAGE_MULTIPLICATIVE": {
      "desc": "GetModifierDamageOutgoing_PercentageMultiplicative",
-     "value": 303
+     "value": 304
     },
     "MODIFIER_PROPERTY_DEATHGOLDCOST": {
      "desc": "GetModifierConstantDeathGoldCost",
-     "value": 137
+     "value": 138
     },
     "MODIFIER_PROPERTY_DISABLE_AUTOATTACK": {
      "desc": "GetDisableAutoAttack",
-     "value": 156
+     "value": 157
     },
     "MODIFIER_PROPERTY_DISABLE_HEALING": {
      "desc": "GetDisableHealing",
-     "value": 177
+     "value": 178
     },
     "MODIFIER_PROPERTY_DISABLE_MANA_GAIN": {
      "desc": "GetDisableManaGain",
-     "value": 178
+     "value": 179
     },
     "MODIFIER_PROPERTY_DISABLE_TURNING": {
      "desc": "GetModifierDisableTurning",
-     "value": 259
+     "value": 260
     },
     "MODIFIER_PROPERTY_DISASSEMBLE_ANYTHING": {
      "desc": "GetModifierDisassembleAnything",
-     "value": 333
+     "value": 334
     },
     "MODIFIER_PROPERTY_DODGE_PROJECTILE": {
      "desc": "GetModifierDodgeProjectile",
-     "value": 186
+     "value": 187
     },
     "MODIFIER_PROPERTY_DONT_GIVE_VISION_OF_ATTACKER": {
      "desc": "GetModifierNoVisionOfAttacker",
-     "value": 276
+     "value": 277
     },
     "MODIFIER_PROPERTY_EVASION_CONSTANT": {
      "desc": "GetModifierEvasion_Constant",
@@ -23164,7 +23463,7 @@
     },
     "MODIFIER_PROPERTY_EXP_RATE_BOOST": {
      "desc": "GetModifierPercentageExpRateBoost",
-     "value": 139
+     "value": 140
     },
     "MODIFIER_PROPERTY_EXTRA_HEALTH_BONUS": {
      "desc": "GetModifierExtraHealthBonus",
@@ -23192,7 +23491,7 @@
     },
     "MODIFIER_PROPERTY_FAIL_ATTACK": {
      "desc": "GetModifierPropetyFailAttack",
-     "value": 299
+     "value": 300
     },
     "MODIFIER_PROPERTY_FIXED_ATTACK_RATE": {
      "desc": "GetModifierFixedAttackRate",
@@ -23200,59 +23499,59 @@
     },
     "MODIFIER_PROPERTY_FIXED_DAY_VISION": {
      "desc": "GetFixedDayVision",
-     "value": 162
+     "value": 163
     },
     "MODIFIER_PROPERTY_FIXED_MANA_REGEN": {
      "desc": "GetModifierFixedManaRegen",
-     "value": 334
+     "value": 335
     },
     "MODIFIER_PROPERTY_FIXED_NIGHT_VISION": {
      "desc": "GetFixedNightVision",
-     "value": 163
+     "value": 164
     },
     "MODIFIER_PROPERTY_FORBID_ILLUSIONS": {
      "desc": "GetModifierPropertyForbidIllusions",
-     "value": 380
+     "value": 381
     },
     "MODIFIER_PROPERTY_FORCE_DRAW_MINIMAP": {
      "desc": "GetForceDrawOnMinimap",
-     "value": 258
+     "value": 259
     },
     "MODIFIER_PROPERTY_FORCE_MAX_HEALTH": {
      "desc": "GetModifierForceMaxHealth",
-     "value": 323
+     "value": 324
     },
     "MODIFIER_PROPERTY_FORCE_MAX_MANA": {
      "desc": "GetModifierForceMaxMana",
-     "value": 324
+     "value": 325
     },
     "MODIFIER_PROPERTY_FOW_TEAM": {
      "desc": "GetModifierFoWTeam",
-     "value": 338
+     "value": 339
     },
     "MODIFIER_PROPERTY_GOLD_RATE_BOOST": {
      "desc": "GetModifierPercentageGoldRateBoost",
-     "value": 140
+     "value": 141
     },
     "MODIFIER_PROPERTY_HAS_BONUS_NEUTRAL_ITEM_CHOICE": {
      "desc": "GetModifierHasBonusNeutralItemChoice",
-     "value": 320
+     "value": 321
     },
     "MODIFIER_PROPERTY_HAS_BONUS_NEUTRAL_ITEM_PASSIVE": {
      "desc": "HasBonusNeutralItemPassive",
-     "value": 321
+     "value": 322
     },
     "MODIFIER_PROPERTY_HEALTHBAR_PIPS": {
      "desc": "GetModifierHealthBarPips",
-     "value": 295
+     "value": 296
     },
     "MODIFIER_PROPERTY_HEALTHCOST_PERCENTAGE": {
      "desc": "GetModifierPercentageHealthcost",
-     "value": 135
+     "value": 136
     },
     "MODIFIER_PROPERTY_HEALTHCOST_PERCENTAGE_STACKING": {
      "desc": "GetModifierPercentageHealthcostStacking",
-     "value": 136
+     "value": 137
     },
     "MODIFIER_PROPERTY_HEALTHCOST_REDUCTION_CONSTANT": {
      "desc": "GetModifierHealthcostReduction_Constant",
@@ -23280,7 +23579,7 @@
     },
     "MODIFIER_PROPERTY_HEAL_AMPLIFY_PERCENTAGE_SOURCE_UNIQUE": {
      "desc": "GetModifierPropertyHealingAmplificationUnique",
-     "value": 384
+     "value": 385
     },
     "MODIFIER_PROPERTY_HEAL_AMPLIFY_PERCENTAGE_TARGET": {
      "desc": "GetModifierHealAmplify_PercentageTarget",
@@ -23288,11 +23587,11 @@
     },
     "MODIFIER_PROPERTY_HEROFACET_OVERRIDE": {
      "desc": "GetModifierHeroFacetOverride",
-     "value": 357
+     "value": 358
     },
     "MODIFIER_PROPERTY_HEROLEVELSCALE": {
      "desc": "GetModifierHeroLevelScale",
-     "value": 400
+     "value": 401
     },
     "MODIFIER_PROPERTY_HP_REGEN_AMPLIFY_PERCENTAGE": {
      "desc": "GetModifierHPRegenAmplify_Percentage",
@@ -23300,7 +23599,7 @@
     },
     "MODIFIER_PROPERTY_HP_REGEN_MULTIPLIER_PRE_AMPLIFICATION": {
      "desc": "GetModifierHPRegenMultiplierPreAmplification",
-     "value": 356
+     "value": 357
     },
     "MODIFIER_PROPERTY_IGNORE_ATTACKSPEED_LIMIT": {
      "desc": "GetModifierAttackSpeed_Limit",
@@ -23308,15 +23607,15 @@
     },
     "MODIFIER_PROPERTY_IGNORE_CAST_ANGLE": {
      "desc": "GetModifierIgnoreCastAngle",
-     "value": 260
+     "value": 261
     },
     "MODIFIER_PROPERTY_IGNORE_COOLDOWN": {
      "desc": "GetModifierIgnoreCooldown",
-     "value": 271
+     "value": 272
     },
     "MODIFIER_PROPERTY_IGNORE_FORCE_ATTACK_TARGET": {
      "desc": "GetModifierPropertyIgnoreForceTarget",
-     "value": 408
+     "value": 409
     },
     "MODIFIER_PROPERTY_IGNORE_MOVESPEED_LIMIT": {
      "desc": "GetModifierIgnoreMovespeedLimit",
@@ -23328,19 +23627,19 @@
     },
     "MODIFIER_PROPERTY_ILLUSION_LABEL": {
      "desc": "GetModifierIllusionLabel",
-     "value": 170
+     "value": 171
     },
     "MODIFIER_PROPERTY_INCOMING_DAMAGE_CONSTANT": {
      "desc": "GetModifierIncomingDamageConstant",
-     "value": 296
+     "value": 297
     },
     "MODIFIER_PROPERTY_INCOMING_DAMAGE_CONSTANT_POST": {
      "desc": "MODIFIER_PROPERTY_INCOMING_DAMAGE_CONSTANT_POST",
-     "value": 302
+     "value": 303
     },
     "MODIFIER_PROPERTY_INCOMING_DAMAGE_ILLUSION": {
      "desc": "",
-     "value": 275
+     "value": 276
     },
     "MODIFIER_PROPERTY_INCOMING_DAMAGE_PERCENTAGE": {
      "desc": "GetModifierIncomingDamage_Percentage",
@@ -23360,11 +23659,11 @@
     },
     "MODIFIER_PROPERTY_INNATE_DAMAGE_BLOCK_PCT_OVERRIDE": {
      "desc": "GetModifierInnateDamageBlockPctOverride",
-     "value": 149
+     "value": 150
     },
     "MODIFIER_PROPERTY_INVENTORY_SLOT_RESTRICTED": {
      "desc": "GetModifierInventorySlotRestricted",
-     "value": 364
+     "value": 365
     },
     "MODIFIER_PROPERTY_INVISIBILITY_ATTACK_BEHAVIOR_EXCEPTION": {
      "desc": "GetModifierInvisibilityAttackBehaviorException",
@@ -23376,31 +23675,31 @@
     },
     "MODIFIER_PROPERTY_IS_ILLUSION": {
      "desc": "GetIsIllusion",
-     "value": 169
+     "value": 170
     },
     "MODIFIER_PROPERTY_IS_SCEPTER": {
      "desc": "GetModifierScepter",
-     "value": 249
+     "value": 250
     },
     "MODIFIER_PROPERTY_IS_SHARD": {
      "desc": "GetModifierShard",
-     "value": 250
+     "value": 251
     },
     "MODIFIER_PROPERTY_ITEM_SELLBACK_COST": {
      "desc": "GetModifierItemSellbackCost",
-     "value": 332
+     "value": 333
     },
     "MODIFIER_PROPERTY_KILL_ASSIST_GOLD_BOOST": {
      "desc": "GetModifierPercentageKillAssistGoldBoost",
-     "value": 141
+     "value": 142
     },
     "MODIFIER_PROPERTY_KILL_STREAK_BONUS_GOLD_PERCENTAGE": {
      "desc": "GetModifierKillStreakBonusGoldPercentage",
-     "value": 355
+     "value": 356
     },
     "MODIFIER_PROPERTY_KNOCKBACK_AMPLIFICATION_PERCENTAGE": {
      "desc": "GetModifierKnockbackAmplification_Percentage",
-     "value": 294
+     "value": 295
     },
     "MODIFIER_PROPERTY_LIFESTEAL_AMPLIFY_PERCENTAGE": {
      "desc": "GetModifierLifestealRegenAmplify_Percentage",
@@ -23408,19 +23707,19 @@
     },
     "MODIFIER_PROPERTY_LIFETIME_FRACTION": {
      "desc": "GetUnitLifetimeFraction",
-     "value": 254
+     "value": 255
     },
     "MODIFIER_PROPERTY_MAGICAL_ARMOR_PIERCING_PERCENTAGE_TARGET": {
      "desc": "GetMagicalArmorPiercingPercentageTarget",
-     "value": 192
+     "value": 193
     },
     "MODIFIER_PROPERTY_MAGICAL_CONSTANT_BLOCK": {
      "desc": "GetModifierMagical_ConstantBlock",
-     "value": 145
+     "value": 146
     },
     "MODIFIER_PROPERTY_MAGICAL_LIFESTEAL": {
      "desc": "GetModifierProperty_MagicalLifesteal",
-     "value": 374
+     "value": 375
     },
     "MODIFIER_PROPERTY_MAGICAL_RESISTANCE_BASE_REDUCTION": {
      "desc": "GetModifierMagicalResistanceBaseReduction",
@@ -23448,15 +23747,15 @@
     },
     "MODIFIER_PROPERTY_MANACOST_OVERRIDE": {
      "desc": "GetModifierPropertyManacostOverride",
-     "value": 381
+     "value": 382
     },
     "MODIFIER_PROPERTY_MANACOST_PERCENTAGE": {
      "desc": "GetModifierPercentageManacost",
-     "value": 133
+     "value": 134
     },
     "MODIFIER_PROPERTY_MANACOST_PERCENTAGE_STACKING": {
      "desc": "GetModifierPercentageManacostStacking",
-     "value": 134
+     "value": 135
     },
     "MODIFIER_PROPERTY_MANACOST_REDUCTION_CONSTANT": {
      "desc": "GetModifierManacostReduction_Constant",
@@ -23484,19 +23783,23 @@
     },
     "MODIFIER_PROPERTY_MAX_ATTACK_RANGE": {
      "desc": "GetModifierMaxAttackRange",
+     "value": 120
+    },
+    "MODIFIER_PROPERTY_MIN_ATTACK_RANGE": {
+     "desc": "GetModifierMinAttackRange",
      "value": 119
     },
     "MODIFIER_PROPERTY_MIN_ATTRIBUTE_LEVEL": {
      "desc": "MinAttributeLevel",
-     "value": 360
+     "value": 361
     },
     "MODIFIER_PROPERTY_MIN_HEALTH": {
      "desc": "GetMinHealth",
-     "value": 164
+     "value": 165
     },
     "MODIFIER_PROPERTY_MIN_MANA": {
      "desc": "GetMinMana",
-     "value": 165
+     "value": 166
     },
     "MODIFIER_PROPERTY_MIN_PHYSICAL_ARMOR": {
      "desc": "GetModifierMinPhysicalArmor",
@@ -23508,27 +23811,27 @@
     },
     "MODIFIER_PROPERTY_MISS_PERCENTAGE_TARGET": {
      "desc": "GetModifierMiss_Percentage_Target",
-     "value": 353
+     "value": 354
     },
     "MODIFIER_PROPERTY_MODEL_CHANGE": {
      "desc": "GetModifierModelChange",
-     "value": 244
+     "value": 245
     },
     "MODIFIER_PROPERTY_MODEL_SCALE": {
      "desc": "GetModifierModelScale",
-     "value": 245
+     "value": 246
     },
     "MODIFIER_PROPERTY_MODEL_SCALE_ANIMATE_TIME": {
      "desc": "GetModifierModelScaleAnimateTime",
-     "value": 246
+     "value": 247
     },
     "MODIFIER_PROPERTY_MODEL_SCALE_CONSTANT": {
      "desc": "GetModifierModelScaleConstant",
-     "value": 248
+     "value": 249
     },
     "MODIFIER_PROPERTY_MODEL_SCALE_USE_IN_OUT_EASE": {
      "desc": "GetModifierModelScaleUseInOutEase",
-     "value": 247
+     "value": 248
     },
     "MODIFIER_PROPERTY_MOVESPEED_ABSOLUTE": {
      "desc": "GetModifierMoveSpeed_Absolute",
@@ -23580,7 +23883,7 @@
     },
     "MODIFIER_PROPERTY_MOVESPEED_MAX_BONUS_CONSTANT": {
      "desc": "GetModifierMoveSpeedMax_BonusConstant",
-     "value": 378
+     "value": 379
     },
     "MODIFIER_PROPERTY_MOVESPEED_MAX_OVERRIDE": {
      "desc": "GetModifierMoveSpeed_MaxOverride",
@@ -23592,11 +23895,11 @@
     },
     "MODIFIER_PROPERTY_MOVESPEED_POST_MULTIPLIER_BONUS_CONSTANT": {
      "desc": "GetModifierMoveSpeedPostMultiplierBonus_Constant",
-     "value": 379
+     "value": 380
     },
     "MODIFIER_PROPERTY_MOVESPEED_REDUCTION_PERCENTAGE": {
      "desc": "GetModifierMoveSpeedReductionPercentage",
-     "value": 285
+     "value": 286
     },
     "MODIFIER_PROPERTY_MP_REGEN_AMPLIFY_PERCENTAGE": {
      "desc": "GetModifierMPRegenAmplify_Percentage",
@@ -23616,23 +23919,23 @@
     },
     "MODIFIER_PROPERTY_NO_FREE_TP_SCROLL_ON_DEATH": {
      "desc": "GetModifierNoFreeTPScrollOnDeath",
-     "value": 319
+     "value": 320
     },
     "MODIFIER_PROPERTY_OVERRIDE_ABILITY_SPECIAL": {
      "desc": "GetModifierOverrideAbilitySpecial",
-     "value": 262
+     "value": 263
     },
     "MODIFIER_PROPERTY_OVERRIDE_ABILITY_SPECIAL_VALUE": {
      "desc": "GetModifierOverrideAbilitySpecialValue",
-     "value": 263
+     "value": 264
     },
     "MODIFIER_PROPERTY_OVERRIDE_ANIMATION": {
      "desc": "GetOverrideAnimation",
-     "value": 152
+     "value": 153
     },
     "MODIFIER_PROPERTY_OVERRIDE_ANIMATION_RATE": {
      "desc": "GetOverrideAnimationRate",
-     "value": 153
+     "value": 154
     },
     "MODIFIER_PROPERTY_OVERRIDE_ATTACK_DAMAGE": {
      "desc": "GetModifierOverrideAttackDamage",
@@ -23640,23 +23943,23 @@
     },
     "MODIFIER_PROPERTY_OVERRIDE_ATTACK_MAGICAL": {
      "desc": "GetOverrideAttackMagical",
-     "value": 181
+     "value": 182
     },
     "MODIFIER_PROPERTY_OVERRIDE_BASE_DAMAGE": {
      "desc": "GetModifierOverrideBaseDamage",
-     "value": 394
+     "value": 395
     },
     "MODIFIER_PROPERTY_OVERRIDE_CREEP_BOUNTY": {
      "desc": "GetModifierOverrideCreepBounty",
-     "value": 393
+     "value": 394
     },
     "MODIFIER_PROPERTY_PACK_RAT": {
      "desc": "GetModifierIsPackRat",
-     "value": 292
+     "value": 293
     },
     "MODIFIER_PROPERTY_PERCENTAGE_DEATHGOLDCOST": {
      "desc": "GetModifierPercentageDeathGoldCost",
-     "value": 138
+     "value": 139
     },
     "MODIFIER_PROPERTY_PERSISTENT_INVISIBILITY": {
      "desc": "GetModifierPersistentInvisibility",
@@ -23664,7 +23967,7 @@
     },
     "MODIFIER_PROPERTY_PHYSICALDAMAGEOUTGOING_PERCENTAGE": {
      "desc": "GetModifierPhysicalDamageOutgoing_Percentage",
-     "value": 293
+     "value": 294
     },
     "MODIFIER_PROPERTY_PHYSICAL_ARMOR_BASE_PERCENTAGE": {
      "desc": "GetModifierPhysicalArmorBase_Percentage",
@@ -23688,7 +23991,7 @@
     },
     "MODIFIER_PROPERTY_PHYSICAL_ARMOR_PIERCING_PERCENTAGE_TARGET": {
      "desc": "GetPhysicalArmorPiercingPercentageTarget",
-     "value": 191
+     "value": 192
     },
     "MODIFIER_PROPERTY_PHYSICAL_ARMOR_TOTAL_PERCENTAGE": {
      "desc": "GetModifierPhysicalArmorTotal_Percentage",
@@ -23696,19 +23999,19 @@
     },
     "MODIFIER_PROPERTY_PHYSICAL_CONSTANT_BLOCK": {
      "desc": "GetModifierPhysical_ConstantBlock",
-     "value": 146
+     "value": 147
     },
     "MODIFIER_PROPERTY_PHYSICAL_CONSTANT_BLOCK_BONUS": {
      "desc": "GetModifierPhysical_ConstantBlockBonus",
-     "value": 148
+     "value": 149
     },
     "MODIFIER_PROPERTY_PHYSICAL_CONSTANT_BLOCK_SPECIAL": {
      "desc": "GetModifierPhysical_ConstantBlockSpecial",
-     "value": 147
+     "value": 148
     },
     "MODIFIER_PROPERTY_PHYSICAL_LIFESTEAL": {
      "desc": "GetModifierProperty_PhysicalLifesteal",
-     "value": 373
+     "value": 374
     },
     "MODIFIER_PROPERTY_PREATTACK_BONUS_DAMAGE": {
      "desc": "GetModifierPreAttack_BonusDamage",
@@ -23728,27 +24031,27 @@
     },
     "MODIFIER_PROPERTY_PREATTACK_CRITICALSTRIKE": {
      "desc": "GetModifierPreAttack_CriticalStrike",
-     "value": 143
+     "value": 144
     },
     "MODIFIER_PROPERTY_PREATTACK_DEADLY_BLOW": {
      "desc": "GetModifierPreAttack_DeadlyBlow",
-     "value": 189
+     "value": 190
     },
     "MODIFIER_PROPERTY_PREATTACK_TARGET_CRITICALSTRIKE": {
      "desc": "GetModifierPreAttack_Target_CriticalStrike",
-     "value": 144
+     "value": 145
     },
     "MODIFIER_PROPERTY_PREREDUCE_INCOMING_DAMAGE_MULT": {
      "desc": "GetModifierPrereduceIncomingDamage_Mult",
-     "value": 300
+     "value": 301
     },
     "MODIFIER_PROPERTY_PRESERVE_NEUTRAL_ITEM_PASSIVES": {
      "desc": "GetModifierPreserveNeutralItemPassives",
-     "value": 322
+     "value": 323
     },
     "MODIFIER_PROPERTY_PRESERVE_PARTICLES_ON_MODEL_CHANGE": {
      "desc": "PreserveParticlesOnModelChanged",
-     "value": 269
+     "value": 270
     },
     "MODIFIER_PROPERTY_PRE_ATTACK": {
      "desc": "GetModifierPreAttack",
@@ -23756,7 +24059,7 @@
     },
     "MODIFIER_PROPERTY_PRIMARY_STAT_DAMAGE_MULTIPLIER": {
      "desc": "GetPrimaryStatDamageMultiplier",
-     "value": 188
+     "value": 189
     },
     "MODIFIER_PROPERTY_PROCATTACK_BONUS_DAMAGE_MAGICAL": {
      "desc": "GetModifierProcAttack_BonusDamage_Magical",
@@ -23784,107 +24087,107 @@
     },
     "MODIFIER_PROPERTY_PROJECTILE_NAME": {
      "desc": "GetModifierProjectileName",
-     "value": 122
+     "value": 123
     },
     "MODIFIER_PROPERTY_PROJECTILE_SPEED": {
      "desc": "GetModifierProjectileSpeed",
-     "value": 309
+     "value": 310
     },
     "MODIFIER_PROPERTY_PROJECTILE_SPEED_BONUS": {
      "desc": "GetModifierProjectileSpeedBonus",
-     "value": 120
+     "value": 121
     },
     "MODIFIER_PROPERTY_PROJECTILE_SPEED_BONUS_PERCENTAGE": {
      "desc": "GetModifierProjectileSpeedBonusPercentage",
-     "value": 121
+     "value": 122
     },
     "MODIFIER_PROPERTY_PROJECTILE_SPEED_TARGET": {
      "desc": "GetModifierProjectileSpeedTarget",
-     "value": 310
+     "value": 311
     },
     "MODIFIER_PROPERTY_PROVIDES_FOW_POSITION": {
      "desc": "GetModifierProvidesFOWVision",
-     "value": 255
+     "value": 256
     },
     "MODIFIER_PROPERTY_PSEUDORANDOM_BONUS": {
      "desc": "GetModofierPropertyPseudoRandomBonus",
-     "value": 350
+     "value": 351
     },
     "MODIFIER_PROPERTY_RADAR_COOLDOWN_REDUCTION": {
      "desc": "GetModifierRadarCooldownReduction",
-     "value": 251
+     "value": 252
     },
     "MODIFIER_PROPERTY_REDIRECT_HEALTH_GAIN": {
      "desc": "GetModifierPropertyRedirectHealthGain",
-     "value": 385
+     "value": 386
     },
     "MODIFIER_PROPERTY_REDIRECT_SPELL": {
      "desc": "GetRedirectSpell",
-     "value": 366
+     "value": 367
     },
     "MODIFIER_PROPERTY_REFLECT_SPELL": {
      "desc": "GetReflectSpell",
-     "value": 155
+     "value": 156
     },
     "MODIFIER_PROPERTY_REINCARNATION": {
      "desc": "ReincarnateTime",
-     "value": 123
+     "value": 124
     },
     "MODIFIER_PROPERTY_REINCARNATION_SUPPRESS_FX": {
      "desc": "ReincarnateSuppressFX",
-     "value": 124
+     "value": 125
     },
     "MODIFIER_PROPERTY_REPLACE_ATTACK": {
      "desc": "GetModifierReplaceAttack",
-     "value": 401
+     "value": 402
     },
     "MODIFIER_PROPERTY_REQUIRED_LEVEL": {
      "desc": "GetRequiredLevel",
-     "value": 390
+     "value": 391
     },
     "MODIFIER_PROPERTY_RESPAWNTIME": {
      "desc": "GetModifierConstantRespawnTime",
-     "value": 125
+     "value": 126
     },
     "MODIFIER_PROPERTY_RESPAWNTIME_PERCENTAGE": {
      "desc": "GetModifierPercentageRespawnTime",
-     "value": 126
+     "value": 127
     },
     "MODIFIER_PROPERTY_RESPAWNTIME_STACKING": {
      "desc": "GetModifierStackingRespawnTime",
-     "value": 127
+     "value": 128
     },
     "MODIFIER_PROPERTY_RESTORATION_AMPLIFICATION": {
      "desc": "GetModifierPropertyRestorationAmplification",
-     "value": 382
+     "value": 383
     },
     "MODIFIER_PROPERTY_RESTORATION_AMPLIFICATION_UNIQUE": {
      "desc": "GetModifierPropertyRestorationAmplificationUnique",
-     "value": 383
+     "value": 384
     },
     "MODIFIER_PROPERTY_SHARE_XPRUNE": {
      "desc": "GetModifierShareXPRune",
-     "value": 317
+     "value": 318
     },
     "MODIFIER_PROPERTY_SKIP_ATTACK_REGULATOR": {
      "desc": "GetSkipAttackRegulator",
-     "value": 352
+     "value": 353
     },
     "MODIFIER_PROPERTY_SLOW_RESISTANCE_APPLIES_TO_ATTACKS": {
      "desc": "GetModifierSlowResistanceAppliesToAttacks",
-     "value": 307
+     "value": 308
     },
     "MODIFIER_PROPERTY_SLOW_RESISTANCE_STACKING": {
      "desc": "GetModifierSlowResistance_Stacking",
-     "value": 306
+     "value": 307
     },
     "MODIFIER_PROPERTY_SLOW_RESISTANCE_UNIQUE": {
      "desc": "GEtModifierSlowResistance_Unique",
-     "value": 305
+     "value": 306
     },
     "MODIFIER_PROPERTY_SPELLS_REQUIRE_HP": {
      "desc": "GetModifierSpellsRequireHP",
-     "value": 256
+     "value": 257
     },
     "MODIFIER_PROPERTY_SPELL_AMPLIFY_PERCENTAGE": {
      "desc": "GetModifierSpellAmplify_Percentage",
@@ -23912,7 +24215,7 @@
     },
     "MODIFIER_PROPERTY_SPELL_REDIRECT_TARGET": {
      "desc": "GetModifierSpellRedirectTarget",
-     "value": 290
+     "value": 291
     },
     "MODIFIER_PROPERTY_STATS_AGILITY_BONUS": {
      "desc": "GetModifierBonusStats_Agility",
@@ -23956,67 +24259,67 @@
     },
     "MODIFIER_PROPERTY_STRONG_ILLUSION": {
      "desc": "GetModifierStrongIllusion",
-     "value": 171
+     "value": 172
     },
     "MODIFIER_PROPERTY_SUPER_ILLUSION": {
      "desc": "GetModifierSuperIllusion",
-     "value": 172
+     "value": 173
     },
     "MODIFIER_PROPERTY_SUPER_ILLUSION_WITH_ITEMS": {
      "desc": "GetModifierSuperIllusionWithItems",
-     "value": 397
+     "value": 398
     },
     "MODIFIER_PROPERTY_SUPER_ILLUSION_WITH_ULTIMATE": {
      "desc": "GetModifierSuperIllusionWithUltimate",
-     "value": 173
+     "value": 174
     },
     "MODIFIER_PROPERTY_SUPPRESS_ATTACK_PROCS": {
      "desc": "GetSuppressAttackProcs",
-     "value": 369
+     "value": 370
     },
     "MODIFIER_PROPERTY_SUPPRESS_CLEAVE": {
      "desc": "GetSuppressCleave",
-     "value": 282
+     "value": 283
     },
     "MODIFIER_PROPERTY_SUPPRESS_CRIT": {
      "desc": "GetSuppressCrit",
-     "value": 329
+     "value": 330
     },
     "MODIFIER_PROPERTY_SUPPRESS_FULLSCREEN_DEATH_FX": {
      "desc": "GetModifierSuppressFullscreenDeathFX",
-     "value": 301
+     "value": 302
     },
     "MODIFIER_PROPERTY_SUPPRESS_INCOMING_CRIT": {
      "desc": "GetSuppressIncomingCrit",
-     "value": 386
+     "value": 387
     },
     "MODIFIER_PROPERTY_SUPPRESS_INVALID_MOVE_ATTACK_ORDERS": {
      "desc": "GetModifierPropertySuppressInvalidMoveAttackOrders",
-     "value": 388
+     "value": 389
     },
     "MODIFIER_PROPERTY_SUPPRESS_TELEPORT": {
      "desc": "GetSuppressTeleport",
-     "value": 280
+     "value": 281
     },
     "MODIFIER_PROPERTY_TEMPEST_DOUBLE": {
      "desc": "GetModifierTempestDouble",
-     "value": 268
+     "value": 269
     },
     "MODIFIER_PROPERTY_TICK_GOLD_MULTIPLIER": {
      "desc": "GetModifierTickGold_Multiplier",
-     "value": 304
+     "value": 305
     },
     "MODIFIER_PROPERTY_TIER_TOKEN_REROLL": {
      "desc": "GetTierTokenReroll",
-     "value": 361
+     "value": 362
     },
     "MODIFIER_PROPERTY_TOOLTIP": {
      "desc": "OnTooltip",
-     "value": 243
+     "value": 244
     },
     "MODIFIER_PROPERTY_TOOLTIP2": {
      "desc": "OnTooltip2",
-     "value": 277
+     "value": 278
     },
     "MODIFIER_PROPERTY_TOTALDAMAGEOUTGOING_PERCENTAGE": {
      "desc": "GetModifierTotalDamageOutgoing_Percentage",
@@ -24024,79 +24327,79 @@
     },
     "MODIFIER_PROPERTY_TOTAL_CONSTANT_BLOCK": {
      "desc": "GetModifierTotal_ConstantBlock",
-     "value": 151
+     "value": 152
     },
     "MODIFIER_PROPERTY_TOTAL_CONSTANT_BLOCK_STACKING": {
      "desc": "GetModifierTotal_ConstantBlockStacking",
-     "value": 363
+     "value": 364
     },
     "MODIFIER_PROPERTY_TOTAL_CONSTANT_BLOCK_UNAVOIDABLE_PRE_ARMOR": {
      "desc": "GetModifierPhysical_ConstantBlockUnavoidablePreArmor",
-     "value": 150
+     "value": 151
     },
     "MODIFIER_PROPERTY_TRANSLATE_ACTIVITY_MODIFIERS": {
      "desc": "GetActivityTranslationModifiers",
-     "value": 252
+     "value": 253
     },
     "MODIFIER_PROPERTY_TRANSLATE_ATTACK_SOUND": {
      "desc": "GetAttackSound",
-     "value": 253
+     "value": 254
     },
     "MODIFIER_PROPERTY_TRIGGER_COSMETIC_AND_END_ATTACK": {
      "desc": "GetTriggerCosmeticAndEndAttack",
-     "value": 187
+     "value": 188
     },
     "MODIFIER_PROPERTY_TURN_RATE_CONSTANT": {
      "desc": "GetModifierTurnRateConstant",
-     "value": 291
+     "value": 292
     },
     "MODIFIER_PROPERTY_TURN_RATE_OVERRIDE": {
      "desc": "GetModifierTurnRate_Override",
-     "value": 176
+     "value": 177
     },
     "MODIFIER_PROPERTY_TURN_RATE_PERCENTAGE": {
      "desc": "GetModifierTurnRate_Percentage",
-     "value": 175
+     "value": 176
     },
     "MODIFIER_PROPERTY_UNIT_DISALLOW_UPGRADING": {
      "desc": "GetModifierUnitDisllowUpgrading",
-     "value": 185
+     "value": 186
     },
     "MODIFIER_PROPERTY_UNIT_STATS_NEEDS_REFRESH": {
      "desc": "GetModifierUnitStatsNeedsRefresh",
-     "value": 182
+     "value": 183
     },
     "MODIFIER_PROPERTY_UNTARGETABLE_FROM": {
      "desc": "GetModifierOverrideUntargetableFrom",
-     "value": 395
+     "value": 396
     },
     "MODIFIER_PROPERTY_UNTARGETABLE_TO": {
      "desc": "GetModifierOverrideUntargetableTo",
-     "value": 396
+     "value": 397
     },
     "MODIFIER_PROPERTY_UPGRADE_NEUTRAL_ARTIFACTS": {
      "desc": "GetModifierPropertyUpgradeNeutralArtifacts",
-     "value": 387
+     "value": 388
     },
     "MODIFIER_PROPERTY_VISION_DEGREES_RESTRICTION": {
      "desc": "GetVisionDegreeRestriction",
-     "value": 362
+     "value": 363
     },
     "MODIFIER_PROPERTY_VISUAL_Z_DELTA": {
      "desc": "GetVisualZDelta",
-     "value": 273
+     "value": 274
     },
     "MODIFIER_PROPERTY_VISUAL_Z_SPEED_BASE_OVERRIDE": {
      "desc": "GetVisualZSpeedBaseOverride",
-     "value": 274
+     "value": 275
     },
     "MODIFIER_PROPERTY_XP_DURING_DEATH": {
      "desc": "GetModifierXPDuringDeath",
-     "value": 174
+     "value": 175
     },
     "MODIFIER_PROPERTY_XP_FOUNTAIN_COUNTDOWN_TIME_OVERRIDE": {
      "desc": "GetModifierXPFountainCountdownTimeOverride",
-     "value": 318
+     "value": 319
     }
    },
    "modifierpriority": {
@@ -28651,31 +28954,47 @@
    },
    "ACT_DOTA_ATTACK_STATUE": {
     "type": "number",
-    "value": 1780
+    "value": 1781
+   },
+   "ACT_DOTA_BATTLEPASS_IDLE": {
+    "type": "number",
+    "value": 1779
+   },
+   "ACT_DOTA_BLINK_DAGGER_STATUE": {
+    "type": "number",
+    "value": 1800
    },
    "ACT_DOTA_CAST1_STATUE": {
     "type": "number",
-    "value": 1789
+    "value": 1793
    },
    "ACT_DOTA_CAST2_STATUE": {
     "type": "number",
-    "value": 1790
+    "value": 1785
    },
    "ACT_DOTA_CAST3_STATUE": {
     "type": "number",
-    "value": 1791
+    "value": 1784
    },
    "ACT_DOTA_CAST4_STATUE": {
     "type": "number",
-    "value": 1792
+    "value": 1794
    },
    "ACT_DOTA_CAST5_STATUE": {
     "type": "number",
-    "value": 1793
+    "value": 1795
+   },
+   "ACT_DOTA_CAST6_STATUE": {
+    "type": "number",
+    "value": 1807
+   },
+   "ACT_DOTA_CAST_ABILITY5_STATUE": {
+    "type": "number",
+    "value": 1799
    },
    "ACT_DOTA_CAST_STATUE": {
     "type": "number",
-    "value": 1781
+    "value": 1792
    },
    "ACT_DOTA_CHANNEL_STATUE": {
     "type": "number",
@@ -28683,71 +29002,71 @@
    },
    "ACT_DOTA_CRATER_CLOSED": {
     "type": "number",
-    "value": 1796
+    "value": 1804
    },
    "ACT_DOTA_CRATER_OPEN": {
+    "type": "number",
+    "value": 1805
+   },
+   "ACT_DOTA_DEATH_FALL": {
     "type": "number",
     "value": 1797
    },
    "ACT_DOTA_DEFEAT_STATUE": {
     "type": "number",
-    "value": 1800
+    "value": 1801
    },
    "ACT_DOTA_FLAIL_STATUE": {
     "type": "number",
-    "value": 1786
+    "value": 1787
    },
    "ACT_DOTA_FORCESTAFF_STATUE": {
     "type": "number",
-    "value": 1801
+    "value": 1798
    },
    "ACT_DOTA_IDLE_RARE_STATUE": {
     "type": "number",
-    "value": 1805
+    "value": 1806
    },
    "ACT_DOTA_IDLE_STATUE": {
     "type": "number",
-    "value": 1784
+    "value": 1788
    },
    "ACT_DOTA_LOADOUT_FRONTPAGE": {
     "type": "number",
-    "value": 1803
+    "value": 1808
    },
    "ACT_DOTA_LOADOUT_STATUE": {
     "type": "number",
-    "value": 1782
+    "value": 1791
    },
    "ACT_DOTA_RUN_STATUE": {
     "type": "number",
-    "value": 1783
+    "value": 1782
    },
    "ACT_DOTA_SPAWN_STATUE": {
     "type": "number",
-    "value": 1787
+    "value": 1790
    },
    "ACT_DOTA_STATUE_SEQUENCE": {
     "type": "number",
-    "value": 1798
+    "value": 1780
    },
    "ACT_DOTA_STUN_STATUE": {
     "type": "number",
-    "value": 1785
+    "value": 1786
    },
    "ACT_DOTA_TAUNT_STATUE": {
     "type": "number",
-    "value": 1788
+    "value": 1789
    },
    "ACT_DOTA_TELEPORT_END_STATUE": {
     "type": "number",
-    "value": 1799
+    "value": 1803
    },
    "ACT_DOTA_TELEPORT_STATUE": {
     "type": "number",
-    "value": 1794
-   },
-   "ACT_DOTA_VICTORY_STATUE": {
-    "type": "number",
-    "value": 1795
+    "value": 1783
    },
    "ACT_DO_NOT_DISTURB": {
     "type": "number",
@@ -32331,139 +32650,139 @@
    },
    "AE_BODYGROUP_SET_VALUE": {
     "type": "number",
-    "value": 16
+    "value": 15
    },
    "AE_CL_ADD_PARTICLE_EFFECT_CP": {
     "type": "number",
-    "value": 45
+    "value": 44
    },
    "AE_CL_CLOTH_ATTR": {
     "type": "number",
-    "value": 19
+    "value": 18
    },
    "AE_CL_CLOTH_EFFECT": {
     "type": "number",
-    "value": 22
+    "value": 21
    },
    "AE_CL_CLOTH_GROUND_OFFSET": {
     "type": "number",
-    "value": 20
+    "value": 19
    },
    "AE_CL_CLOTH_STIFFEN": {
     "type": "number",
-    "value": 21
+    "value": 20
    },
    "AE_CL_CREATE_ANIM_SCOPE_PROP": {
     "type": "number",
-    "value": 23
+    "value": 22
    },
    "AE_CL_CREATE_PARTICLE_BRASS": {
     "type": "number",
-    "value": 60
+    "value": 62
    },
    "AE_CL_CREATE_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 7
+    "value": 8
    },
    "AE_CL_CREATE_PARTICLE_EFFECT_CFG": {
     "type": "number",
-    "value": 9
+    "value": 10
    },
    "AE_CL_DISABLE_BODYGROUP": {
     "type": "number",
-    "value": 15
+    "value": 60
    },
    "AE_CL_DOTA_NPC_CREATE_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 50
+    "value": 49
    },
    "AE_CL_DOTA_PLAY_STATUS_EFFECT": {
     "type": "number",
-    "value": 48
+    "value": 47
    },
    "AE_CL_DOTA_RUBICK_ARCANA_CREATE_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 51
+    "value": 50
    },
    "AE_CL_DOTA_STOP_STATUS_EFFECT": {
     "type": "number",
-    "value": 49
+    "value": 48
    },
    "AE_CL_ENABLE_BODYGROUP": {
     "type": "number",
-    "value": 14
+    "value": 59
    },
    "AE_CL_HIDE_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 43
+    "value": 42
    },
    "AE_CL_PANORAMA_EVENT": {
     "type": "number",
-    "value": 47
+    "value": 46
    },
    "AE_CL_PLAYSOUND": {
     "type": "number",
-    "value": 1
+    "value": 2
    },
    "AE_CL_PLAYSOUND_ATTACHMENT": {
     "type": "number",
-    "value": 2
+    "value": 3
    },
    "AE_CL_PLAYSOUND_LOOPING": {
     "type": "number",
-    "value": 6
+    "value": 7
    },
    "AE_CL_PLAYSOUND_POSITION": {
     "type": "number",
-    "value": 3
+    "value": 4
    },
    "AE_CL_SHOW_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 44
+    "value": 43
    },
    "AE_CL_SPEECH": {
     "type": "number",
-    "value": 46
+    "value": 45
    },
    "AE_CL_STOPSOUND": {
     "type": "number",
-    "value": 5
+    "value": 6
    },
    "AE_CL_STOP_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 8
+    "value": 9
    },
    "AE_CL_STOP_RAGDOLL_CONTROL": {
     "type": "number",
-    "value": 13
+    "value": 14
    },
    "AE_CL_SUPPRESS_EVENTS_WITH_TAG": {
     "type": "number",
-    "value": 42
+    "value": 41
    },
    "AE_DESTRUCTIBLE_PART_DESTROY": {
     "type": "number",
-    "value": 29
+    "value": 28
    },
    "AE_DISABLE_PLATFORM": {
     "type": "number",
-    "value": 26
+    "value": 25
    },
    "AE_DOTA_CREATE_CLINKZ_ATTACK": {
     "type": "number",
-    "value": 56
+    "value": 55
    },
    "AE_DOTA_DIE_PHANTOM_DEATH_PARTICLES": {
     "type": "number",
-    "value": 58
+    "value": 57
    },
    "AE_DOTA_PET_ITEM_DROP": {
     "type": "number",
-    "value": 53
+    "value": 52
    },
    "AE_DOTA_PET_ITEM_PICKUP": {
     "type": "number",
-    "value": 52
+    "value": 51
    },
    "AE_DOTA_PLAY_SOUND_ATTACK": {
     "type": "number",
@@ -32471,19 +32790,19 @@
    },
    "AE_DOTA_PLAY_SOUND_ATTACK_BACKSTAB": {
     "type": "number",
-    "value": 57
+    "value": 56
    },
    "AE_DOTA_PLAY_SOUND_ATTACK_SPECIAL": {
     "type": "number",
-    "value": 55
+    "value": 54
    },
    "AE_DOTA_SUPPRESS_CONSTANT_LAYER": {
     "type": "number",
-    "value": 54
+    "value": 53
    },
    "AE_DOTA_SWITCH_ATTACK_COMBO": {
     "type": "number",
-    "value": 59
+    "value": 58
    },
    "AE_EMPTY": {
     "type": "number",
@@ -32491,91 +32810,95 @@
    },
    "AE_ENABLE_PLATFORM_PLAYER_FOLLOWS_YAW": {
     "type": "number",
-    "value": 27
+    "value": 26
    },
    "AE_ENABLE_PLATFORM_PLAYER_IGNORES_YAW": {
     "type": "number",
-    "value": 28
+    "value": 27
    },
    "AE_FIRE_INPUT": {
     "type": "number",
-    "value": 18
+    "value": 17
    },
    "AE_FOOTSTEP": {
     "type": "number",
-    "value": 12
+    "value": 13
    },
    "AE_PULSE_GRAPH": {
     "type": "number",
-    "value": 25
+    "value": 24
    },
    "AE_SCRIPT_FIRE_EVENT_01": {
     "type": "number",
-    "value": 32
+    "value": 31
    },
    "AE_SCRIPT_FIRE_EVENT_02": {
     "type": "number",
-    "value": 33
+    "value": 32
    },
    "AE_SCRIPT_FIRE_EVENT_03": {
     "type": "number",
-    "value": 34
+    "value": 33
    },
    "AE_SCRIPT_FIRE_EVENT_04": {
     "type": "number",
-    "value": 35
+    "value": 34
    },
    "AE_SCRIPT_FIRE_EVENT_05": {
     "type": "number",
-    "value": 36
+    "value": 35
    },
    "AE_SCRIPT_FIRE_EVENT_06": {
     "type": "number",
-    "value": 37
+    "value": 36
    },
    "AE_SCRIPT_FIRE_EVENT_07": {
     "type": "number",
-    "value": 38
+    "value": 37
    },
    "AE_SCRIPT_FIRE_EVENT_08": {
     "type": "number",
-    "value": 39
+    "value": 38
    },
    "AE_SCRIPT_FIRE_EVENT_09": {
     "type": "number",
-    "value": 40
+    "value": 39
    },
    "AE_SCRIPT_FIRE_EVENT_10": {
     "type": "number",
-    "value": 41
+    "value": 40
+   },
+   "AE_STATE_CHANGE_IN_PROGRESS": {
+    "type": "number",
+    "value": 1
    },
    "AE_SV_CREATE_PARTICLE_EFFECT_CFG": {
     "type": "number",
-    "value": 10
+    "value": 11
    },
    "AE_SV_IKLOCK": {
     "type": "number",
-    "value": 24
+    "value": 23
    },
    "AE_SV_PLAYSOUND": {
     "type": "number",
-    "value": 4
+    "value": 5
    },
    "AE_SV_STOP_PARTICLE_EFFECT": {
     "type": "number",
-    "value": 11
+    "value": 12
    },
    "AE_VEHICLE_ENTER_FINISHED": {
     "type": "number",
-    "value": 30
+    "value": 29
    },
    "AE_VEHICLE_EXIT_FINISHED": {
     "type": "number",
-    "value": 31
+    "value": 30
    },
    "AE_WEAPON_PERFORM_ATTACK": {
     "type": "number",
-    "value": 17
+    "value": 16
    },
    "AddToScriptHelp": {
     "fn": {
@@ -32658,9 +32981,6 @@
       "type": "table"
      },
      "CDOTAVoteSystem": {
-      "type": "table"
-     },
-     "CDOTA_Ability_Aghanim_Spear": {
       "type": "table"
      },
      "CDOTA_Ability_Animation_Attack": {
@@ -32849,6 +33169,9 @@
      "CSceneEntity": {
       "type": "table"
      },
+     "CScriptHTTPRequest": {
+      "type": "table"
+     },
      "CScriptHeroList": {
       "type": "table"
      },
@@ -32862,6 +33185,9 @@
       "type": "table"
      },
      "CScriptUniformRandomStream": {
+      "type": "table"
+     },
+     "CTakeDamageInfo": {
       "type": "table"
      },
      "Convars": {
@@ -35932,7 +36258,7 @@
    },
    "background_idle": {
     "type": "number",
-    "value": 1804
+    "value": 1809
    },
    "bit": {
     "members": {
@@ -36300,7 +36626,7 @@
    },
    "ti6": {
     "type": "number",
-    "value": 1779
+    "value": 1796
    },
    "vlua": {
     "members": {
@@ -36560,7 +36886,7 @@
    "PlayerResource": "CDOTA_PlayerResource",
    "Tutorial": "CDOTATutorial",
    "VoteSystem": "CDOTAVoteSystem",
-   "c": "CEntityInstance",
+   "c": "CBaseEntity",
    "debugoverlay": "CDebugOverlayScriptHelper"
   },
   "valueTypes": {
@@ -36771,9 +37097,10 @@
   }
  },
  "build": {
-  "clientVersion": "6943",
-  "sourceRevision": "11069754",
-  "steamBuildId": "25664722",
-  "versionDate": "Oct 01 2026"
- }
+  "clientVersion": "6951",
+  "sourceRevision": "11096670",
+  "steamBuildId": "25768240",
+  "versionDate": "Oct 06 2026"
+ },
+ "map": "dota"
 }

@@ -14,22 +14,29 @@
       "entities": "vscripts/entities.json",
       "annotations": "annotations/lua",
       "summary": {
-        "classes": 106,
+        "classes": 107,
         "functions": 240,
         "enums": 51,
-        "constants": 1600,
-        "entities": 3520,
+        "constants": 1606,
+        "entities": 3535,
         "builds": {
           "server": {
-            "steamBuildId": "25664722",
-            "versionDate": "Oct 01 2026"
+            "steamBuildId": "25768240",
+            "versionDate": "Oct 06 2026"
           },
           "client": {
-            "steamBuildId": "25664722",
-            "versionDate": "Oct 01 2026"
+            "steamBuildId": "25768240",
+            "versionDate": "Oct 06 2026"
           }
+        },
+        "lastChange": {
+          "from": "25664722",
+          "added": 41,
+          "removed": 6,
+          "changed": 439
         }
-      }
+      },
+      "changelog": "vscripts/changelog.json"
     }
   ]
 }
